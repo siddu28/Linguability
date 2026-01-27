@@ -1,0 +1,118 @@
+.lessons-page {
+    min-height: 100vh;
+    background-color: var(--color-background);
+}
+
+.lessons-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--spacing-xl);
+}
+
+.lessons-header {
+    margin-bottom: var(--spacing-xl);
+}
+
+.lessons-title {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: var(--spacing-xs);
+}
+
+.lessons-subtitle {
+    color: var(--color-text-secondary);
+}
+
+.lessons-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.course-card {
+    padding: var(--spacing-xl);
+}
+
+.course-title {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--spacing-xs);
+}
+
+.course-language {
+    color: var(--color-primary);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    margin-bottom: var(--spacing-lg);
+}
+
+.lesson-items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.lesson-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background-color var(--transition-fast);
+}
+
+.lesson-item:hover {
+    background-color: var(--color-background);
+}
+
+.lesson-status {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.check {
+    width: 24px;
+    height: 24px;
+    background-color: var(--color-success);
+    color: var(--color-white);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-sm);
+}
+
+.progress-dot {
+    width: 12px;
+    height: 12px;
+    background-color: var(--color-primary);
+    border-radius: var(--radius-full);
+}
+
+.empty-dot {
+    width: 12px;
+    height: 12px;
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-full);
+}
+
+.lesson-name {
+    flex: 1;
+    font-size: var(--font-size-base);
+}
+
+.lesson-item.completed .lesson-name {
+    color: var(--color-text-muted);
+}
+
+.lesson-item.in-progress {
+    background-color: rgba(233, 30, 140, 0.05);
+}
+
+.lesson-item.in-progress .lesson-name {
+    font-weight: var(--font-weight-medium);
+}
