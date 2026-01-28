@@ -99,6 +99,30 @@ export async function updateLessonProgress(userId, lessonId, progress) {
     return data
 }
 
+// Mark lesson as completed
+export async function markLessonComplete(userId, lessonId) {
+    return updateLessonProgress(userId, lessonId, {
+        status: 'completed',
+        progress_percent: 100,
+        completed_at: new Date().toISOString()
+    })
+}
+
+// Get progress for a specific lesson
+export async function getSingleLessonProgress(userId, lessonId) {
+    const { data, error } = await supabase
+        .from('lesson_progress')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('lesson_id', lessonId)
+        .single()
+
+    if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching lesson progress:', error)
+    }
+    return data
+}
+
 // ============ NOTIFICATIONS ============
 
 export async function getNotifications(userId) {
