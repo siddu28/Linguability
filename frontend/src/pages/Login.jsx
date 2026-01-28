@@ -9,14 +9,19 @@ import {
     ArrowLeft,
     Check
 } from 'lucide-react'
+import { supabase } from '../lib/supabaseClient'
+import { useAuth } from '../context/AuthContext'
 import Input from '../components/Input'
 import Button from '../components/Button'
 import './Login.css'
 
 function Login() {
     const navigate = useNavigate()
+    const { user, loading: authLoading } = useAuth()
     const [isSignUp, setIsSignUp] = useState(false)
     const [signupStep, setSignupStep] = useState(1) // 1: form, 2: challenges
+    const [submitting, setSubmitting] = useState(false)
+    const [errorMessage, setErrorMessage] = useState('')
     const [formData, setFormData] = useState({
         fullName: '',
         email: '',
@@ -80,23 +85,85 @@ function Login() {
 
     const handleSubmit = (e) => {
         e.preventDefault()
+        setErrorMessage('')
+
         if (isSignUp) {
             // Move to challenges selection step
             setSignupStep(2)
         } else {
-            // Sign in - go directly to dashboard
-            navigate('/dashboard')
+            // Sign in with Supabase
+            async function run() {
+                setSubmitting(true)
+                try {
+                    const { data, error } = await supabase.auth.signInWithPassword({
+                        email: formData.email,
+                        password: formData.password,
+                    })
+                    if (error) throw error
+                    if (data?.session) navigate('/dashboard')
+                } catch (err) {
+                    setErrorMessage(err?.message || 'Authentication failed')
+                } finally {
+                    setSubmitting(false)
+                }
+            }
+            run()
         }
     }
 
-    const handleCompleteSignup = () => {
-        // Save challenges to localStorage (later to backend)
-        localStorage.setItem('learningChallenges', JSON.stringify(selectedChallenges))
-        navigate('/dashboard')
+    const handleCompleteSignup = async () => {
+        setErrorMessage('')
+        setSubmitting(true)
+        try {
+            const { data, error } = await supabase.auth.signUp({
+                email: formData.email,
+                password: formData.password,
+                options: {
+                    data: {
+                        full_name: formData.fullName,
+                        learning_challenges: selectedChallenges,
+                    },
+                },
+            })
+            if (error) throw error
+
+            // Save challenges to localStorage as backup
+            localStorage.setItem('learningChallenges', JSON.stringify(selectedChallenges))
+
+            // If email confirmation is enabled, session may be null.
+            if (data?.session) {
+                navigate('/dashboard')
+            } else {
+                setErrorMessage('Check your email to confirm your account, then sign in.')
+                setSignupStep(1)
+                setIsSignUp(false)
+            }
+        } catch (err) {
+            setErrorMessage(err?.message || 'Sign up failed')
+        } finally {
+            setSubmitting(false)
+        }
     }
 
     const handleSkipChallenges = () => {
-        navigate('/dashboard')
+        handleCompleteSignup()
+    }
+
+    const handleGoogleSignIn = async () => {
+        setErrorMessage('')
+        setSubmitting(true)
+        try {
+            const { error } = await supabase.auth.signInWithOAuth({
+                provider: 'google',
+                options: {
+                    redirectTo: `${window.location.origin}/dashboard`,
+                },
+            })
+            if (error) throw error
+        } catch (err) {
+            setErrorMessage(err?.message || 'Google sign-in failed')
+            setSubmitting(false)
+        }
     }
 
     const features = [
@@ -199,11 +266,17 @@ function Login() {
                                     onChange={handleChange}
                                 />
 
-                                <Button type="submit" variant="primary" size="large" className="submit-btn">
-                                    {isSignUp ? 'Continue' : 'Sign In'}
-                                    {isSignUp && <ArrowRight size={18} />}
+                                <Button type="submit" variant="primary" size="large" className="submit-btn" disabled={authLoading || submitting}>
+                                    {(authLoading || submitting) ? 'Please wait…' : (isSignUp ? 'Continue' : 'Sign In')}
+                                    {isSignUp && !submitting && <ArrowRight size={18} />}
                                 </Button>
                             </form>
+
+                            {errorMessage && (
+                                <p className="form-error" role="alert">
+                                    {errorMessage}
+                                </p>
+                            )}
 
                             {/* Divider */}
                             <div className="auth-divider">
@@ -211,7 +284,7 @@ function Login() {
                             </div>
 
                             {/* Google Sign In */}
-                            <button className="google-signin-btn" type="button" onClick={() => console.log('Google Sign In clicked')}>
+                            <button className="google-signin-btn" type="button" onClick={handleGoogleSignIn} disabled={authLoading || submitting}>
                                 <svg className="google-icon" viewBox="0 0 24 24" width="20" height="20">
                                     <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
                                     <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
@@ -265,17 +338,24 @@ function Login() {
                                 ))}
                             </div>
 
+                            {errorMessage && (
+                                <p className="form-error" role="alert">
+                                    {errorMessage}
+                                </p>
+                            )}
+
                             <div className="challenges-actions">
                                 <Button
                                     variant="primary"
                                     size="large"
                                     className="submit-btn"
                                     onClick={handleCompleteSignup}
+                                    disabled={submitting}
                                 >
-                                    {selectedChallenges.length > 0 ? 'Continue with Selected' : 'Get Started'}
-                                    <ArrowRight size={18} />
+                                    {submitting ? 'Creating account…' : (selectedChallenges.length > 0 ? 'Continue with Selected' : 'Get Started')}
+                                    {!submitting && <ArrowRight size={18} />}
                                 </Button>
-                                <button className="skip-btn" onClick={handleSkipChallenges}>
+                                <button className="skip-btn" onClick={handleSkipChallenges} disabled={submitting}>
                                     Skip for now
                                 </button>
                             </div>
