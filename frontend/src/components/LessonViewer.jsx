@@ -11,6 +11,8 @@ import {
     Home
 } from 'lucide-react'
 import { getWordsForLesson } from '../data/wordsData'
+import { getNumbersForLesson } from '../data/numbersData'
+import { getSentencesForLesson } from '../data/sentencesData'
 import Button from './Button'
 import './LessonViewer.css'
 
@@ -29,12 +31,44 @@ function LessonViewer({
     const [spokenText, setSpokenText] = useState('')
     const [matchResult, setMatchResult] = useState(null) // 'correct', 'incorrect', null
     const [recognition, setRecognition] = useState(null)
+    const [availableVoices, setAvailableVoices] = useState([])
+    const [voiceError, setVoiceError] = useState(null)
 
-    // Load words for this lesson
+    // Load available voices
     useEffect(() => {
-        const lessonWords = getWordsForLesson(language.id, lessonTitle)
-        setWords(lessonWords)
-    }, [language.id, lessonTitle])
+        const loadVoices = () => {
+            const voices = window.speechSynthesis.getVoices()
+            setAvailableVoices(voices)
+        }
+
+        // Load voices immediately if available
+        loadVoices()
+
+        // Also load when voices change (some browsers load async)
+        window.speechSynthesis.onvoiceschanged = loadVoices
+
+        return () => {
+            window.speechSynthesis.onvoiceschanged = null
+        }
+    }, [])
+
+    // Load data for this lesson based on section type
+    useEffect(() => {
+        let lessonData = []
+
+        // Determine section type and get appropriate data
+        const sectionLower = section.toLowerCase()
+
+        if (sectionLower === 'words') {
+            lessonData = getWordsForLesson(language.id, lessonTitle)
+        } else if (sectionLower === 'numbers') {
+            lessonData = getNumbersForLesson(language.id, lessonTitle)
+        } else if (sectionLower === 'sentences') {
+            lessonData = getSentencesForLesson(language.id, lessonTitle)
+        }
+
+        setWords(lessonData)
+    }, [language.id, section, lessonTitle])
 
     // Initialize Speech Recognition
     useEffect(() => {
@@ -78,6 +112,30 @@ function LessonViewer({
         return codes[langId] || 'en-US'
     }
 
+    // Find best available voice for language
+    const findVoiceForLanguage = (langCode) => {
+        if (availableVoices.length === 0) return null
+
+        // Try to find exact match
+        let voice = availableVoices.find(v => v.lang === langCode)
+
+        // Try partial match (e.g., 'ta' for Tamil)
+        if (!voice) {
+            const langPrefix = langCode.split('-')[0]
+            voice = availableVoices.find(v => v.lang.startsWith(langPrefix))
+        }
+
+        // For Indian languages, try Google voices which often have better support
+        if (!voice && ['hi-IN', 'ta-IN', 'te-IN'].includes(langCode)) {
+            voice = availableVoices.find(v =>
+                v.name.toLowerCase().includes('google') &&
+                v.lang.startsWith(langCode.split('-')[0])
+            )
+        }
+
+        return voice
+    }
+
     const currentWord = words[currentIndex]
     const progress = words.length > 0 ? (visitedWords.length / words.length) * 100 : 0
     const learnedProgress = words.length > 0 ? (learnedWords.length / words.length) * 100 : 0
@@ -86,17 +144,84 @@ function LessonViewer({
     const handleListen = useCallback(() => {
         if (!currentWord || isSpeaking) return
 
+        setVoiceError(null)
         setIsSpeaking(true)
-        const utterance = new SpeechSynthesisUtterance(currentWord.word)
-        utterance.lang = getLanguageCode(language.id)
-        utterance.rate = 0.8 // Slower for learning
 
-        utterance.onend = () => setIsSpeaking(false)
-        utterance.onerror = () => setIsSpeaking(false)
+        const langCode = getLanguageCode(language.id)
+        const nativeVoice = findVoiceForLanguage(langCode)
+
+        // Find English voice for fallback
+        const englishVoice = availableVoices.find(v =>
+            v.lang.startsWith('en') && (v.name.includes('Google') || v.name.includes('Microsoft') || v.default)
+        ) || availableVoices.find(v => v.lang.startsWith('en'))
+
+        // Clean phonetic text for TTS - remove IPA slashes and special characters
+        const cleanPhonetic = (text) => {
+            if (!text) return ''
+            return text
+                .replace(/\//g, '') // Remove slashes
+                .replace(/[ˈˌ]/g, '') // Remove stress marks
+                .replace(/ː/g, '') // Remove length marks
+                .replace(/ṁ/g, 'm') // Convert special m
+                .replace(/ṇ/g, 'n') // Convert retroflex n
+                .replace(/ṉ/g, 'n') // Convert Tamil n
+                .replace(/ṟ/g, 'r') // Convert Tamil r
+                .replace(/ḷ/g, 'l') // Convert retroflex l
+                .replace(/ā/g, 'aa') // Convert long a
+                .replace(/ī/g, 'ee') // Convert long i
+                .replace(/ū/g, 'oo') // Convert long u
+                .replace(/ē/g, 'ay') // Convert long e
+                .replace(/ō/g, 'oh') // Convert long o
+                .replace(/ś/g, 'sh') // Convert palatal s
+                .replace(/ṣ/g, 'sh') // Convert retroflex s
+                .replace(/ṭ/g, 't') // Convert retroflex t
+                .replace(/ḍ/g, 'd') // Convert retroflex d
+                .replace(/r̥/g, 'ri') // Convert vocalic r
+                .replace(/ñ/g, 'ny') // Convert palatal n  
+                .replace(/θ/g, 'th') // Convert theta
+                .replace(/ð/g, 'th') // Convert eth
+                .replace(/ŋ/g, 'ng') // Convert eng
+                .trim()
+        }
+
+        // Decide what to speak and which voice to use
+        let textToSpeak = currentWord.word
+        let voiceToUse = nativeVoice
+        let usingFallback = false
+
+        // For Indian languages without native voice, use speakable pronunciation with English voice
+        if (!nativeVoice && ['tamil', 'telugu', 'hindi'].includes(language.id)) {
+            textToSpeak = currentWord.speakable || currentWord.translation
+            voiceToUse = englishVoice
+            usingFallback = true
+        }
+
+        const utterance = new SpeechSynthesisUtterance(textToSpeak)
+        utterance.rate = 0.7 // Slower for learning
+
+        if (voiceToUse) {
+            utterance.voice = voiceToUse
+            utterance.lang = voiceToUse.lang
+        } else {
+            utterance.lang = langCode
+        }
+
+        utterance.onend = () => {
+            setIsSpeaking(false)
+            if (usingFallback) {
+                setVoiceError(`Playing phonetic pronunciation. Native ${language.name} voice not available.`)
+            }
+        }
+
+        utterance.onerror = (event) => {
+            console.error('TTS error:', event)
+            setIsSpeaking(false)
+            setVoiceError(`Unable to play audio. Check browser TTS support.`)
+        }
 
         window.speechSynthesis.cancel() // Cancel any ongoing speech
         window.speechSynthesis.speak(utterance)
-    }, [currentWord, language.id, isSpeaking])
+    }, [currentWord, language.id, language.name, isSpeaking, availableVoices])
 
     // Speech Recognition: Start listening
     const handleSpeak = () => {
@@ -268,6 +393,13 @@ function LessonViewer({
                     <Volume2 size={20} />
                     {isSpeaking ? 'Speaking...' : 'Listen'}
                 </button>
+
+                {/* Voice Error Message */}
+                {voiceError && (
+                    <div className="voice-error">
+                        ⚠️ {voiceError}
+                    </div>
+                )}
 
                 {/* Phonetic */}
                 <div className="phonetic-badge">
