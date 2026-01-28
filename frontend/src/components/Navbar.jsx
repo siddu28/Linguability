@@ -72,7 +72,7 @@ function Navbar() {
 
     const handleProfileClick = () => {
         setShowProfileMenu(false)
-        navigate('/settings')
+        navigate('/profile')
     }
 
     const handleSettingsClick = () => {

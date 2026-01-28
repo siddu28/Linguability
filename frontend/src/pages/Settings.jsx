@@ -1,5 +1,7 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { RotateCcw } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
+import { getUserSettings, upsertUserSettings, getProfile, updateProfile } from '../lib/database'
 import Navbar from '../components/Navbar'
 import Card from '../components/Card'
 import Button from '../components/Button'
@@ -8,25 +10,117 @@ import Select from '../components/Select'
 import './Settings.css'
 
 function Settings() {
+    const { user } = useAuth()
     const [activeTab, setActiveTab] = useState('accessibility')
+    const [loading, setLoading] = useState(true)
+    const [saving, setSaving] = useState(false)
 
-    const [settings, setSettings] = useState({
-        // Visual Settings
+    const defaultSettings = {
         theme: 'light',
-        fontSize: 'medium',
-        fontFamily: 'poppins',
-        lineHeight: 'normal',
-        letterSpacing: 'normal',
+        font_size: 'medium',
+        font_family: 'poppins',
+        line_height: 'normal',
+        letter_spacing: 'normal',
+        reduce_motion: false,
+        focus_mode: false,
+        reading_ruler: false,
+        text_to_speech: false,
+        speech_rate: 1,
+    }
 
-        // Reading Aids
-        reduceMotion: false,
-        focusMode: false,
-        readingRuler: false,
+    const [settings, setSettings] = useState(defaultSettings)
+    const [learningChallenges, setLearningChallenges] = useState([])
 
-        // Audio Settings
-        textToSpeech: false,
-        speechRate: 1,
-    })
+    // Load settings from Supabase
+    useEffect(() => {
+        async function loadSettings() {
+            if (!user?.id) return
+            setLoading(true)
+
+            try {
+                // Load user settings
+                const savedSettings = await getUserSettings(user.id)
+                if (savedSettings) {
+                    setSettings({
+                        theme: savedSettings.theme || 'light',
+                        font_size: savedSettings.font_size || 'medium',
+                        font_family: savedSettings.font_family || 'poppins',
+                        line_height: savedSettings.line_height || 'normal',
+                        letter_spacing: savedSettings.letter_spacing || 'normal',
+                        reduce_motion: savedSettings.reduce_motion || false,
+                        focus_mode: savedSettings.focus_mode || false,
+                        reading_ruler: savedSettings.reading_ruler || false,
+                        text_to_speech: savedSettings.text_to_speech || false,
+                        speech_rate: savedSettings.speech_rate || 1,
+                    })
+                }
+
+                // Load learning challenges from profile
+                const profile = await getProfile(user.id)
+                if (profile?.learning_challenges) {
+                    setLearningChallenges(profile.learning_challenges)
+                }
+            } catch (err) {
+                console.error('Error loading settings:', err)
+            } finally {
+                setLoading(false)
+            }
+        }
+        loadSettings()
+    }, [user])
+
+    // Save settings to Supabase (debounced)
+    const saveSettings = useCallback(async (newSettings) => {
+        if (!user?.id) return
+        setSaving(true)
+        try {
+            await upsertUserSettings(user.id, newSettings)
+        } catch (err) {
+            console.error('Error saving settings:', err)
+        } finally {
+            setSaving(false)
+        }
+    }, [user])
+
+    const handleSelectChange = (key) => (e) => {
+        const newSettings = { ...settings, [key]: e.target.value }
+        setSettings(newSettings)
+        saveSettings(newSettings)
+    }
+
+    const handleToggleChange = (key) => () => {
+        const newSettings = { ...settings, [key]: !settings[key] }
+        setSettings(newSettings)
+        saveSettings(newSettings)
+    }
+
+    const handleSliderChange = (e) => {
+        const newSettings = { ...settings, speech_rate: parseFloat(e.target.value) }
+        setSettings(newSettings)
+        saveSettings(newSettings)
+    }
+
+    const resetToDefault = async () => {
+        setSettings(defaultSettings)
+        await saveSettings(defaultSettings)
+    }
+
+    // Save learning challenges to profile
+    const handleChallengeToggle = async (challengeId) => {
+        if (!user?.id) return
+
+        const newChallenges = learningChallenges.includes(challengeId)
+            ? learningChallenges.filter(id => id !== challengeId)
+            : [...learningChallenges, challengeId]
+
+        setLearningChallenges(newChallenges)
+
+        try {
+            await updateProfile(user.id, { learning_challenges: newChallenges })
+        } catch (err) {
+            console.error('Error saving challenges:', err)
+        }
+    }
 
     const tabs = [
         { id: 'accessibility', label: 'Accessibility', icon: '⚙️' },
@@ -68,31 +162,24 @@ function Settings() {
         { value: 'wider', label: 'Wider' },
     ]
 
-    const handleSelectChange = (key) => (e) => {
-        setSettings({ ...settings, [key]: e.target.value })
-    }
+    const challengeOptions = [
+        { id: 'dyslexia', label: 'Dyslexia', description: 'Difficulty with reading, spelling, or writing' },
+        { id: 'adhd', label: 'ADHD', description: 'Attention and focus challenges' },
+        { id: 'auditory', label: 'Auditory Processing', description: 'Difficulty processing spoken information' },
+        { id: 'visual', label: 'Visual Processing', description: 'Difficulty processing visual information' },
+        { id: 'motor', label: 'Motor Difficulties', description: 'Challenges with fine motor skills' },
+        { id: 'memory', label: 'Memory Challenges', description: 'Difficulty retaining information' },
+    ]
 
-    const handleToggleChange = (key) => () => {
-        setSettings({ ...settings, [key]: !settings[key] })
-    }
-
-    const handleSliderChange = (e) => {
-        setSettings({ ...settings, speechRate: parseFloat(e.target.value) })
-    }
-
-    const resetToDefault = () => {
-        setSettings({
-            theme: 'light',
-            fontSize: 'medium',
-            fontFamily: 'poppins',
-            lineHeight: 'normal',
-            letterSpacing: 'normal',
-            reduceMotion: false,
-            focusMode: false,
-            readingRuler: false,
-            textToSpeech: false,
-            speechRate: 1,
-        })
+    if (loading) {
+        return (
+            <div className="settings-page">
+                <Navbar />
+                <main className="settings-content">
+                    <div className="loading-message">Loading settings...</div>
+                </main>
+            </div>
+        )
     }
 
     return (
@@ -152,32 +239,32 @@ function Settings() {
                                         label="Font Size"
                                         id="fontSize"
                                         options={fontSizeOptions}
-                                        value={settings.fontSize}
-                                        onChange={handleSelectChange('fontSize')}
+                                        value={settings.font_size}
+                                        onChange={handleSelectChange('font_size')}
                                     />
 
                                     <Select
                                         label="Font Family"
                                         id="fontFamily"
                                         options={fontFamilyOptions}
-                                        value={settings.fontFamily}
-                                        onChange={handleSelectChange('fontFamily')}
+                                        value={settings.font_family}
+                                        onChange={handleSelectChange('font_family')}
                                     />
 
                                     <Select
                                         label="Line Height"
                                         id="lineHeight"
                                         options={lineHeightOptions}
-                                        value={settings.lineHeight}
-                                        onChange={handleSelectChange('lineHeight')}
+                                        value={settings.line_height}
+                                        onChange={handleSelectChange('line_height')}
                                     />
 
                                     <Select
                                         label="Letter Spacing"
                                         id="letterSpacing"
                                         options={letterSpacingOptions}
-                                        value={settings.letterSpacing}
-                                        onChange={handleSelectChange('letterSpacing')}
+                                        value={settings.letter_spacing}
+                                        onChange={handleSelectChange('letter_spacing')}
                                     />
                                 </div>
                             </Card>
@@ -192,24 +279,24 @@ function Settings() {
                                         id="reduceMotion"
                                         label="Reduce Motion"
                                         description="Minimize animations"
-                                        checked={settings.reduceMotion}
-                                        onChange={handleToggleChange('reduceMotion')}
+                                        checked={settings.reduce_motion}
+                                        onChange={handleToggleChange('reduce_motion')}
                                     />
 
                                     <Toggle
                                         id="focusMode"
                                         label="Focus Mode"
                                         description="Hide non-essential elements"
-                                        checked={settings.focusMode}
-                                        onChange={handleToggleChange('focusMode')}
+                                        checked={settings.focus_mode}
+                                        onChange={handleToggleChange('focus_mode')}
                                     />
 
                                     <Toggle
                                         id="readingRuler"
                                         label="Reading Ruler"
                                         description="Highlight current line"
-                                        checked={settings.readingRuler}
-                                        onChange={handleToggleChange('readingRuler')}
+                                        checked={settings.reading_ruler}
+                                        onChange={handleToggleChange('reading_ruler')}
                                     />
                                 </div>
                             </Card>
@@ -224,21 +311,21 @@ function Settings() {
                                 id="textToSpeech"
                                 label="Text-to-Speech"
                                 description="Read content aloud"
-                                checked={settings.textToSpeech}
-                                onChange={handleToggleChange('textToSpeech')}
+                                checked={settings.text_to_speech}
+                                onChange={handleToggleChange('text_to_speech')}
                             />
 
                             <div className="slider-wrapper">
                                 <div className="slider-header">
                                     <label className="slider-label">Speech Rate</label>
-                                    <span className="slider-value">{settings.speechRate}x</span>
+                                    <span className="slider-value">{settings.speech_rate}x</span>
                                 </div>
                                 <input
                                     type="range"
                                     min="0.5"
                                     max="2"
                                     step="0.1"
-                                    value={settings.speechRate}
+                                    value={settings.speech_rate}
                                     onChange={handleSliderChange}
                                     className="slider"
                                 />
@@ -271,29 +358,14 @@ function Settings() {
                                 </p>
 
                                 <div className="profile-challenges-list">
-                                    {[
-                                        { id: 'dyslexia', label: 'Dyslexia', description: 'Difficulty with reading, spelling, or writing' },
-                                        { id: 'adhd', label: 'ADHD', description: 'Attention and focus challenges' },
-                                        { id: 'auditory', label: 'Auditory Processing', description: 'Difficulty processing spoken information' },
-                                        { id: 'visual', label: 'Visual Processing', description: 'Difficulty processing visual information' },
-                                        { id: 'motor', label: 'Motor Difficulties', description: 'Challenges with fine motor skills' },
-                                        { id: 'memory', label: 'Memory Challenges', description: 'Difficulty retaining information' },
-                                    ].map((challenge) => {
-                                        const savedChallenges = JSON.parse(localStorage.getItem('learningChallenges') || '[]')
-                                        const isChecked = savedChallenges.includes(challenge.id)
+                                    {challengeOptions.map((challenge) => {
+                                        const isChecked = learningChallenges.includes(challenge.id)
                                         return (
                                             <label key={challenge.id} className={`profile-challenge-item ${isChecked ? 'selected' : ''}`}>
                                                 <input
                                                     type="checkbox"
-                                                    defaultChecked={isChecked}
-                                                    onChange={(e) => {
-                                                        const current = JSON.parse(localStorage.getItem('learningChallenges') || '[]')
-                                                        if (e.target.checked) {
-                                                            localStorage.setItem('learningChallenges', JSON.stringify([...current, challenge.id]))
-                                                        } else {
-                                                            localStorage.setItem('learningChallenges', JSON.stringify(current.filter(id => id !== challenge.id)))
-                                                        }
-                                                    }}
+                                                    checked={isChecked}
+                                                    onChange={() => handleChallengeToggle(challenge.id)}
                                                     className="profile-challenge-checkbox"
                                                 />
                                                 <div className="profile-challenge-content">
@@ -313,7 +385,7 @@ function Settings() {
                                 <div className="account-info">
                                     <div className="info-row">
                                         <span className="info-label">Email</span>
-                                        <span className="info-value">siddukasam28@gmail.com</span>
+                                        <span className="info-value">{user?.email}</span>
                                     </div>
                                     <div className="info-row">
                                         <span className="info-label">Member since</span>
