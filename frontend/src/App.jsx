@@ -8,6 +8,7 @@ import Lessons from './pages/Lessons'
 import Practice from './pages/Practice'
 import Profile from './pages/Profile'
 import Assessments from './pages/Assessments'
+import StudyRooms from './pages/StudyRooms'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 
@@ -73,6 +74,14 @@ function App() {
                         element={
                             <ProtectedRoute>
                                 <Assessments />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/study-rooms"
+                        element={
+                            <ProtectedRoute>
+                                <StudyRooms />
                             </ProtectedRoute>
                         }
                     />
