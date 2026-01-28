@@ -253,10 +253,76 @@ function Settings() {
                 )}
 
                 {activeTab === 'profile' && (
-                    <Card className="placeholder-card">
-                        <h3>Profile Settings</h3>
-                        <p>Profile settings will be available here.</p>
-                    </Card>
+                    <>
+                        <div className="section-header-row">
+                            <div>
+                                <h2 className="section-title">Profile Settings</h2>
+                                <p className="section-subtitle">Manage your account and learning preferences</p>
+                            </div>
+                        </div>
+
+                        <div className="settings-grid">
+                            {/* Learning Challenges */}
+                            <Card className="settings-card challenges-card">
+                                <h3 className="card-title">Learning Challenges</h3>
+                                <p className="card-subtitle">
+                                    Select any challenges you'd like support with.
+                                    We'll suggest helpful accessibility features.
+                                </p>
+
+                                <div className="profile-challenges-list">
+                                    {[
+                                        { id: 'dyslexia', label: 'Dyslexia', description: 'Difficulty with reading, spelling, or writing' },
+                                        { id: 'adhd', label: 'ADHD', description: 'Attention and focus challenges' },
+                                        { id: 'auditory', label: 'Auditory Processing', description: 'Difficulty processing spoken information' },
+                                        { id: 'visual', label: 'Visual Processing', description: 'Difficulty processing visual information' },
+                                        { id: 'motor', label: 'Motor Difficulties', description: 'Challenges with fine motor skills' },
+                                        { id: 'memory', label: 'Memory Challenges', description: 'Difficulty retaining information' },
+                                    ].map((challenge) => {
+                                        const savedChallenges = JSON.parse(localStorage.getItem('learningChallenges') || '[]')
+                                        const isChecked = savedChallenges.includes(challenge.id)
+                                        return (
+                                            <label key={challenge.id} className={`profile-challenge-item ${isChecked ? 'selected' : ''}`}>
+                                                <input
+                                                    type="checkbox"
+                                                    defaultChecked={isChecked}
+                                                    onChange={(e) => {
+                                                        const current = JSON.parse(localStorage.getItem('learningChallenges') || '[]')
+                                                        if (e.target.checked) {
+                                                            localStorage.setItem('learningChallenges', JSON.stringify([...current, challenge.id]))
+                                                        } else {
+                                                            localStorage.setItem('learningChallenges', JSON.stringify(current.filter(id => id !== challenge.id)))
+                                                        }
+                                                    }}
+                                                    className="profile-challenge-checkbox"
+                                                />
+                                                <div className="profile-challenge-content">
+                                                    <span className="profile-challenge-label">{challenge.label}</span>
+                                                    <span className="profile-challenge-description">{challenge.description}</span>
+                                                </div>
+                                            </label>
+                                        )
+                                    })}
+                                </div>
+                            </Card>
+
+                            {/* Account Info Placeholder */}
+                            <Card className="settings-card">
+                                <h3 className="card-title">Account Information</h3>
+                                <p className="card-subtitle">Your account details</p>
+                                <div className="account-info">
+                                    <div className="info-row">
+                                        <span className="info-label">Email</span>
+                                        <span className="info-value">siddukasam28@gmail.com</span>
+                                    </div>
+                                    <div className="info-row">
+                                        <span className="info-label">Member since</span>
+                                        <span className="info-value">January 2026</span>
+                                    </div>
+                                </div>
+                            </Card>
+                        </div>
+                    </>
                 )}
 
                 {activeTab === 'language' && (
