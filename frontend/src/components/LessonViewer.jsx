@@ -20,7 +20,8 @@ function LessonViewer({
     language,
     section,
     lessonTitle,
-    onClose
+    onClose,
+    onProgress // Callback: (progressPercent, isComplete) => void
 }) {
     const [words, setWords] = useState([])
     const [currentIndex, setCurrentIndex] = useState(0)
@@ -343,12 +344,31 @@ function LessonViewer({
         setMatchResult(null)
     }
 
+    // Handle closing with progress report
+    const handleClose = () => {
+        // Calculate actual progress based on visited/learned words
+        const progressPercent = words.length > 0
+            ? Math.round((visitedWords.length / words.length) * 100)
+            : 0
+
+        // Lesson is complete only if all words have been visited
+        const isComplete = words.length > 0 && visitedWords.length >= words.length
+
+        // Report progress to parent
+        if (onProgress) {
+            onProgress(progressPercent, isComplete)
+        }
+
+        // Close the viewer
+        onClose()
+    }
+
     if (words.length === 0) {
         return (
             <div className="lesson-viewer">
                 <div className="lesson-viewer-content">
                     <p>No words found for this lesson.</p>
-                    <Button onClick={onClose}>Go Back</Button>
+                    <Button onClick={handleClose}>Go Back</Button>
                 </div>
             </div>
         )
@@ -358,7 +378,7 @@ function LessonViewer({
         <div className="lesson-viewer">
             {/* Header */}
             <div className="viewer-header">
-                <button className="back-home-btn" onClick={onClose}>
+                <button className="back-home-btn" onClick={handleClose}>
                     <Home size={20} />
                 </button>
                 <div className="breadcrumb">
@@ -483,7 +503,7 @@ function LessonViewer({
                     <Button
                         variant="primary"
                         icon={Check}
-                        onClick={onClose}
+                        onClick={handleClose}
                     >
                         Finish Lesson
                     </Button>

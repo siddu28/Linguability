@@ -180,18 +180,35 @@ function Lessons() {
         }
     }
 
-    // Handle closing lesson viewer
-    const handleCloseLessonViewer = async () => {
-        if (activeLesson && user && selectedLanguage) {
-            // Find the lesson index
-            const section = baseLessonSections.find(s => s.title === activeLesson.section)
-            if (section) {
-                const lessonIndex = section.lessons.findIndex(l => l.title === activeLesson.lesson.title)
-                if (lessonIndex !== -1) {
-                    await handleLessonComplete(section, activeLesson.lesson, lessonIndex)
-                }
+    // Handle progress update from lesson viewer
+    const handleLessonProgress = async (progressPercent, isComplete) => {
+        if (!activeLesson || !user || !selectedLanguage) return
+
+        // Find the lesson section and index
+        const section = baseLessonSections.find(s => s.title === activeLesson.section)
+        if (!section) return
+
+        const lessonIndex = section.lessons.findIndex(l => l.title === activeLesson.lesson.title)
+        if (lessonIndex === -1) return
+
+        const lessonId = generateLessonId(selectedLanguage.id, section.id.toLowerCase(), lessonIndex)
+
+        try {
+            if (isComplete) {
+                // Mark as completed only when all words are visited
+                await markLessonComplete(user.id, lessonId)
+            } else if (progressPercent > 0) {
+                // Save as in_progress with percentage
+                await updateLessonProgress(user.id, lessonId, 'in_progress', progressPercent)
             }
+            await loadProgress() // Reload progress
+        } catch (error) {
+            console.error('Error saving lesson progress:', error)
         }
+    }
+
+    // Handle closing lesson viewer
+    const handleCloseLessonViewer = () => {
         setActiveLesson(null)
     }
 
@@ -409,6 +426,7 @@ function Lessons() {
                     section={activeLesson.section}
                     lessonTitle={activeLesson.lesson.title}
                     onClose={handleCloseLessonViewer}
+                    onProgress={handleLessonProgress}
                 />
             )}
         </div>
