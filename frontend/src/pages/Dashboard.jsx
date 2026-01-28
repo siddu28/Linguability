@@ -118,7 +118,7 @@ function Dashboard() {
                                     />
                                 </div>
                             </div>
-                            <Button variant="primary" icon={Play}>
+                            <Button variant="primary" icon={Play} className="resume-btn">
                                 Resume
                             </Button>
                         </div>

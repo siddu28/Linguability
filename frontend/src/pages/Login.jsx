@@ -12,7 +12,7 @@ import './Login.css'
 
 function Login() {
     const navigate = useNavigate()
-    const [isSignUp, setIsSignUp] = useState(true)
+    const [isSignUp, setIsSignUp] = useState(false)
     const [formData, setFormData] = useState({
         fullName: '',
         email: '',
