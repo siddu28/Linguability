@@ -206,6 +206,15 @@
     opacity: 0.6;
 }
 
+.lesson-item.in_progress {
+    border-left: 4px solid var(--color-primary);
+    background-color: rgba(233, 30, 140, 0.03);
+}
+
+.lesson-item.completed {
+    opacity: 0.85;
+}
+
 .lesson-number {
     width: 32px;
     height: 32px;
@@ -218,6 +227,11 @@
     font-weight: var(--font-weight-medium);
     color: var(--color-text-secondary);
     flex-shrink: 0;
+}
+
+.lesson-item.completed .lesson-number {
+    background-color: #10B981;
+    color: var(--color-white);
 }
 
 .lesson-details {
@@ -236,6 +250,11 @@
     gap: var(--spacing-xs);
     font-size: var(--font-size-sm);
     color: var(--color-text-muted);
+}
+
+.lesson-progress-inline {
+    color: var(--color-primary);
+    font-weight: var(--font-weight-medium);
 }
 
 .lesson-actions {
@@ -258,6 +277,11 @@
 
 .start-lesson-btn {
     min-width: 100px;
+}
+
+.repeat-lesson-btn {
+    min-width: 90px;
+    border: 1px solid var(--color-border);
 }
 
 .status-icon.completed {
