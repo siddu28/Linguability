@@ -369,12 +369,30 @@ function Onboarding() {
 
     const speakText = (text) => {
         if ('speechSynthesis' in window) {
+            // Cancel any ongoing speech
+            window.speechSynthesis.cancel()
+            
             const utterance = new SpeechSynthesisUtterance(text)
             utterance.rate = demoSettings.audioSpeed
+            utterance.pitch = 1
+            utterance.volume = 1
+            
+            // Try to find a Hindi voice, fallback to default
+            const voices = window.speechSynthesis.getVoices()
+            const hindiVoice = voices.find(v => v.lang.includes('hi')) || 
+                              voices.find(v => v.lang.includes('en'))
+            if (hindiVoice) {
+                utterance.voice = hindiVoice
+            }
             utterance.lang = 'hi-IN'
-            window.speechSynthesis.speak(utterance)
+            
             setIsPlaying(true)
             utterance.onend = () => setIsPlaying(false)
+            utterance.onerror = () => setIsPlaying(false)
+            
+            window.speechSynthesis.speak(utterance)
+        } else {
+            alert('Text-to-speech is not supported in your browser')
         }
     }
 
@@ -679,7 +697,7 @@ function Onboarding() {
                         </div>
                         <p className="panel-subtitle">Changes apply instantly to the demo</p>
 
-                        <div className="settings-grid">
+                        <div className="settings-list">
                             <div className="setting-group">
                                 <label className="setting-label">
                                     <Type size={16} />
@@ -701,22 +719,6 @@ function Onboarding() {
                             </div>
 
                             <div className="setting-group">
-                                <label className="setting-label">
-                                    <Type size={16} />
-                                    Font Size
-                                </label>
-                                <select 
-                                    value={demoSettings.fontSize}
-                                    onChange={(e) => setDemoSettings(prev => ({ ...prev, fontSize: e.target.value }))}
-                                >
-                                    <option value="small">Small (14px)</option>
-                                    <option value="medium">Medium (16px)</option>
-                                    <option value="large">Large (20px)</option>
-                                    <option value="xlarge">Extra Large (24px)</option>
-                                </select>
-                            </div>
-
-                            <div className="setting-group">
                                 <label className="setting-label">Line Height</label>
                                 <select 
                                     value={demoSettings.lineHeight}
@@ -725,19 +727,6 @@ function Onboarding() {
                                     <option value="normal">Normal (1.6)</option>
                                     <option value="relaxed">Relaxed (2.0)</option>
                                     <option value="loose">Loose (2.5)</option>
-                                </select>
-                            </div>
-
-                            <div className="setting-group">
-                                <label className="setting-label">Letter Spacing</label>
-                                <select 
-                                    value={demoSettings.letterSpacing}
-                                    onChange={(e) => setDemoSettings(prev => ({ ...prev, letterSpacing: e.target.value }))}
-                                >
-                                    <option value="normal">Normal</option>
-                                    <option value="wide">Wide</option>
-                                    <option value="wider">Wider</option>
-                                    <option value="widest">Widest</option>
                                 </select>
                             </div>
 
@@ -756,6 +745,35 @@ function Onboarding() {
                                     <option value="light-green">Light Green (Natural)</option>
                                     <option value="light-yellow">Light Yellow</option>
                                     <option value="dark">Dark Mode</option>
+                                </select>
+                            </div>
+
+                            <div className="setting-group">
+                                <label className="setting-label">
+                                    <Type size={16} />
+                                    Font Size
+                                </label>
+                                <select 
+                                    value={demoSettings.fontSize}
+                                    onChange={(e) => setDemoSettings(prev => ({ ...prev, fontSize: e.target.value }))}
+                                >
+                                    <option value="small">Small (14px)</option>
+                                    <option value="medium">Medium (16px)</option>
+                                    <option value="large">Large (20px)</option>
+                                    <option value="xlarge">Extra Large (24px)</option>
+                                </select>
+                            </div>
+
+                            <div className="setting-group">
+                                <label className="setting-label">Letter Spacing</label>
+                                <select 
+                                    value={demoSettings.letterSpacing}
+                                    onChange={(e) => setDemoSettings(prev => ({ ...prev, letterSpacing: e.target.value }))}
+                                >
+                                    <option value="normal">Normal</option>
+                                    <option value="wide">Wide</option>
+                                    <option value="wider">Wider</option>
+                                    <option value="widest">Widest</option>
                                 </select>
                             </div>
 
