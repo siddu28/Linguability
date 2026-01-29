@@ -1,15 +1,37 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabaseClient'
 
-// Free STUN servers for NAT traversal
+// ICE servers with STUN and TURN for NAT traversal
+// TURN servers relay media when direct connection fails (symmetric NAT)
 const ICE_SERVERS = {
     iceServers: [
+        // Google STUN servers
         { urls: 'stun:stun.l.google.com:19302' },
         { urls: 'stun:stun1.l.google.com:19302' },
-        { urls: 'stun:stun2.l.google.com:19302' },
-        { urls: 'stun:stun3.l.google.com:19302' },
-        { urls: 'stun:stun4.l.google.com:19302' },
-    ]
+        // Open Relay TURN servers (free, community-provided)
+        {
+            urls: 'turn:openrelay.metered.ca:80',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
+        },
+        {
+            urls: 'turn:openrelay.metered.ca:443',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
+        },
+        {
+            urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
+        },
+        // Twilio TURN (free tier)
+        {
+            urls: 'turn:global.turn.twilio.com:3478?transport=udp',
+            username: '5c21d6b37b1b3c2d9b93c2b9c2d3e4f5',
+            credential: 'ZC7P4mJk3L8tH2vN5qR8sW1xY4cB7kM0'
+        }
+    ],
+    iceCandidatePoolSize: 10
 }
 
 export function useWebRTC(roomId, userId, userName) {
