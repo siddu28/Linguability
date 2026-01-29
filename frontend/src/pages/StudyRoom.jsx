@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
     ArrowLeft,
@@ -8,7 +8,8 @@ import {
     VideoOff,
     LogOut,
     Users,
-    User
+    User,
+    Trash2
 } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import TaskList from '../components/TaskList'
@@ -21,17 +22,19 @@ function StudyRoom() {
     const navigate = useNavigate()
     const { user } = useAuth()
     const localVideoRef = useRef(null)
-    const [localStream, setLocalStream] = useState(null)
+    const streamRef = useRef(null)
 
     // Room state
     const [roomData, setRoomData] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+    const [isCreator, setIsCreator] = useState(false)
 
     // Media controls state
     const [isAudioEnabled, setIsAudioEnabled] = useState(true)
     const [isVideoEnabled, setIsVideoEnabled] = useState(true)
     const [mediaError, setMediaError] = useState(null)
+    const [streamReady, setStreamReady] = useState(false)
 
     // Participants state
     const [participants, setParticipants] = useState([])
@@ -40,7 +43,7 @@ function StudyRoom() {
     const [tasks, setTasks] = useState([])
 
     // Fetch room data
-    const fetchRoomData = async () => {
+    const fetchRoomData = useCallback(async () => {
         try {
             const { data, error } = await supabase
                 .from('study_rooms')
@@ -52,14 +55,15 @@ function StudyRoom() {
             if (!data) throw new Error('Room not found')
 
             setRoomData(data)
+            setIsCreator(data.created_by === user?.id)
         } catch (err) {
             console.error('Error fetching room:', err)
             setError('Room not found or no longer available')
         }
-    }
+    }, [roomId, user?.id])
 
     // Fetch participants
-    const fetchParticipants = async () => {
+    const fetchParticipants = useCallback(async () => {
         try {
             const { data, error } = await supabase
                 .from('room_participants')
@@ -71,10 +75,10 @@ function StudyRoom() {
         } catch (err) {
             console.error('Error fetching participants:', err)
         }
-    }
+    }, [roomId])
 
     // Fetch tasks
-    const fetchTasks = async () => {
+    const fetchTasks = useCallback(async () => {
         try {
             const { data, error } = await supabase
                 .from('room_tasks')
@@ -87,14 +91,13 @@ function StudyRoom() {
         } catch (err) {
             console.error('Error fetching tasks:', err)
         }
-    }
+    }, [roomId])
 
     // Join room (add participant)
-    const joinRoom = async () => {
+    const joinRoom = useCallback(async () => {
         if (!user) return
 
         try {
-            // Get user profile name or use email
             const userName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Anonymous'
 
             const { error } = await supabase
@@ -103,8 +106,8 @@ function StudyRoom() {
                     room_id: roomId,
                     user_id: user.id,
                     user_name: userName,
-                    is_audio_enabled: isAudioEnabled,
-                    is_video_enabled: isVideoEnabled
+                    is_audio_enabled: true,
+                    is_video_enabled: true
                 }, {
                     onConflict: 'room_id,user_id'
                 })
@@ -113,22 +116,48 @@ function StudyRoom() {
         } catch (err) {
             console.error('Error joining room:', err)
         }
-    }
+    }, [roomId, user])
 
     // Leave room (remove participant)
-    const leaveRoomFromDb = async () => {
+    const leaveRoomFromDb = useCallback(async () => {
         if (!user) return
 
         try {
-            const { error } = await supabase
+            await supabase
                 .from('room_participants')
                 .delete()
                 .eq('room_id', roomId)
                 .eq('user_id', user.id)
-
-            if (error) throw error
         } catch (err) {
             console.error('Error leaving room:', err)
+        }
+    }, [roomId, user])
+
+    // Delete room (only for creator)
+    const deleteRoom = async () => {
+        if (!user || !isCreator) return
+
+        const confirmDelete = window.confirm('Are you sure you want to delete this room? All participants will be removed.')
+        if (!confirmDelete) return
+
+        try {
+            // Stop local media
+            if (streamRef.current) {
+                streamRef.current.getTracks().forEach(track => track.stop())
+            }
+
+            // Delete the room (cascades to participants and tasks)
+            const { error } = await supabase
+                .from('study_rooms')
+                .delete()
+                .eq('id', roomId)
+
+            if (error) throw error
+
+            navigate('/study-rooms')
+        } catch (err) {
+            console.error('Error deleting room:', err)
+            alert('Failed to delete room')
         }
     }
 
@@ -143,7 +172,27 @@ function StudyRoom() {
             setLoading(false)
         }
 
-        initRoom()
+        if (user) {
+            initRoom()
+        }
+
+        // Subscribe to room changes (for deletion detection)
+        const roomSubscription = supabase
+            .channel(`room_${roomId}_data`)
+            .on(
+                'postgres_changes',
+                {
+                    event: 'DELETE',
+                    schema: 'public',
+                    table: 'study_rooms',
+                    filter: `id=eq.${roomId}`
+                },
+                () => {
+                    alert('This room has been deleted by the host.')
+                    navigate('/study-rooms')
+                }
+            )
+            .subscribe()
 
         // Subscribe to participants changes
         const participantsSubscription = supabase
@@ -156,8 +205,7 @@ function StudyRoom() {
                     table: 'room_participants',
                     filter: `room_id=eq.${roomId}`
                 },
-                (payload) => {
-                    console.log('Participant change:', payload)
+                () => {
                     fetchParticipants()
                 }
             )
@@ -174,8 +222,7 @@ function StudyRoom() {
                     table: 'room_tasks',
                     filter: `room_id=eq.${roomId}`
                 },
-                (payload) => {
-                    console.log('Task change:', payload)
+                () => {
                     fetchTasks()
                 }
             )
@@ -184,59 +231,76 @@ function StudyRoom() {
         // Cleanup on unmount
         return () => {
             leaveRoomFromDb()
+            supabase.removeChannel(roomSubscription)
             supabase.removeChannel(participantsSubscription)
             supabase.removeChannel(tasksSubscription)
         }
-    }, [roomId, user])
+    }, [roomId, user, fetchRoomData, fetchParticipants, fetchTasks, joinRoom, leaveRoomFromDb, navigate])
 
     // Initialize media stream
     useEffect(() => {
+        let mounted = true
+
         async function initializeMedia() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: true,
                     audio: true
                 })
-                setLocalStream(stream)
+
+                if (!mounted) {
+                    stream.getTracks().forEach(track => track.stop())
+                    return
+                }
+
+                streamRef.current = stream
+                setStreamReady(true)
+
                 if (localVideoRef.current) {
                     localVideoRef.current.srcObject = stream
+                    localVideoRef.current.play().catch(console.error)
                 }
             } catch (error) {
                 console.error('Error accessing media devices:', error)
-                setMediaError('Could not access camera or microphone. Please check permissions.')
+                if (mounted) {
+                    setMediaError('Could not access camera or microphone. Please check permissions.')
+                }
             }
         }
 
         initializeMedia()
 
-        // Cleanup on unmount
         return () => {
-            if (localStream) {
-                localStream.getTracks().forEach(track => track.stop())
+            mounted = false
+            if (streamRef.current) {
+                streamRef.current.getTracks().forEach(track => track.stop())
+                streamRef.current = null
             }
         }
     }, [])
 
-    // Update video element when stream changes
+    // Re-attach stream when video ref is available
     useEffect(() => {
-        if (localVideoRef.current && localStream) {
-            localVideoRef.current.srcObject = localStream
+        if (localVideoRef.current && streamRef.current && isVideoEnabled) {
+            localVideoRef.current.srcObject = streamRef.current
+            localVideoRef.current.play().catch(console.error)
         }
-    }, [localStream])
+    }, [isVideoEnabled, streamReady])
 
     // Toggle audio
     const toggleAudio = async () => {
-        if (localStream) {
-            const audioTrack = localStream.getAudioTracks()[0]
+        if (streamRef.current) {
+            const audioTrack = streamRef.current.getAudioTracks()[0]
             if (audioTrack) {
-                audioTrack.enabled = !audioTrack.enabled
-                setIsAudioEnabled(audioTrack.enabled)
+                const newState = !audioTrack.enabled
+                audioTrack.enabled = newState
+                setIsAudioEnabled(newState)
 
                 // Update in database
                 if (user) {
                     await supabase
                         .from('room_participants')
-                        .update({ is_audio_enabled: audioTrack.enabled })
+                        .update({ is_audio_enabled: newState })
                         .eq('room_id', roomId)
                         .eq('user_id', user.id)
                 }
@@ -244,19 +308,20 @@ function StudyRoom() {
         }
     }
 
-    // Toggle video
+    // Toggle video - keeping track enabled but hiding video element
     const toggleVideo = async () => {
-        if (localStream) {
-            const videoTrack = localStream.getVideoTracks()[0]
+        if (streamRef.current) {
+            const videoTrack = streamRef.current.getVideoTracks()[0]
             if (videoTrack) {
-                videoTrack.enabled = !videoTrack.enabled
-                setIsVideoEnabled(videoTrack.enabled)
+                const newState = !isVideoEnabled
+                videoTrack.enabled = newState
+                setIsVideoEnabled(newState)
 
                 // Update in database
                 if (user) {
                     await supabase
                         .from('room_participants')
-                        .update({ is_video_enabled: videoTrack.enabled })
+                        .update({ is_video_enabled: newState })
                         .eq('room_id', roomId)
                         .eq('user_id', user.id)
                 }
@@ -266,8 +331,8 @@ function StudyRoom() {
 
     // Leave room
     const leaveRoom = async () => {
-        if (localStream) {
-            localStream.getTracks().forEach(track => track.stop())
+        if (streamRef.current) {
+            streamRef.current.getTracks().forEach(track => track.stop())
         }
         await leaveRoomFromDb()
         navigate('/study-rooms')
@@ -288,7 +353,6 @@ function StudyRoom() {
                 })
 
             if (error) throw error
-            // Real-time subscription will update the tasks
         } catch (err) {
             console.error('Error adding task:', err)
         }
@@ -309,7 +373,6 @@ function StudyRoom() {
                 .eq('id', taskId)
 
             if (error) throw error
-            // Real-time subscription will update the tasks
         } catch (err) {
             console.error('Error toggling task:', err)
         }
@@ -372,9 +435,21 @@ function StudyRoom() {
                         <h1 className="room-title">{roomData?.name || 'Study Session'}</h1>
                         <span className="room-id">Room ID: {roomId?.slice(0, 8)}...</span>
                     </div>
-                    <div className="participants-count">
-                        <Users size={18} />
-                        <span>{participants.length} Participant{participants.length !== 1 ? 's' : ''}</span>
+                    <div className="header-actions">
+                        <div className="participants-count">
+                            <Users size={18} />
+                            <span>{participants.length} Participant{participants.length !== 1 ? 's' : ''}</span>
+                        </div>
+                        {isCreator && (
+                            <button
+                                className="delete-room-btn"
+                                onClick={deleteRoom}
+                                aria-label="Delete room"
+                            >
+                                <Trash2 size={18} />
+                                <span>Delete Room</span>
+                            </button>
+                        )}
                     </div>
                 </div>
 
@@ -384,25 +459,30 @@ function StudyRoom() {
                     <div className="video-section">
                         {/* Video Grid */}
                         <div className="video-grid">
-                            {/* Local Video */}
+                            {/* Local Video - Always mount video element */}
                             <div className="video-container local">
                                 {mediaError ? (
                                     <div className="video-placeholder error">
                                         <p>{mediaError}</p>
                                     </div>
-                                ) : !isVideoEnabled ? (
-                                    <div className="video-placeholder">
-                                        <User size={48} />
-                                        <span>Camera Off</span>
-                                    </div>
                                 ) : (
-                                    <video
-                                        ref={localVideoRef}
-                                        autoPlay
-                                        muted
-                                        playsInline
-                                        className="video-element"
-                                    />
+                                    <>
+                                        {/* Video element - hidden when camera off */}
+                                        <video
+                                            ref={localVideoRef}
+                                            autoPlay
+                                            muted
+                                            playsInline
+                                            className={`video-element ${!isVideoEnabled ? 'hidden' : ''}`}
+                                        />
+                                        {/* Placeholder shown when camera off */}
+                                        {!isVideoEnabled && (
+                                            <div className="video-placeholder camera-off">
+                                                <User size={48} />
+                                                <span>Camera Off</span>
+                                            </div>
+                                        )}
+                                    </>
                                 )}
                                 <div className="video-label">
                                     <span>You</span>
@@ -410,18 +490,22 @@ function StudyRoom() {
                                 </div>
                             </div>
 
-                            {/* Other participants placeholders */}
+                            {/* Other participants */}
                             {participants
                                 .filter(p => p.user_id !== user?.id)
                                 .map((participant) => (
-                                    <div key={participant.id} className="video-container">
-                                        <div className="video-placeholder">
+                                    <div key={participant.id} className="video-container remote">
+                                        <div className="video-placeholder remote-user">
                                             <User size={48} />
-                                            <span>{participant.user_name}</span>
+                                            <span className="remote-user-name">{participant.user_name}</span>
+                                            <span className="remote-user-status">
+                                                {participant.is_video_enabled ? 'Video On' : 'Camera Off'}
+                                            </span>
                                         </div>
                                         <div className="video-label">
                                             <span>{participant.user_name}</span>
                                             {!participant.is_audio_enabled && <MicOff size={14} />}
+                                            {!participant.is_video_enabled && <VideoOff size={14} />}
                                         </div>
                                     </div>
                                 ))
@@ -433,10 +517,21 @@ function StudyRoom() {
                                     <div className="video-placeholder">
                                         <Users size={48} />
                                         <span>Waiting for others to join...</span>
+                                        <span className="share-hint">Share this room from the Study Rooms page</span>
                                     </div>
                                 </div>
                             )}
                         </div>
+
+                        {/* WebRTC Notice */}
+                        {participants.length > 1 && (
+                            <div className="webrtc-notice">
+                                <p>
+                                    <strong>Note:</strong> Real-time video streaming between participants requires a WebRTC signaling server.
+                                    Currently showing participant presence and status. Full video calls require additional infrastructure.
+                                </p>
+                            </div>
+                        )}
 
                         {/* Control Bar */}
                         <div className="control-bar">
@@ -494,10 +589,16 @@ function StudyRoom() {
                                 <span className="participant-name">
                                     {participant.user_name}
                                     {participant.user_id === user?.id && ' (You)'}
+                                    {participant.user_id === roomData?.created_by && ' · Host'}
                                 </span>
-                                {!participant.is_audio_enabled && (
-                                    <MicOff size={14} className="participant-muted" />
-                                )}
+                                <div className="participant-status">
+                                    {!participant.is_audio_enabled && (
+                                        <MicOff size={14} className="status-icon muted" />
+                                    )}
+                                    {!participant.is_video_enabled && (
+                                        <VideoOff size={14} className="status-icon" />
+                                    )}
+                                </div>
                             </li>
                         ))}
                     </ul>
