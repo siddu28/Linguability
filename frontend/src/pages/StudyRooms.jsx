@@ -4,51 +4,127 @@ import { Search, Plus, Users, Video, X } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import Card from '../components/Card'
 import Button from '../components/Button'
+import { supabase } from '../lib/supabaseClient'
+import { useAuth } from '../context/AuthContext'
 import './StudyRooms.css'
 
 function StudyRooms() {
     const navigate = useNavigate()
+    const { user } = useAuth()
     const [searchQuery, setSearchQuery] = useState('')
     const [showCreateModal, setShowCreateModal] = useState(false)
     const [newRoomName, setNewRoomName] = useState('')
     const [newRoomDescription, setNewRoomDescription] = useState('')
+    const [rooms, setRooms] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [error, setError] = useState(null)
 
-    // Load rooms from localStorage
-    const [rooms, setRooms] = useState(() => {
-        const stored = localStorage.getItem('studyRooms')
-        return stored ? JSON.parse(stored) : []
-    })
+    // Fetch rooms from Supabase
+    const fetchRooms = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('study_rooms')
+                .select(`
+                    *,
+                    room_participants (count)
+                `)
+                .eq('is_active', true)
+                .order('created_at', { ascending: false })
 
-    // Save rooms to localStorage when changed
+            if (error) throw error
+
+            // Transform data to include participant count
+            const roomsWithCount = data.map(room => ({
+                ...room,
+                participants: room.room_participants?.[0]?.count || 0
+            }))
+
+            setRooms(roomsWithCount)
+        } catch (err) {
+            console.error('Error fetching rooms:', err)
+            setError('Failed to load rooms')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    // Initial fetch and real-time subscription
     useEffect(() => {
-        localStorage.setItem('studyRooms', JSON.stringify(rooms))
-    }, [rooms])
+        fetchRooms()
+
+        // Subscribe to real-time changes on study_rooms table
+        const roomsSubscription = supabase
+            .channel('study_rooms_changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'study_rooms'
+                },
+                (payload) => {
+                    console.log('Room change:', payload)
+                    fetchRooms() // Refetch to get updated data
+                }
+            )
+            .subscribe()
+
+        // Subscribe to participant changes for live count updates
+        const participantsSubscription = supabase
+            .channel('participants_changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'room_participants'
+                },
+                (payload) => {
+                    console.log('Participant change:', payload)
+                    fetchRooms() // Refetch to update participant counts
+                }
+            )
+            .subscribe()
+
+        return () => {
+            supabase.removeChannel(roomsSubscription)
+            supabase.removeChannel(participantsSubscription)
+        }
+    }, [])
 
     const filteredRooms = rooms.filter(room =>
         room.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        room.description.toLowerCase().includes(searchQuery.toLowerCase())
+        (room.description || '').toLowerCase().includes(searchQuery.toLowerCase())
     )
 
-    const handleCreateRoom = (e) => {
+    const handleCreateRoom = async (e) => {
         e.preventDefault()
-        if (!newRoomName.trim()) return
+        if (!newRoomName.trim() || !user) return
 
-        const newRoom = {
-            id: `room-${Date.now()}`,
-            name: newRoomName.trim(),
-            description: newRoomDescription.trim() || 'A study session',
-            participants: 0,
-            maxParticipants: 10,
-            createdAt: new Date().toISOString()
+        try {
+            const { data, error } = await supabase
+                .from('study_rooms')
+                .insert({
+                    name: newRoomName.trim(),
+                    description: newRoomDescription.trim() || 'A study session',
+                    created_by: user.id,
+                    max_participants: 10
+                })
+                .select()
+                .single()
+
+            if (error) throw error
+
+            setNewRoomName('')
+            setNewRoomDescription('')
+            setShowCreateModal(false)
+
+            // Navigate to the new room
+            navigate(`/study-rooms/${data.id}`)
+        } catch (err) {
+            console.error('Error creating room:', err)
+            setError('Failed to create room')
         }
-
-        setRooms([...rooms, newRoom])
-        setNewRoomName('')
-        setNewRoomDescription('')
-        setShowCreateModal(false)
-
-        // Navigate to the new room
-        navigate(`/study-rooms/${newRoom.id}`)
     }
 
     const handleJoinRoom = (roomId) => {
@@ -93,8 +169,19 @@ function StudyRooms() {
                     />
                 </div>
 
-                {/* Rooms Grid */}
-                {filteredRooms.length > 0 ? (
+                {/* Error Message */}
+                {error && (
+                    <div className="error-message">
+                        {error}
+                    </div>
+                )}
+
+                {/* Loading State */}
+                {loading ? (
+                    <div className="loading-state">
+                        <p>Loading rooms...</p>
+                    </div>
+                ) : filteredRooms.length > 0 ? (
                     <div className="rooms-grid">
                         {filteredRooms.map((room) => (
                             <Card key={room.id} className="room-card">
@@ -105,7 +192,7 @@ function StudyRooms() {
                                     </span>
                                     <span className="participants-badge">
                                         <Users size={14} />
-                                        {room.participants}/{room.maxParticipants}
+                                        {room.participants}/{room.max_participants}
                                     </span>
                                 </div>
 

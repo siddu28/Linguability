@@ -178,6 +178,23 @@
     margin-right: auto;
 }
 
+/* Loading State */
+.loading-state {
+    text-align: center;
+    padding: var(--spacing-3xl);
+    color: var(--color-text-muted);
+}
+
+/* Error Message */
+.error-message {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--color-error);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--spacing-lg);
+    text-align: center;
+}
+
 /* Modal Styles */
 .modal-overlay {
     position: fixed;
