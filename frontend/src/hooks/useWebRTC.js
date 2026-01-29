@@ -7,57 +7,114 @@ const ICE_SERVERS = {
         { urls: 'stun:stun.l.google.com:19302' },
         { urls: 'stun:stun1.l.google.com:19302' },
         { urls: 'stun:stun2.l.google.com:19302' },
+        { urls: 'stun:stun3.l.google.com:19302' },
+        { urls: 'stun:stun4.l.google.com:19302' },
     ]
 }
 
-export function useWebRTC(roomId, userId, userName, localStream) {
+export function useWebRTC(roomId, userId, userName) {
     const [remoteStreams, setRemoteStreams] = useState({})
     const [connectionStatus, setConnectionStatus] = useState({})
+    const [localStream, setLocalStream] = useState(null)
+
     const peerConnections = useRef({})
     const pendingCandidates = useRef({})
     const channelRef = useRef(null)
+    const localStreamRef = useRef(null)
+
+    // Update local stream ref
+    const updateLocalStream = useCallback((stream) => {
+        localStreamRef.current = stream
+        setLocalStream(stream)
+
+        // Add tracks to existing peer connections
+        if (stream) {
+            Object.keys(peerConnections.current).forEach(peerId => {
+                const pc = peerConnections.current[peerId]
+                const senders = pc.getSenders()
+
+                stream.getTracks().forEach(track => {
+                    const existingSender = senders.find(s => s.track?.kind === track.kind)
+                    if (existingSender) {
+                        existingSender.replaceTrack(track)
+                    } else {
+                        pc.addTrack(track, stream)
+                    }
+                })
+            })
+        }
+    }, [])
+
+    // Send signaling data via Supabase
+    const sendSignal = useCallback(async (data) => {
+        try {
+            console.log(`Sending ${data.type} signal from ${userId} to ${data.to}`)
+            const { error } = await supabase.from('webrtc_signals').insert({
+                room_id: roomId,
+                from_user: userId,
+                to_user: data.to,
+                signal_type: data.type,
+                signal_data: JSON.stringify(data.payload),
+                created_at: new Date().toISOString()
+            })
+            if (error) {
+                console.error('Error sending signal:', error)
+            }
+        } catch (error) {
+            console.error('Error sending signal:', error)
+        }
+    }, [roomId, userId])
 
     // Create a peer connection for a specific user
     const createPeerConnection = useCallback((remoteUserId, remoteUserName) => {
-        if (peerConnections.current[remoteUserId]) {
-            return peerConnections.current[remoteUserId]
+        // Return existing connection if available and not closed
+        const existingPc = peerConnections.current[remoteUserId]
+        if (existingPc && existingPc.connectionState !== 'closed' && existingPc.connectionState !== 'failed') {
+            return existingPc
         }
 
-        console.log(`Creating peer connection for ${remoteUserName} (${remoteUserId})`)
+        console.log(`Creating new peer connection for ${remoteUserName} (${remoteUserId})`)
 
         const pc = new RTCPeerConnection(ICE_SERVERS)
         peerConnections.current[remoteUserId] = pc
 
-        // Add local tracks to the connection
-        if (localStream) {
-            localStream.getTracks().forEach(track => {
-                pc.addTrack(track, localStream)
+        // Set initial status
+        setConnectionStatus(prev => ({
+            ...prev,
+            [remoteUserId]: 'new'
+        }))
+
+        // Add local tracks to the connection if stream exists
+        if (localStreamRef.current) {
+            console.log('Adding local tracks to peer connection')
+            localStreamRef.current.getTracks().forEach(track => {
+                pc.addTrack(track, localStreamRef.current)
             })
         }
 
         // Handle incoming remote tracks
         pc.ontrack = (event) => {
-            console.log(`Received remote track from ${remoteUserName}`)
+            console.log(`Received remote track from ${remoteUserName}:`, event.track.kind)
             const [remoteStream] = event.streams
-            setRemoteStreams(prev => ({
-                ...prev,
-                [remoteUserId]: {
-                    stream: remoteStream,
-                    userName: remoteUserName
-                }
-            }))
+            if (remoteStream) {
+                setRemoteStreams(prev => ({
+                    ...prev,
+                    [remoteUserId]: {
+                        stream: remoteStream,
+                        userName: remoteUserName
+                    }
+                }))
+            }
         }
 
         // Handle ICE candidates
         pc.onicecandidate = async (event) => {
             if (event.candidate) {
-                // Send ICE candidate via Supabase Realtime
+                console.log('Sending ICE candidate to', remoteUserId)
                 await sendSignal({
                     type: 'ice-candidate',
-                    candidate: event.candidate,
-                    from: userId,
-                    to: remoteUserId,
-                    roomId
+                    payload: event.candidate.toJSON(),
+                    to: remoteUserId
                 })
             }
         }
@@ -69,97 +126,126 @@ export function useWebRTC(roomId, userId, userName, localStream) {
                 ...prev,
                 [remoteUserId]: pc.connectionState
             }))
+
+            if (pc.connectionState === 'failed') {
+                console.log('Connection failed, closing peer connection')
+                pc.close()
+            }
         }
 
         // Handle ICE connection state
         pc.oniceconnectionstatechange = () => {
-            console.log(`ICE connection state with ${remoteUserName}: ${pc.iceConnectionState}`)
+            console.log(`ICE state with ${remoteUserName}: ${pc.iceConnectionState}`)
+        }
+
+        // Handle ICE gathering state
+        pc.onicegatheringstatechange = () => {
+            console.log(`ICE gathering state: ${pc.iceGatheringState}`)
+        }
+
+        // Handle negotiation needed
+        pc.onnegotiationneeded = async () => {
+            console.log('Negotiation needed for', remoteUserId)
         }
 
         return pc
-    }, [localStream, roomId, userId])
-
-    // Send signaling data via Supabase
-    const sendSignal = async (data) => {
-        try {
-            await supabase.from('webrtc_signals').insert({
-                room_id: roomId,
-                from_user: data.from,
-                to_user: data.to,
-                signal_type: data.type,
-                signal_data: JSON.stringify(data.type === 'ice-candidate' ? data.candidate : data.sdp),
-                created_at: new Date().toISOString()
-            })
-        } catch (error) {
-            console.error('Error sending signal:', error)
-        }
-    }
+    }, [sendSignal])
 
     // Handle incoming offer
     const handleOffer = useCallback(async (fromUserId, fromUserName, offer) => {
-        console.log(`Received offer from ${fromUserName}`)
+        console.log(`Handling offer from ${fromUserName}`)
 
         const pc = createPeerConnection(fromUserId, fromUserName)
 
         try {
+            // Check if we already have a remote description
+            if (pc.signalingState !== 'stable' && pc.signalingState !== 'have-local-offer') {
+                console.log('Ignoring offer, signaling state:', pc.signalingState)
+                return
+            }
+
             await pc.setRemoteDescription(new RTCSessionDescription(offer))
+            console.log('Remote description set successfully')
 
             // Apply any pending ICE candidates
             if (pendingCandidates.current[fromUserId]) {
+                console.log(`Applying ${pendingCandidates.current[fromUserId].length} pending ICE candidates`)
                 for (const candidate of pendingCandidates.current[fromUserId]) {
-                    await pc.addIceCandidate(new RTCIceCandidate(candidate))
+                    try {
+                        await pc.addIceCandidate(new RTCIceCandidate(candidate))
+                    } catch (e) {
+                        console.error('Error adding pending ICE candidate:', e)
+                    }
                 }
                 delete pendingCandidates.current[fromUserId]
             }
 
             const answer = await pc.createAnswer()
             await pc.setLocalDescription(answer)
+            console.log('Answer created and set locally')
 
             await sendSignal({
                 type: 'answer',
-                sdp: answer,
-                from: userId,
-                to: fromUserId,
-                roomId
+                payload: answer,
+                to: fromUserId
             })
+            console.log('Answer sent to', fromUserId)
         } catch (error) {
             console.error('Error handling offer:', error)
         }
-    }, [createPeerConnection, roomId, userId])
+    }, [createPeerConnection, sendSignal])
 
     // Handle incoming answer
     const handleAnswer = useCallback(async (fromUserId, answer) => {
-        console.log(`Received answer from ${fromUserId}`)
+        console.log(`Handling answer from ${fromUserId}`)
 
         const pc = peerConnections.current[fromUserId]
-        if (pc) {
-            try {
-                await pc.setRemoteDescription(new RTCSessionDescription(answer))
+        if (!pc) {
+            console.log('No peer connection for answer from', fromUserId)
+            return
+        }
 
-                // Apply any pending ICE candidates
-                if (pendingCandidates.current[fromUserId]) {
-                    for (const candidate of pendingCandidates.current[fromUserId]) {
-                        await pc.addIceCandidate(new RTCIceCandidate(candidate))
-                    }
-                    delete pendingCandidates.current[fromUserId]
-                }
-            } catch (error) {
-                console.error('Error handling answer:', error)
+        try {
+            if (pc.signalingState !== 'have-local-offer') {
+                console.log('Ignoring answer, signaling state:', pc.signalingState)
+                return
             }
+
+            await pc.setRemoteDescription(new RTCSessionDescription(answer))
+            console.log('Remote description (answer) set successfully')
+
+            // Apply any pending ICE candidates
+            if (pendingCandidates.current[fromUserId]) {
+                console.log(`Applying ${pendingCandidates.current[fromUserId].length} pending ICE candidates`)
+                for (const candidate of pendingCandidates.current[fromUserId]) {
+                    try {
+                        await pc.addIceCandidate(new RTCIceCandidate(candidate))
+                    } catch (e) {
+                        console.error('Error adding pending ICE candidate:', e)
+                    }
+                }
+                delete pendingCandidates.current[fromUserId]
+            }
+        } catch (error) {
+            console.error('Error handling answer:', error)
         }
     }, [])
 
     // Handle incoming ICE candidate
     const handleIceCandidate = useCallback(async (fromUserId, candidate) => {
+        console.log('Received ICE candidate from', fromUserId)
+
         const pc = peerConnections.current[fromUserId]
-        if (pc && pc.remoteDescription) {
+        if (pc && pc.remoteDescription && pc.remoteDescription.type) {
             try {
                 await pc.addIceCandidate(new RTCIceCandidate(candidate))
+                console.log('ICE candidate added successfully')
             } catch (error) {
                 console.error('Error adding ICE candidate:', error)
             }
         } else {
             // Store candidate for later
+            console.log('Storing ICE candidate for later (no remote description yet)')
             if (!pendingCandidates.current[fromUserId]) {
                 pendingCandidates.current[fromUserId] = []
             }
@@ -169,66 +255,100 @@ export function useWebRTC(roomId, userId, userName, localStream) {
 
     // Initiate call to a new participant
     const callParticipant = useCallback(async (remoteUserId, remoteUserName) => {
-        console.log(`Initiating call to ${remoteUserName}`)
+        if (!localStreamRef.current) {
+            console.log('Cannot call - no local stream yet')
+            return
+        }
+
+        console.log(`Initiating call to ${remoteUserName} (${remoteUserId})`)
 
         const pc = createPeerConnection(remoteUserId, remoteUserName)
 
         try {
-            const offer = await pc.createOffer()
+            // Check if we should create an offer (avoid collision)
+            if (pc.signalingState !== 'stable') {
+                console.log('Signaling not stable, skipping offer creation')
+                return
+            }
+
+            const offer = await pc.createOffer({
+                offerToReceiveAudio: true,
+                offerToReceiveVideo: true
+            })
             await pc.setLocalDescription(offer)
+            console.log('Offer created and set locally')
 
             await sendSignal({
                 type: 'offer',
-                sdp: offer,
-                from: userId,
+                payload: offer,
                 to: remoteUserId,
-                fromUserName: userName,
-                roomId
+                fromUserName: userName
             })
+            console.log('Offer sent to', remoteUserId)
         } catch (error) {
             console.error('Error creating offer:', error)
         }
-    }, [createPeerConnection, roomId, userId, userName])
+    }, [createPeerConnection, sendSignal, userName])
+
+    // Process a signal from the database
+    const processSignal = useCallback(async (signal) => {
+        const payload = JSON.parse(signal.signal_data)
+
+        console.log(`Processing ${signal.signal_type} from ${signal.from_user}`)
+
+        if (signal.signal_type === 'offer') {
+            await handleOffer(signal.from_user, 'Peer', payload)
+        } else if (signal.signal_type === 'answer') {
+            await handleAnswer(signal.from_user, payload)
+        } else if (signal.signal_type === 'ice-candidate') {
+            await handleIceCandidate(signal.from_user, payload)
+        }
+
+        // Delete processed signal
+        try {
+            await supabase
+                .from('webrtc_signals')
+                .delete()
+                .eq('id', signal.id)
+        } catch (e) {
+            console.error('Error deleting signal:', e)
+        }
+    }, [handleOffer, handleAnswer, handleIceCandidate])
 
     // Listen for signaling messages
     useEffect(() => {
         if (!roomId || !userId) return
 
+        console.log('Setting up WebRTC signaling for room', roomId)
+
         // Fetch and process any pending signals
         const processPendingSignals = async () => {
-            const { data: signals } = await supabase
+            const { data: signals, error } = await supabase
                 .from('webrtc_signals')
                 .select('*')
                 .eq('room_id', roomId)
                 .eq('to_user', userId)
                 .order('created_at', { ascending: true })
 
-            if (signals) {
+            if (error) {
+                console.error('Error fetching pending signals:', error)
+                return
+            }
+
+            if (signals && signals.length > 0) {
+                console.log(`Processing ${signals.length} pending signals`)
                 for (const signal of signals) {
-                    const signalData = JSON.parse(signal.signal_data)
-
-                    if (signal.signal_type === 'offer') {
-                        await handleOffer(signal.from_user, 'Peer', signalData)
-                    } else if (signal.signal_type === 'answer') {
-                        await handleAnswer(signal.from_user, signalData)
-                    } else if (signal.signal_type === 'ice-candidate') {
-                        await handleIceCandidate(signal.from_user, signalData)
-                    }
-
-                    // Delete processed signal
-                    await supabase
-                        .from('webrtc_signals')
-                        .delete()
-                        .eq('id', signal.id)
+                    await processSignal(signal)
                 }
             }
         }
 
+        // Initial fetch
         processPendingSignals()
 
         // Subscribe to new signals
         channelRef.current = supabase
-            .channel(`webrtc_${roomId}_${userId}`)
+            .channel(`webrtc_signals_${roomId}_${userId}`)
             .on(
                 'postgres_changes',
                 {
@@ -239,40 +359,31 @@ export function useWebRTC(roomId, userId, userName, localStream) {
                 },
                 async (payload) => {
                     const signal = payload.new
-                    if (signal.room_id !== roomId) return
-
-                    const signalData = JSON.parse(signal.signal_data)
-
-                    if (signal.signal_type === 'offer') {
-                        await handleOffer(signal.from_user, 'Peer', signalData)
-                    } else if (signal.signal_type === 'answer') {
-                        await handleAnswer(signal.from_user, signalData)
-                    } else if (signal.signal_type === 'ice-candidate') {
-                        await handleIceCandidate(signal.from_user, signalData)
+                    if (signal.room_id === roomId) {
+                        await processSignal(signal)
                     }
-
-                    // Delete processed signal
-                    await supabase
-                        .from('webrtc_signals')
-                        .delete()
-                        .eq('id', signal.id)
                 }
             )
-            .subscribe()
+            .subscribe((status) => {
+                console.log('WebRTC channel subscription status:', status)
+            })
 
         return () => {
             if (channelRef.current) {
+                console.log('Removing WebRTC channel')
                 supabase.removeChannel(channelRef.current)
             }
         }
-    }, [roomId, userId, handleOffer, handleAnswer, handleIceCandidate])
+    }, [roomId, userId, processSignal])
 
     // Cleanup peer connections
     const cleanup = useCallback(() => {
+        console.log('Cleaning up WebRTC connections')
         Object.values(peerConnections.current).forEach(pc => {
             pc.close()
         })
         peerConnections.current = {}
+        pendingCandidates.current = {}
         setRemoteStreams({})
         setConnectionStatus({})
     }, [])
@@ -281,8 +392,10 @@ export function useWebRTC(roomId, userId, userName, localStream) {
     const closeConnection = useCallback((remoteUserId) => {
         const pc = peerConnections.current[remoteUserId]
         if (pc) {
+            console.log('Closing connection to', remoteUserId)
             pc.close()
             delete peerConnections.current[remoteUserId]
+            delete pendingCandidates.current[remoteUserId]
             setRemoteStreams(prev => {
                 const next = { ...prev }
                 delete next[remoteUserId]
@@ -299,6 +412,8 @@ export function useWebRTC(roomId, userId, userName, localStream) {
     return {
         remoteStreams,
         connectionStatus,
+        localStream,
+        updateLocalStream,
         callParticipant,
         closeConnection,
         cleanup

@@ -25,7 +25,6 @@ function StudyRoom() {
     const navigate = useNavigate()
     const { user } = useAuth()
     const localVideoRef = useRef(null)
-    const streamRef = useRef(null)
     const remoteVideoRefs = useRef({})
 
     // Room state
@@ -50,14 +49,15 @@ function StudyRoom() {
     const {
         remoteStreams,
         connectionStatus,
+        localStream,
+        updateLocalStream,
         callParticipant,
         closeConnection,
         cleanup: cleanupWebRTC
     } = useWebRTC(
         roomId,
         user?.id,
-        user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Anonymous',
-        streamRef.current
+        user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Anonymous'
     )
 
     // Fetch room data
@@ -161,15 +161,12 @@ function StudyRoom() {
         if (!confirmDelete) return
 
         try {
-            // Cleanup WebRTC
             cleanupWebRTC()
 
-            // Stop local media
-            if (streamRef.current) {
-                streamRef.current.getTracks().forEach(track => track.stop())
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop())
             }
 
-            // Delete the room (cascades to participants and tasks)
             const { error } = await supabase
                 .from('study_rooms')
                 .delete()
@@ -183,18 +180,6 @@ function StudyRoom() {
             alert('Failed to delete room')
         }
     }
-
-    // Call all existing participants when stream is ready
-    const callExistingParticipants = useCallback(async () => {
-        if (!streamRef.current || !user) return
-
-        const currentParticipants = await fetchParticipants()
-        const otherParticipants = currentParticipants.filter(p => p.user_id !== user.id)
-
-        for (const participant of otherParticipants) {
-            callParticipant(participant.user_id, participant.user_name)
-        }
-    }, [user, fetchParticipants, callParticipant])
 
     // Initialize room
     useEffect(() => {
@@ -211,7 +196,7 @@ function StudyRoom() {
             initRoom()
         }
 
-        // Subscribe to room changes (for deletion detection)
+        // Subscribe to room deletion
         const roomSubscription = supabase
             .channel(`room_${roomId}_data`)
             .on(
@@ -240,10 +225,12 @@ function StudyRoom() {
                     table: 'room_participants',
                     filter: `room_id=eq.${roomId}`
                 },
-                async (payload) => {
+                (payload) => {
                     const newParticipant = payload.new
-                    // If someone new joined and it's not us, call them
-                    if (newParticipant.user_id !== user?.id && streamRef.current) {
+                    console.log('New participant joined:', newParticipant.user_name)
+                    // Call new participant if we have a stream
+                    if (newParticipant.user_id !== user?.id && localStream) {
+                        console.log('Calling new participant')
                         callParticipant(newParticipant.user_id, newParticipant.user_name)
                     }
                     fetchParticipants()
@@ -259,7 +246,7 @@ function StudyRoom() {
                 },
                 (payload) => {
                     const leftParticipant = payload.old
-                    // Close connection to user who left
+                    console.log('Participant left:', leftParticipant.user_id)
                     if (leftParticipant.user_id !== user?.id) {
                         closeConnection(leftParticipant.user_id)
                     }
@@ -297,7 +284,6 @@ function StudyRoom() {
             )
             .subscribe()
 
-        // Cleanup on unmount
         return () => {
             leaveRoomFromDb()
             cleanupWebRTC()
@@ -305,7 +291,7 @@ function StudyRoom() {
             supabase.removeChannel(participantsSubscription)
             supabase.removeChannel(tasksSubscription)
         }
-    }, [roomId, user, fetchRoomData, fetchParticipants, fetchTasks, joinRoom, leaveRoomFromDb, navigate, callParticipant, closeConnection, cleanupWebRTC])
+    }, [roomId, user])
 
     // Initialize media stream
     useEffect(() => {
@@ -313,6 +299,7 @@ function StudyRoom() {
 
         async function initializeMedia() {
             try {
+                console.log('Requesting media access...')
                 const stream = await navigator.mediaDevices.getUserMedia({
                     video: true,
                     audio: true
@@ -323,16 +310,17 @@ function StudyRoom() {
                     return
                 }
 
-                streamRef.current = stream
+                console.log('Media stream obtained, updating WebRTC hook')
+
+                // Update the WebRTC hook with the stream
+                updateLocalStream(stream)
                 setStreamReady(true)
 
+                // Set local video
                 if (localVideoRef.current) {
                     localVideoRef.current.srcObject = stream
                     localVideoRef.current.play().catch(console.error)
                 }
-
-                // Now call existing participants
-                callExistingParticipants()
             } catch (error) {
                 console.error('Error accessing media devices:', error)
                 if (mounted) {
@@ -345,26 +333,42 @@ function StudyRoom() {
 
         return () => {
             mounted = false
-            if (streamRef.current) {
-                streamRef.current.getTracks().forEach(track => track.stop())
-                streamRef.current = null
+        }
+    }, [updateLocalStream])
+
+    // Call existing participants when stream is ready
+    useEffect(() => {
+        if (!localStream || !user) return
+
+        const callExistingParticipants = async () => {
+            const currentParticipants = await fetchParticipants()
+            const otherParticipants = currentParticipants.filter(p => p.user_id !== user.id)
+
+            console.log(`Calling ${otherParticipants.length} existing participants`)
+            for (const participant of otherParticipants) {
+                callParticipant(participant.user_id, participant.user_name)
             }
         }
-    }, [callExistingParticipants])
 
-    // Re-attach stream when video ref is available
+        // Small delay to ensure signaling is set up
+        const timer = setTimeout(callExistingParticipants, 1000)
+        return () => clearTimeout(timer)
+    }, [localStream, user, fetchParticipants, callParticipant])
+
+    // Update local video when stream changes
     useEffect(() => {
-        if (localVideoRef.current && streamRef.current && isVideoEnabled) {
-            localVideoRef.current.srcObject = streamRef.current
+        if (localVideoRef.current && localStream && isVideoEnabled) {
+            localVideoRef.current.srcObject = localStream
             localVideoRef.current.play().catch(console.error)
         }
-    }, [isVideoEnabled, streamReady])
+    }, [localStream, isVideoEnabled])
 
     // Attach remote streams to video elements
     useEffect(() => {
         Object.entries(remoteStreams).forEach(([oderId, { stream }]) => {
             const videoElement = remoteVideoRefs.current[oderId]
             if (videoElement && stream && videoElement.srcObject !== stream) {
+                console.log('Attaching remote stream for', oderId)
                 videoElement.srcObject = stream
                 videoElement.play().catch(console.error)
             }
@@ -373,14 +377,13 @@ function StudyRoom() {
 
     // Toggle audio
     const toggleAudio = async () => {
-        if (streamRef.current) {
-            const audioTrack = streamRef.current.getAudioTracks()[0]
+        if (localStream) {
+            const audioTrack = localStream.getAudioTracks()[0]
             if (audioTrack) {
                 const newState = !audioTrack.enabled
                 audioTrack.enabled = newState
                 setIsAudioEnabled(newState)
 
-                // Update in database
                 if (user) {
                     await supabase
                         .from('room_participants')
@@ -394,14 +397,13 @@ function StudyRoom() {
 
     // Toggle video
     const toggleVideo = async () => {
-        if (streamRef.current) {
-            const videoTrack = streamRef.current.getVideoTracks()[0]
+        if (localStream) {
+            const videoTrack = localStream.getVideoTracks()[0]
             if (videoTrack) {
                 const newState = !isVideoEnabled
                 videoTrack.enabled = newState
                 setIsVideoEnabled(newState)
 
-                // Update in database
                 if (user) {
                     await supabase
                         .from('room_participants')
@@ -416,8 +418,8 @@ function StudyRoom() {
     // Leave room
     const leaveRoom = async () => {
         cleanupWebRTC()
-        if (streamRef.current) {
-            streamRef.current.getTracks().forEach(track => track.stop())
+        if (localStream) {
+            localStream.getTracks().forEach(track => track.stop())
         }
         await leaveRoomFromDb()
         navigate('/study-rooms')
@@ -470,7 +472,7 @@ function StudyRoom() {
         completed: task.is_completed
     }))
 
-    // Get other participants (not current user)
+    // Get other participants
     const otherParticipants = participants.filter(p => p.user_id !== user?.id)
 
     // Loading state
@@ -576,15 +578,16 @@ function StudyRoom() {
                                 </div>
                             </div>
 
-                            {/* Remote participants with WebRTC streams */}
+                            {/* Remote participants */}
                             {otherParticipants.map((participant) => {
-                                const remoteStream = remoteStreams[participant.user_id]
+                                const remoteData = remoteStreams[participant.user_id]
                                 const status = connectionStatus[participant.user_id]
                                 const isConnected = status === 'connected'
+                                const hasStream = remoteData?.stream
 
                                 return (
                                     <div key={participant.id} className="video-container remote">
-                                        {remoteStream?.stream ? (
+                                        {hasStream ? (
                                             <>
                                                 <video
                                                     ref={el => remoteVideoRefs.current[participant.user_id] = el}
@@ -601,22 +604,19 @@ function StudyRoom() {
                                                 )}
                                             </>
                                         ) : (
-                                            <div className="video-placeholder remote-user connecting">
+                                            <div className={`video-placeholder remote-user ${status === 'connecting' || status === 'new' ? 'connecting' : ''}`}>
                                                 <User size={48} />
                                                 <span className="remote-user-name">{participant.user_name}</span>
                                                 <span className="remote-user-status">
                                                     {status === 'connecting' || status === 'new' ? (
-                                                        <>
-                                                            <Wifi size={14} />
-                                                            Connecting...
-                                                        </>
+                                                        <>Connecting...</>
                                                     ) : status === 'failed' || status === 'disconnected' ? (
                                                         <>
                                                             <WifiOff size={14} />
                                                             Connection failed
                                                         </>
                                                     ) : (
-                                                        'Establishing connection...'
+                                                        <>Establishing connection...</>
                                                     )}
                                                 </span>
                                             </div>
@@ -631,7 +631,7 @@ function StudyRoom() {
                                 )
                             })}
 
-                            {/* Waiting for others message */}
+                            {/* Waiting for others */}
                             {otherParticipants.length === 0 && (
                                 <div className="video-container waiting">
                                     <div className="video-placeholder">
