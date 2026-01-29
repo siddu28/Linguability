@@ -47,24 +47,6 @@ function Login() {
             label: 'Auditory Processing',
             description: 'Difficulty processing spoken information',
             suggestedFeatures: ['Captions', 'Visual cues', 'Written instructions']
-        },
-        {
-            id: 'visual',
-            label: 'Visual Processing',
-            description: 'Difficulty processing visual information',
-            suggestedFeatures: ['High contrast', 'Larger text', 'Audio descriptions']
-        },
-        {
-            id: 'motor',
-            label: 'Motor Difficulties',
-            description: 'Challenges with fine motor skills',
-            suggestedFeatures: ['Keyboard navigation', 'Larger buttons', 'Voice input']
-        },
-        {
-            id: 'memory',
-            label: 'Memory Challenges',
-            description: 'Difficulty retaining information',
-            suggestedFeatures: ['Frequent reviews', 'Spaced repetition', 'Visual aids']
         }
     ]
 
@@ -122,13 +104,11 @@ function Login() {
                     data: {
                         full_name: formData.fullName,
                         learning_challenges: selectedChallenges,
+                        onboarding_completed: true,
                     },
                 },
             })
             if (error) throw error
-
-            // Save challenges to localStorage as backup
-            localStorage.setItem('learningChallenges', JSON.stringify(selectedChallenges))
 
             // If email confirmation is enabled, session may be null.
             if (data?.session) {
@@ -156,7 +136,7 @@ function Login() {
             const { error } = await supabase.auth.signInWithOAuth({
                 provider: 'google',
                 options: {
-                    redirectTo: `${window.location.origin}/dashboard`,
+                    redirectTo: `${window.location.origin}/onboarding`,
                 },
             })
             if (error) throw error

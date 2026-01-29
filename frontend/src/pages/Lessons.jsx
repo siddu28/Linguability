@@ -11,12 +11,15 @@ import {
     Eye,
     Clock
 } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
+import { getUserSettings, getProfile } from '../lib/database'
 import Navbar from '../components/Navbar'
 import Card from '../components/Card'
 import Button from '../components/Button'
 import './Lessons.css'
 
 function Lessons() {
+    const { user } = useAuth()
     const [selectedLanguage, setSelectedLanguage] = useState(null)
     const [accessibilitySettings, setAccessibilitySettings] = useState({
         challenges: [],
@@ -28,11 +31,40 @@ function Lessons() {
         textToSpeech: false
     })
 
-    // Load accessibility settings from localStorage (will come from Supabase later)
+    // Load accessibility settings from Supabase
     useEffect(() => {
-        const challenges = JSON.parse(localStorage.getItem('learningChallenges') || '[]')
-        setAccessibilitySettings(prev => ({ ...prev, challenges }))
-    }, [])
+        async function loadSettings() {
+            if (!user?.id) return
+
+            try {
+                // Load learning challenges from profile
+                const profile = await getProfile(user.id)
+                if (profile?.learning_challenges) {
+                    setAccessibilitySettings(prev => ({ 
+                        ...prev, 
+                        challenges: profile.learning_challenges 
+                    }))
+                }
+
+                // Load other settings
+                const settings = await getUserSettings(user.id)
+                if (settings) {
+                    setAccessibilitySettings(prev => ({
+                        ...prev,
+                        fontSize: settings.font_size || 'medium',
+                        fontFamily: settings.font_family || 'poppins',
+                        reduceMotion: settings.reduce_motion || false,
+                        focusMode: settings.focus_mode || false,
+                        readingRuler: settings.reading_ruler || false,
+                        textToSpeech: settings.text_to_speech || false
+                    }))
+                }
+            } catch (err) {
+                console.error('Error loading settings:', err)
+            }
+        }
+        loadSettings()
+    }, [user])
 
     // Language options
     const languages = [

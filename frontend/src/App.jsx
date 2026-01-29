@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Login from './pages/Login'
 import Logout from './pages/Logout'
+import Onboarding from './pages/Onboarding'
 import Dashboard from './pages/Dashboard'
 import Notifications from './pages/Notifications'
 import Settings from './pages/Settings'
@@ -20,6 +21,7 @@ function App() {
                     <Route path="/" element={<Navigate to="/login" replace />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/logout" element={<Logout />} />
+                    <Route path="/onboarding" element={<Onboarding />} />
 
                     <Route
                         path="/dashboard"
