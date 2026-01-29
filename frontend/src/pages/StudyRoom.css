@@ -185,6 +185,36 @@
     margin-top: var(--spacing-sm);
 }
 
+.video-placeholder.connecting {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.remote-user-status {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.connected {
+    color: var(--color-success);
+}
+
+.status-icon.connected {
+    color: var(--color-success);
+}
+
 /* WebRTC Notice */
 .webrtc-notice {
     background-color: rgba(59, 130, 246, 0.1);
