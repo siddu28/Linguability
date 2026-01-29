@@ -9,6 +9,7 @@ import Practice from './pages/Practice'
 import Profile from './pages/Profile'
 import Assessments from './pages/Assessments'
 import StudyRooms from './pages/StudyRooms'
+import StudyRoom from './pages/StudyRoom'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
 
@@ -82,6 +83,14 @@ function App() {
                         element={
                             <ProtectedRoute>
                                 <StudyRooms />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/study-rooms/:roomId"
+                        element={
+                            <ProtectedRoute>
+                                <StudyRoom />
                             </ProtectedRoute>
                         }
                     />
