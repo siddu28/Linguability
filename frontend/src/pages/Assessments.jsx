@@ -8,11 +8,12 @@ import {
     ClipboardList,
     Mic,
     Clock,
-    Play
+    Play,
+    Lock
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { getAssessmentStats, getAssessmentResults } from '../lib/database'
-import { getAllQuizzes } from '../data/quizData'
+import { getAllQuizzes, isQuizUnlocked, quizzes } from '../data/quizData'
 import Navbar from '../components/Navbar'
 import Card from '../components/Card'
 import Button from '../components/Button'
@@ -35,7 +36,7 @@ function Assessments() {
         async function loadData() {
             if (!user?.id) return
 
-            setLoading(true)
+            setLoading(false)
             try {
                 const [statsData, resultsData] = await Promise.all([
                     getAssessmentStats(user.id),
@@ -52,40 +53,39 @@ function Assessments() {
         loadData()
     }, [user])
 
-    // Get all available quizzes from quizData
+    // Get all quizzes and categorize them
     const allQuizzes = getAllQuizzes()
 
-    // Map quizzes to assessment format
-    const assessments = allQuizzes.map(quiz => ({
-        id: quiz.id,
-        type: quiz.type,
-        level: quiz.level,
-        title: quiz.title,
-        description: quiz.description,
-        questions: quiz.questionsCount,
-        duration: `~${Math.round(quiz.duration / 60)} min`,
-        accessibilityOptions: ['Extended time', 'Audio questions', 'Multiple response formats'],
-        completed: stats.completedQuizIds.includes(quiz.id),
-        language: quiz.language
-    }))
+    // Separate quizzes into categories based on completion and unlock status
+    const categorizedQuizzes = allQuizzes.map(quiz => {
+        const isCompleted = stats.completedQuizIds.includes(quiz.id)
+        const isUnlocked = isQuizUnlocked(quiz.id, stats.completedQuizIds)
+        const prerequisiteQuiz = quiz.prerequisite ? quizzes[quiz.prerequisite] : null
 
-    // Add the speaking assessment (placeholder for now)
-    assessments.push({
-        id: 'pronunciation-check',
-        type: 'speaking',
-        level: 'beginner',
-        title: 'Pronunciation Check',
-        description: 'Record yourself speaking Hindi phrases for AI evaluation',
-        questions: 5,
-        duration: '~15 min',
-        accessibilityOptions: ['Extended time', 'Audio questions', 'Multiple response formats'],
-        completed: false,
-        language: 'hindi',
-        comingSoon: true
+        return {
+            ...quiz,
+            isCompleted,
+            isUnlocked,
+            prerequisiteQuiz,
+            // Build assessment format
+            type: quiz.type,
+            level: quiz.level,
+            title: quiz.title,
+            description: quiz.description,
+            questions: quiz.questionsCount,
+            duration: `~${Math.round(quiz.duration / 60)} min`,
+            accessibilityOptions: ['Extended time', 'Audio questions', 'Multiple response formats']
+        }
     })
 
-    const availableAssessments = assessments.filter(a => !a.completed)
-    const completedAssessments = assessments.filter(a => a.completed)
+    // Available = Unlocked AND Not Completed
+    const availableAssessments = categorizedQuizzes.filter(q => q.isUnlocked && !q.isCompleted)
+
+    // Completed = Already done
+    const completedAssessments = categorizedQuizzes.filter(q => q.isCompleted)
+
+    // Locked = Has prerequisite that's not completed
+    const lockedAssessments = categorizedQuizzes.filter(q => !q.isUnlocked)
 
     const currentList = activeTab === 'available' ? availableAssessments : completedAssessments
 
@@ -116,8 +116,8 @@ function Assessments() {
 
     // Handle starting an assessment
     const handleStartAssessment = (assessment) => {
-        if (assessment.comingSoon) {
-            return // Don't navigate for coming soon items
+        if (assessment.comingSoon || !assessment.isUnlocked) {
+            return // Don't navigate for coming soon or locked items
         }
         navigate(`/assessments/quiz/${assessment.id}`)
     }
@@ -131,6 +131,16 @@ function Assessments() {
         const utterance = new SpeechSynthesisUtterance(text)
         utterance.rate = 0.9
         window.speechSynthesis.speak(utterance)
+    }
+
+    // Get level badge color
+    const getLevelColor = (level) => {
+        switch (level) {
+            case 'beginner': return 'tag-beginner'
+            case 'intermediate': return 'tag-intermediate'
+            case 'advanced': return 'tag-advanced'
+            default: return ''
+        }
     }
 
     return (
@@ -184,7 +194,9 @@ function Assessments() {
                                         {assessment.type === 'speaking' && <Mic size={14} />}
                                         {assessment.type}
                                     </span>
-                                    <span className="tag tag-level">{assessment.level}</span>
+                                    <span className={`tag ${getLevelColor(assessment.level)}`}>
+                                        {assessment.level}
+                                    </span>
                                     {assessment.comingSoon && (
                                         <span className="tag tag-coming-soon">Coming Soon</span>
                                     )}
@@ -224,9 +236,8 @@ function Assessments() {
                                 icon={Play}
                                 className="start-btn"
                                 onClick={() => handleStartAssessment(assessment)}
-                                disabled={assessment.comingSoon}
                             >
-                                {assessment.completed ? 'Retake Assessment' : 'Start Assessment'}
+                                {assessment.isCompleted ? 'Retake Assessment' : 'Start Assessment'}
                             </Button>
                         </Card>
                     ))}
@@ -237,6 +248,50 @@ function Assessments() {
                         </div>
                     )}
                 </div>
+
+                {/* Show Locked Quizzes (Coming Up Next) */}
+                {activeTab === 'available' && lockedAssessments.length > 0 && (
+                    <div className="locked-section">
+                        <h2 className="section-title">🔒 Unlock Next</h2>
+                        <p className="section-description">Complete the basic quizzes to unlock these</p>
+                        <div className="assessments-grid locked-grid">
+                            {lockedAssessments.map((assessment) => (
+                                <Card key={assessment.id} className="assessment-card locked">
+                                    <div className="locked-overlay">
+                                        <Lock size={24} />
+                                        <span>
+                                            Complete "{assessment.prerequisiteQuiz?.title}" first
+                                        </span>
+                                    </div>
+                                    <div className="assessment-header">
+                                        <div className="assessment-tags">
+                                            <span className={`tag tag-${assessment.type}`}>
+                                                {assessment.type}
+                                            </span>
+                                            <span className={`tag ${getLevelColor(assessment.level)}`}>
+                                                {assessment.level}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <h3 className="assessment-title">{assessment.title}</h3>
+                                    <p className="assessment-description">{assessment.description}</p>
+
+                                    <div className="assessment-meta">
+                                        <span className="meta-item">
+                                            <ClipboardList size={16} />
+                                            {assessment.questions} questions
+                                        </span>
+                                        <span className="meta-item">
+                                            <Clock size={16} />
+                                            {assessment.duration}
+                                        </span>
+                                    </div>
+                                </Card>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
                 {/* Recent Results Section (only show in completed tab) */}
                 {activeTab === 'completed' && completedResults.length > 0 && (

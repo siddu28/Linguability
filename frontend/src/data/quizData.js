@@ -2,7 +2,9 @@
 import { wordsData, lessonKeyMap } from './wordsData'
 
 // Available quizzes configuration
+// Each quiz can have a 'prerequisite' field pointing to the quiz ID that must be completed first
 export const quizzes = {
+    // =============== BEGINNER (BASICS) ===============
     'hindi-basics': {
         id: 'hindi-basics',
         title: 'Hindi Basics Quiz',
@@ -12,7 +14,8 @@ export const quizzes = {
         categories: ['greetings', 'objects', 'colors', 'family', 'food'],
         questionsCount: 10,
         duration: 600, // 10 minutes in seconds
-        type: 'quiz'
+        type: 'quiz',
+        prerequisite: null // No prerequisite, always available
     },
     'tamil-basics': {
         id: 'tamil-basics',
@@ -23,7 +26,8 @@ export const quizzes = {
         categories: ['greetings', 'objects', 'colors', 'family', 'food'],
         questionsCount: 10,
         duration: 600,
-        type: 'quiz'
+        type: 'quiz',
+        prerequisite: null
     },
     'telugu-basics': {
         id: 'telugu-basics',
@@ -34,7 +38,46 @@ export const quizzes = {
         categories: ['greetings', 'objects', 'colors', 'family', 'food'],
         questionsCount: 10,
         duration: 600,
-        type: 'quiz'
+        type: 'quiz',
+        prerequisite: null
+    },
+
+    // =============== INTERMEDIATE (MEDIUM) ===============
+    'hindi-intermediate': {
+        id: 'hindi-intermediate',
+        title: 'Hindi Intermediate Quiz',
+        description: 'Challenge yourself with intermediate Hindi vocabulary',
+        language: 'hindi',
+        level: 'intermediate',
+        categories: ['greetings', 'objects', 'colors', 'family', 'food'],
+        questionsCount: 15,
+        duration: 900, // 15 minutes
+        type: 'quiz',
+        prerequisite: 'hindi-basics' // Must complete basics first
+    },
+    'tamil-intermediate': {
+        id: 'tamil-intermediate',
+        title: 'Tamil Intermediate Quiz',
+        description: 'Challenge yourself with intermediate Tamil vocabulary',
+        language: 'tamil',
+        level: 'intermediate',
+        categories: ['greetings', 'objects', 'colors', 'family', 'food'],
+        questionsCount: 15,
+        duration: 900,
+        type: 'quiz',
+        prerequisite: 'tamil-basics'
+    },
+    'telugu-intermediate': {
+        id: 'telugu-intermediate',
+        title: 'Telugu Intermediate Quiz',
+        description: 'Challenge yourself with intermediate Telugu vocabulary',
+        language: 'telugu',
+        level: 'intermediate',
+        categories: ['greetings', 'objects', 'colors', 'family', 'food'],
+        questionsCount: 15,
+        duration: 900,
+        type: 'quiz',
+        prerequisite: 'telugu-basics'
     }
 }
 
@@ -126,9 +169,38 @@ export function getAllQuizzes() {
     return Object.values(quizzes)
 }
 
+// Check if a quiz is unlocked based on completed quizzes
+export function isQuizUnlocked(quizId, completedQuizIds) {
+    const quiz = quizzes[quizId]
+    if (!quiz) return false
+
+    // If no prerequisite, quiz is always unlocked
+    if (!quiz.prerequisite) return true
+
+    // Check if prerequisite is completed
+    return completedQuizIds.includes(quiz.prerequisite)
+}
+
+// Get quizzes that are unlocked for a user
+export function getUnlockedQuizzes(completedQuizIds) {
+    return Object.values(quizzes).filter(quiz =>
+        isQuizUnlocked(quiz.id, completedQuizIds)
+    )
+}
+
+// Get quizzes that are locked (prerequisite not met)
+export function getLockedQuizzes(completedQuizIds) {
+    return Object.values(quizzes).filter(quiz =>
+        !isQuizUnlocked(quiz.id, completedQuizIds) && quiz.prerequisite
+    )
+}
+
 // Map lesson titles to quiz IDs (for future use)
 export const lessonToQuizMap = {
     'Hindi Basics Quiz': 'hindi-basics',
     'Tamil Basics Quiz': 'tamil-basics',
-    'Telugu Basics Quiz': 'telugu-basics'
+    'Telugu Basics Quiz': 'telugu-basics',
+    'Hindi Intermediate Quiz': 'hindi-intermediate',
+    'Tamil Intermediate Quiz': 'tamil-intermediate',
+    'Telugu Intermediate Quiz': 'telugu-intermediate'
 }
