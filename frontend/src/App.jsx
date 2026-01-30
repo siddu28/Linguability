@@ -8,6 +8,7 @@ import Lessons from './pages/Lessons'
 import Practice from './pages/Practice'
 import Profile from './pages/Profile'
 import Assessments from './pages/Assessments'
+import QuizPage from './pages/QuizPage'
 import StudyRooms from './pages/StudyRooms'
 import StudyRoom from './pages/StudyRoom'
 import { AuthProvider } from './context/AuthContext'
@@ -75,6 +76,14 @@ function App() {
                         element={
                             <ProtectedRoute>
                                 <Assessments />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/assessments/quiz/:quizId"
+                        element={
+                            <ProtectedRoute>
+                                <QuizPage />
                             </ProtectedRoute>
                         }
                     />

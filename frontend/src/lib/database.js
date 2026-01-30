@@ -168,3 +168,77 @@ export async function createNotification(userId, notification) {
     }
     return data
 }
+
+// ============ ASSESSMENT RESULTS ============
+
+export async function saveAssessmentResult(userId, result) {
+    const { data, error } = await supabase
+        .from('assessment_results')
+        .insert({
+            user_id: userId,
+            quiz_id: result.quizId,
+            quiz_title: result.quizTitle,
+            score: result.score,
+            total_questions: result.totalQuestions,
+            score_percentage: result.scorePercentage,
+            time_taken_seconds: result.timeTakenSeconds,
+            answers: result.answers || []
+        })
+        .select()
+        .single()
+
+    if (error) {
+        console.error('Error saving assessment result:', error)
+        throw error
+    }
+    return data
+}
+
+export async function getAssessmentResults(userId) {
+    const { data, error } = await supabase
+        .from('assessment_results')
+        .select('*')
+        .eq('user_id', userId)
+        .order('completed_at', { ascending: false })
+
+    if (error) {
+        console.error('Error fetching assessment results:', error)
+        return []
+    }
+    return data
+}
+
+export async function getAssessmentStats(userId) {
+    const { data, error } = await supabase
+        .from('assessment_results')
+        .select('score_percentage, quiz_id')
+        .eq('user_id', userId)
+
+    if (error) {
+        console.error('Error fetching assessment stats:', error)
+        return { completed: 0, averageScore: 0, completedQuizIds: [] }
+    }
+
+    const completed = data.length
+    const averageScore = completed > 0
+        ? Math.round(data.reduce((sum, r) => sum + parseFloat(r.score_percentage), 0) / completed)
+        : 0
+    const completedQuizIds = [...new Set(data.map(r => r.quiz_id))]
+
+    return { completed, averageScore, completedQuizIds }
+}
+
+export async function hasCompletedQuiz(userId, quizId) {
+    const { data, error } = await supabase
+        .from('assessment_results')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('quiz_id', quizId)
+        .limit(1)
+
+    if (error) {
+        console.error('Error checking quiz completion:', error)
+        return false
+    }
+    return data && data.length > 0
+}
