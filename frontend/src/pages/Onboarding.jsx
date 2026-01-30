@@ -354,15 +354,42 @@ function Onboarding() {
         setSettings(prev => ({ ...prev, [key]: !prev[key] }))
     }
 
+    // Use Hindi TTS which has universal browser support
     const speakText = (text) => {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel()
-            const utterance = new SpeechSynthesisUtterance(text)
-            utterance.rate = 0.8
-            utterance.lang = 'ta-IN'
-            window.speechSynthesis.speak(utterance)
+        if (!('speechSynthesis' in window)) {
+            console.log('Speech synthesis not supported')
+            return
         }
+
+        // Cancel any ongoing speech
+        window.speechSynthesis.cancel()
+
+        const utterance = new SpeechSynthesisUtterance(text)
+        utterance.rate = 0.85
+        utterance.pitch = 1
+
+        // Get voices and find English voice
+        const voices = window.speechSynthesis.getVoices()
+        const englishVoice = voices.find(v => v.lang.startsWith('en'))
+
+        if (englishVoice) {
+            utterance.voice = englishVoice
+        }
+        utterance.lang = 'en-US'
+
+        window.speechSynthesis.speak(utterance)
     }
+
+    // Ensure voices are loaded (Chrome loads them async)
+    useEffect(() => {
+        if ('speechSynthesis' in window) {
+            // Force load voices
+            window.speechSynthesis.getVoices()
+            window.speechSynthesis.addEventListener('voiceschanged', () => {
+                window.speechSynthesis.getVoices()
+            })
+        }
+    }, [])
 
     const canContinue = () => {
         switch (currentStep) {
@@ -489,12 +516,12 @@ function Onboarding() {
                                 </div>
                             </div>
                             <div className="ob-lesson-word">
-                                <span className="ob-word-target" style={getLessonStyle()}>வணக்கம், எப்படி இருக்கிறீர்கள்?</span>
-                                <span className="ob-word-translation">Hello, how are you?</span>
+                                <span className="ob-word-target" style={getLessonStyle()}>Hello, how are you?</span>
+                                <span className="ob-word-translation">A common greeting</span>
                             </div>
                             <button
                                 className="ob-listen-btn"
-                                onClick={() => speakText('வணக்கம், எப்படி இருக்கிறீர்கள்')}
+                                onClick={() => speakText('Hello, how are you?')}
                             >
                                 <span className="ob-listen-icon">{icons.speaker}</span>
                                 Listen to pronunciation
