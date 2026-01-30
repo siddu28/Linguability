@@ -125,6 +125,47 @@ export const quizzes = {
         type: 'quiz',
         prerequisite: 'telugu-intermediate',
         useAdvanced: true
+    },
+
+    // =============== ENGLISH QUIZZES ===============
+    'english-basics': {
+        id: 'english-basics',
+        title: 'English Basics Quiz',
+        description: 'Test your knowledge of basic English vocabulary and phrases',
+        language: 'english',
+        level: 'beginner',
+        categories: ['greetings', 'objects', 'colors', 'family', 'food'],
+        questionsCount: 10,
+        duration: 600,
+        type: 'quiz',
+        prerequisite: null,
+        useAdvanced: false
+    },
+    'english-intermediate': {
+        id: 'english-intermediate',
+        title: 'English Intermediate Quiz',
+        description: 'Challenge yourself with intermediate English vocabulary',
+        language: 'english',
+        level: 'intermediate',
+        categories: ['greetings', 'objects', 'colors', 'family', 'food'],
+        questionsCount: 15,
+        duration: 900,
+        type: 'quiz',
+        prerequisite: 'english-basics',
+        useAdvanced: false
+    },
+    'english-advanced': {
+        id: 'english-advanced',
+        title: 'English Advanced Quiz',
+        description: 'Master advanced English vocabulary: emotions, nature, actions & more',
+        language: 'english',
+        level: 'advanced',
+        categories: ['emotions', 'nature', 'actions', 'body', 'time'],
+        questionsCount: 20,
+        duration: 1200,
+        type: 'quiz',
+        prerequisite: 'english-intermediate',
+        useAdvanced: true
     }
 }
 
@@ -271,10 +312,13 @@ export const lessonToQuizMap = {
     'Hindi Basics Quiz': 'hindi-basics',
     'Tamil Basics Quiz': 'tamil-basics',
     'Telugu Basics Quiz': 'telugu-basics',
+    'English Basics Quiz': 'english-basics',
     'Hindi Intermediate Quiz': 'hindi-intermediate',
     'Tamil Intermediate Quiz': 'tamil-intermediate',
     'Telugu Intermediate Quiz': 'telugu-intermediate',
+    'English Intermediate Quiz': 'english-intermediate',
     'Hindi Advanced Quiz': 'hindi-advanced',
     'Tamil Advanced Quiz': 'tamil-advanced',
-    'Telugu Advanced Quiz': 'telugu-advanced'
+    'Telugu Advanced Quiz': 'telugu-advanced',
+    'English Advanced Quiz': 'english-advanced'
 }
