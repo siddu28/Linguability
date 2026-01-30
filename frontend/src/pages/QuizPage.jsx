@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Trophy, Target, Clock, RotateCcw, Home, CheckCircle2 } from 'lucide-react'
+import { ArrowLeft, Trophy, Target, Clock, RotateCcw, Home, CheckCircle2, XCircle, Check, X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { getProfile, getUserSettings, saveAssessmentResult } from '../lib/database'
 import { getQuizById, generateQuizQuestions } from '../data/quizData'
@@ -23,6 +23,7 @@ function QuizPage() {
     const [quizCompleted, setQuizCompleted] = useState(false)
     const [results, setResults] = useState(null)
     const [saving, setSaving] = useState(false)
+    const [showAnswerReview, setShowAnswerReview] = useState(false)
 
     // Load quiz and user data
     useEffect(() => {
@@ -77,6 +78,7 @@ function QuizPage() {
         setQuizStarted(true)
         setQuizCompleted(false)
         setResults(null)
+        setShowAnswerReview(false)
     }
 
     // Handle quiz completion
@@ -195,6 +197,15 @@ function QuizPage() {
                                 </div>
                             </div>
 
+                            <div className="quiz-rules">
+                                <h3>📋 Quiz Rules:</h3>
+                                <ul>
+                                    <li>One attempt per question</li>
+                                    <li>Answers cannot be changed once selected</li>
+                                    <li>Review all answers at the end</li>
+                                </ul>
+                            </div>
+
                             {shouldHideTimer() && (
                                 <div className="accessibility-notice">
                                     <CheckCircle2 size={18} />
@@ -219,7 +230,6 @@ function QuizPage() {
                         questions={questions}
                         quizConfig={quiz}
                         hideTimer={shouldHideTimer()}
-                        learningMode={true}
                         textToSpeech={userSettings?.text_to_speech ?? true}
                         speechRate={userSettings?.speech_rate ?? 1}
                         onComplete={handleQuizComplete}
@@ -227,7 +237,7 @@ function QuizPage() {
                 )}
 
                 {/* Results Screen */}
-                {quizCompleted && results && (
+                {quizCompleted && results && !showAnswerReview && (
                     <div className="results-screen">
                         <div className="results-card">
                             <div className="results-header">
@@ -248,15 +258,20 @@ function QuizPage() {
                             </div>
 
                             <div className="results-stats">
-                                <div className="result-stat">
-                                    <Trophy size={20} />
-                                    <span className="stat-value">{results.score}/{results.totalQuestions}</span>
-                                    <span className="stat-label">Correct Answers</span>
+                                <div className="result-stat correct">
+                                    <CheckCircle2 size={20} />
+                                    <span className="stat-value">{results.score}</span>
+                                    <span className="stat-label">Correct</span>
+                                </div>
+                                <div className="result-stat incorrect">
+                                    <XCircle size={20} />
+                                    <span className="stat-value">{results.totalQuestions - results.score}</span>
+                                    <span className="stat-label">Wrong</span>
                                 </div>
                                 <div className="result-stat">
                                     <Clock size={20} />
                                     <span className="stat-value">{formatTime(results.timeTakenSeconds)}</span>
-                                    <span className="stat-label">Time Taken</span>
+                                    <span className="stat-label">Time</span>
                                 </div>
                             </div>
 
@@ -265,6 +280,12 @@ function QuizPage() {
                             )}
 
                             <div className="results-actions">
+                                <Button
+                                    variant="secondary"
+                                    onClick={() => setShowAnswerReview(true)}
+                                >
+                                    📝 Review Answers
+                                </Button>
                                 <Button
                                     variant="secondary"
                                     icon={RotateCcw}
@@ -277,9 +298,90 @@ function QuizPage() {
                                     icon={Home}
                                     onClick={() => navigate('/assessments')}
                                 >
-                                    Back to Assessments
+                                    Done
                                 </Button>
                             </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Answer Review Screen */}
+                {quizCompleted && results && showAnswerReview && (
+                    <div className="answer-review-screen">
+                        <div className="review-header">
+                            <button
+                                className="back-to-results-btn"
+                                onClick={() => setShowAnswerReview(false)}
+                            >
+                                <ArrowLeft size={18} />
+                                Back to Results
+                            </button>
+                            <h1>Answer Review</h1>
+                            <p className="review-summary">
+                                You got <strong>{results.score}</strong> out of <strong>{results.totalQuestions}</strong> correct
+                            </p>
+                        </div>
+
+                        <div className="answers-list">
+                            {results.answers.map((answer, index) => (
+                                <div
+                                    key={index}
+                                    className={`answer-card ${answer.isCorrect ? 'correct' : 'incorrect'}`}
+                                >
+                                    <div className="answer-header">
+                                        <span className="question-number">Question {index + 1}</span>
+                                        <span className={`status-badge ${answer.isCorrect ? 'correct' : 'incorrect'}`}>
+                                            {answer.isCorrect ? (
+                                                <><Check size={14} /> Correct</>
+                                            ) : (
+                                                <><X size={14} /> Wrong</>
+                                            )}
+                                        </span>
+                                    </div>
+
+                                    <p className="question-text-review">{answer.question}</p>
+
+                                    <div className="answer-details">
+                                        <div className="your-answer">
+                                            <span className="answer-label">Your answer:</span>
+                                            <span className={`answer-value ${answer.isCorrect ? 'correct' : 'incorrect'}`}>
+                                                {answer.selectedAnswer}
+                                            </span>
+                                        </div>
+
+                                        {!answer.isCorrect && (
+                                            <div className="correct-answer">
+                                                <span className="answer-label">Correct answer:</span>
+                                                <span className="answer-value correct">
+                                                    {answer.correctAnswer}
+                                                </span>
+                                            </div>
+                                        )}
+
+                                        <div className="translation">
+                                            <span className="answer-label">Meaning:</span>
+                                            <span className="answer-value">{answer.translation}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="review-actions">
+                            <Button
+                                variant="secondary"
+                                icon={RotateCcw}
+                                onClick={handleStartQuiz}
+                            >
+                                Try Again
+                            </Button>
+                            <Button
+                                variant="primary"
+                                icon={Home}
+                                onClick={() => navigate('/assessments')}
+                            >
+                                Back to Assessments
+                            </Button>
                         </div>
                     </div>
                 )}

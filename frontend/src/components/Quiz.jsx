@@ -1,12 +1,11 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Volume2, ChevronRight, RotateCcw, Check, X } from 'lucide-react'
+import { Volume2, ChevronRight, Check, X } from 'lucide-react'
 import './Quiz.css'
 
 function Quiz({
     questions,
     quizConfig,
     hideTimer = false,
-    learningMode = true,
     textToSpeech = true,
     speechRate = 1,
     onComplete
@@ -18,7 +17,6 @@ function Quiz({
     const [score, setScore] = useState(0)
     const [answers, setAnswers] = useState([])
     const [timeRemaining, setTimeRemaining] = useState(quizConfig?.duration || 600)
-    const [canRetry, setCanRetry] = useState(false)
     const [startTime] = useState(Date.now())
 
     const currentQuestion = questions[currentQuestionIndex]
@@ -59,9 +57,9 @@ function Quiz({
         window.speechSynthesis.speak(utterance)
     }, [textToSpeech, speechRate])
 
-    // Handle option selection
+    // Handle option selection - ONE ATTEMPT ONLY
     const handleOptionSelect = (option, index) => {
-        if (isAnswered && !canRetry) return
+        if (isAnswered) return // Prevent multiple attempts
 
         setSelectedOption(index)
         const correct = option === currentQuestion.correctAnswer
@@ -70,38 +68,18 @@ function Quiz({
 
         if (correct) {
             setScore(prev => prev + 1)
-            setCanRetry(false)
-
-            // Record answer
-            setAnswers(prev => [...prev, {
-                questionId: currentQuestion.id,
-                question: currentQuestion.question,
-                selectedAnswer: option,
-                correctAnswer: currentQuestion.correctAnswer,
-                isCorrect: true
-            }])
-        } else {
-            if (learningMode) {
-                setCanRetry(true)
-            } else {
-                // Record wrong answer in standard mode
-                setAnswers(prev => [...prev, {
-                    questionId: currentQuestion.id,
-                    question: currentQuestion.question,
-                    selectedAnswer: option,
-                    correctAnswer: currentQuestion.correctAnswer,
-                    isCorrect: false
-                }])
-            }
         }
-    }
 
-    // Handle retry in learning mode
-    const handleRetry = () => {
-        setSelectedOption(null)
-        setIsAnswered(false)
-        setIsCorrect(null)
-        setCanRetry(false)
+        // Record answer
+        setAnswers(prev => [...prev, {
+            questionId: currentQuestion.id,
+            question: currentQuestion.question,
+            selectedAnswer: option,
+            correctAnswer: currentQuestion.correctAnswer,
+            isCorrect: correct,
+            category: currentQuestion.category,
+            translation: currentQuestion.translation
+        }])
     }
 
     // Move to next question
@@ -111,7 +89,6 @@ function Quiz({
             setSelectedOption(null)
             setIsAnswered(false)
             setIsCorrect(null)
-            setCanRetry(false)
         } else {
             handleQuizComplete()
         }
@@ -120,14 +97,29 @@ function Quiz({
     // Complete the quiz
     const handleQuizComplete = () => {
         const timeTaken = Math.round((Date.now() - startTime) / 1000)
-        const scorePercentage = Math.round((score / questions.length) * 100)
+        const finalScore = answers.filter(a => a.isCorrect).length + (isCorrect ? 1 : 0)
+        const scorePercentage = Math.round((finalScore / questions.length) * 100)
+
+        // Include current answer if not yet added
+        let finalAnswers = [...answers]
+        if (isAnswered && answers.length < questions.length) {
+            finalAnswers.push({
+                questionId: currentQuestion.id,
+                question: currentQuestion.question,
+                selectedAnswer: currentQuestion.options[selectedOption],
+                correctAnswer: currentQuestion.correctAnswer,
+                isCorrect: isCorrect,
+                category: currentQuestion.category,
+                translation: currentQuestion.translation
+            })
+        }
 
         onComplete({
-            score,
+            score: finalScore,
             totalQuestions: questions.length,
             scorePercentage,
             timeTakenSeconds: timeTaken,
-            answers
+            answers: finalAnswers
         })
     }
 
@@ -190,7 +182,8 @@ function Quiz({
                             if (index === selectedOption) {
                                 optionClass += isCorrect ? ' correct' : ' incorrect'
                             }
-                            if (!isCorrect && option === currentQuestion.correctAnswer && !canRetry) {
+                            // Show the correct answer after selection
+                            if (option === currentQuestion.correctAnswer && !isCorrect) {
                                 optionClass += ' show-correct'
                             }
                         }
@@ -200,7 +193,7 @@ function Quiz({
                                 key={index}
                                 className={optionClass}
                                 onClick={() => handleOptionSelect(option, index)}
-                                disabled={isAnswered && !canRetry}
+                                disabled={isAnswered}
                             >
                                 <span className="option-letter">
                                     {String.fromCharCode(65 + index)}
@@ -209,6 +202,11 @@ function Quiz({
                                 {isAnswered && index === selectedOption && (
                                     <span className="option-icon">
                                         {isCorrect ? <Check size={20} /> : <X size={20} />}
+                                    </span>
+                                )}
+                                {isAnswered && option === currentQuestion.correctAnswer && !isCorrect && (
+                                    <span className="option-icon correct-icon">
+                                        <Check size={20} />
                                     </span>
                                 )}
                             </button>
@@ -226,15 +224,12 @@ function Quiz({
                         ) : (
                             <p className="feedback-text">
                                 <X size={20} />
-                                {canRetry
-                                    ? "Not quite right. Try again!"
-                                    : `The correct answer is: ${currentQuestion.correctAnswer}`
-                                }
+                                Incorrect. The correct answer is: <strong>{currentQuestion.correctAnswer}</strong>
                             </p>
                         )}
 
-                        {/* Show phonetic pronunciation for correct answers */}
-                        {isCorrect && currentQuestion.phonetic && (
+                        {/* Show phonetic pronunciation */}
+                        {currentQuestion.phonetic && (
                             <p className="pronunciation-hint">
                                 Pronunciation: {currentQuestion.phonetic}
                             </p>
@@ -244,26 +239,21 @@ function Quiz({
 
                 {/* Action Buttons */}
                 <div className="quiz-actions">
-                    {canRetry ? (
-                        <button className="retry-btn" onClick={handleRetry}>
-                            <RotateCcw size={18} />
-                            Try Again
-                        </button>
-                    ) : isAnswered ? (
+                    {isAnswered && (
                         <button className="next-btn" onClick={handleNextQuestion}>
                             {currentQuestionIndex < questions.length - 1
                                 ? 'Next Question'
-                                : 'Finish Quiz'
+                                : 'See Results'
                             }
                             <ChevronRight size={18} />
                         </button>
-                    ) : null}
+                    )}
                 </div>
             </div>
 
             {/* Score Indicator */}
             <div className="score-indicator">
-                <span>Current Score: {score}/{currentQuestionIndex + (isAnswered && !canRetry ? 1 : 0)}</span>
+                <span>Score: {score}/{currentQuestionIndex + (isAnswered ? 1 : 0)}</span>
             </div>
         </div>
     )
