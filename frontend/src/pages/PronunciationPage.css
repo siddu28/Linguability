@@ -166,6 +166,30 @@
     margin-bottom: var(--spacing-lg);
 }
 
+/* Start Pronunciation Test Button */
+.pronunciation-intro-card>button {
+    width: 100%;
+    padding: var(--spacing-lg) var(--spacing-xl);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    background: linear-gradient(135deg, var(--color-primary), #FF6B9D);
+    border: none;
+    border-radius: var(--radius-lg);
+    color: white;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    box-shadow: 0 4px 14px rgba(233, 30, 140, 0.3);
+}
+
+.pronunciation-intro-card>button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(233, 30, 140, 0.4);
+}
+
 /* Results Card */
 .pronunciation-results-card {
     background: var(--color-white);
