@@ -242,3 +242,45 @@ export async function hasCompletedQuiz(userId, quizId) {
     }
     return data && data.length > 0
 }
+
+// ============ PRONUNCIATION RESULTS ============
+
+export async function savePronunciationResult(userId, result) {
+    // Save to assessment_results table with type 'pronunciation'
+    const { data, error } = await supabase
+        .from('assessment_results')
+        .insert({
+            user_id: userId,
+            quiz_id: result.testId,
+            quiz_title: result.testTitle,
+            score: result.passedWords,
+            total_questions: result.totalWords,
+            score_percentage: result.score,
+            time_taken_seconds: null,
+            answers: result.results,
+            completed_at: result.completedAt
+        })
+        .select()
+        .single()
+
+    if (error) {
+        console.error('Error saving pronunciation result:', error)
+        throw error
+    }
+    return data
+}
+
+export async function getPronunciationResults(userId) {
+    const { data, error } = await supabase
+        .from('assessment_results')
+        .select('*')
+        .eq('user_id', userId)
+        .like('quiz_id', '%pronunciation%')
+        .order('completed_at', { ascending: false })
+
+    if (error) {
+        console.error('Error fetching pronunciation results:', error)
+        return []
+    }
+    return data
+}

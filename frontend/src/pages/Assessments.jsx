@@ -14,6 +14,11 @@ import {
 import { useAuth } from '../context/AuthContext'
 import { getAssessmentStats, getAssessmentResults } from '../lib/database'
 import { getAllQuizzes, isQuizUnlocked, quizzes } from '../data/quizData'
+import {
+    getAllPronunciationTests,
+    isPronunciationTestUnlocked,
+    pronunciationTests
+} from '../data/pronunciationData'
 import Navbar from '../components/Navbar'
 import Card from '../components/Card'
 import Button from '../components/Button'
@@ -55,6 +60,7 @@ function Assessments() {
 
     // Get all quizzes and categorize them
     const allQuizzes = getAllQuizzes()
+    const allPronunciationTests = getAllPronunciationTests()
 
     // Separate quizzes into categories based on completion and unlock status
     const categorizedQuizzes = allQuizzes.map(quiz => {
@@ -68,6 +74,7 @@ function Assessments() {
             isUnlocked,
             prerequisiteQuiz,
             // Build assessment format
+            assessmentType: 'quiz',
             type: quiz.type,
             level: quiz.level,
             title: quiz.title,
@@ -78,14 +85,40 @@ function Assessments() {
         }
     })
 
+    // Categorize pronunciation tests
+    const categorizedPronunciation = allPronunciationTests.map(test => {
+        const isCompleted = stats.completedQuizIds.includes(test.id)
+        const isUnlocked = isPronunciationTestUnlocked(test.id, stats.completedQuizIds)
+        const prerequisiteTest = test.prerequisite ? pronunciationTests[test.prerequisite] : null
+
+        return {
+            ...test,
+            isCompleted,
+            isUnlocked,
+            prerequisiteQuiz: prerequisiteTest,
+            // Build assessment format
+            assessmentType: 'speaking',
+            type: test.type,
+            level: test.level,
+            title: test.title,
+            description: test.description,
+            questions: test.wordsCount,
+            duration: `~${Math.round(test.duration / 60)} min`,
+            accessibilityOptions: ['Audio playback', 'Retry attempts', 'Visual feedback']
+        }
+    })
+
+    // Combine all assessments
+    const allAssessments = [...categorizedQuizzes, ...categorizedPronunciation]
+
     // Available = Unlocked AND Not Completed
-    const availableAssessments = categorizedQuizzes.filter(q => q.isUnlocked && !q.isCompleted)
+    const availableAssessments = allAssessments.filter(q => q.isUnlocked && !q.isCompleted)
 
     // Completed = Already done
-    const completedAssessments = categorizedQuizzes.filter(q => q.isCompleted)
+    const completedAssessments = allAssessments.filter(q => q.isCompleted)
 
     // Locked = Has prerequisite that's not completed
-    const lockedAssessments = categorizedQuizzes.filter(q => !q.isUnlocked)
+    const lockedAssessments = allAssessments.filter(q => !q.isUnlocked)
 
     const currentList = activeTab === 'available' ? availableAssessments : completedAssessments
 
@@ -119,7 +152,13 @@ function Assessments() {
         if (assessment.comingSoon || !assessment.isUnlocked) {
             return // Don't navigate for coming soon or locked items
         }
-        navigate(`/assessments/quiz/${assessment.id}`)
+
+        // Route based on assessment type
+        if (assessment.assessmentType === 'speaking') {
+            navigate(`/assessments/pronunciation/${assessment.id}`)
+        } else {
+            navigate(`/assessments/quiz/${assessment.id}`)
+        }
     }
 
     // Text-to-speech for reading assessment info
@@ -132,6 +171,7 @@ function Assessments() {
         utterance.rate = 0.9
         window.speechSynthesis.speak(utterance)
     }
+
 
     // Get level badge color
     const getLevelColor = (level) => {
