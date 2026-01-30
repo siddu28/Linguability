@@ -39,6 +39,17 @@ function PronunciationTest({
         }
     }, [])
 
+    // Get speech recognition language code
+    const getSpeechLang = useCallback(() => {
+        const langMap = {
+            'english': 'en-US',
+            'hindi': 'hi-IN',
+            'tamil': 'ta-IN',
+            'telugu': 'te-IN'
+        }
+        return langMap[testConfig?.language] || 'en-US'
+    }, [testConfig?.language])
+
     // Initialize Speech Recognition
     const initializeRecognition = useCallback(() => {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition
@@ -47,7 +58,7 @@ function PronunciationTest({
         const recognition = new SpeechRecognition()
         recognition.continuous = false
         recognition.interimResults = false
-        recognition.lang = 'en-US'
+        recognition.lang = getSpeechLang()
         recognition.maxAlternatives = 1
 
         recognition.onstart = () => {
@@ -145,9 +156,9 @@ function PronunciationTest({
         window.speechSynthesis.cancel()
         const utterance = new SpeechSynthesisUtterance(currentWord.word)
         utterance.rate = speechRate
-        utterance.lang = 'en-US'
+        utterance.lang = getSpeechLang()
         window.speechSynthesis.speak(utterance)
-    }, [currentWord, textToSpeech, speechRate])
+    }, [currentWord, textToSpeech, speechRate, getSpeechLang])
 
     // Move to next word
     const handleNextWord = () => {
