@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Trophy, Target, Clock, RotateCcw, Home, CheckCircle2, XCircle, Check, X } from 'lucide-react'
+import { ArrowLeft, Trophy, Target, Clock, RotateCcw, Home, CheckCircle2, XCircle, Check, X, Play, RefreshCw } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { getProfile, getUserSettings, saveAssessmentResult } from '../lib/database'
+import { getProfile, getUserSettings, saveAssessmentResult, saveQuizProgress, getQuizProgress, deleteQuizProgress } from '../lib/database'
 import { getQuizById, generateQuizQuestions } from '../data/quizData'
 import Navbar from '../components/Navbar'
 import Quiz from '../components/Quiz'
@@ -25,6 +25,12 @@ function QuizPage() {
     const [saving, setSaving] = useState(false)
     const [showAnswerReview, setShowAnswerReview] = useState(false)
 
+    // Resume-related state
+    const [savedProgress, setSavedProgress] = useState(null)
+    const [showResumePrompt, setShowResumePrompt] = useState(false)
+    const [initialQuizState, setInitialQuizState] = useState(null)
+    const [startTime, setStartTime] = useState(null)
+
     // Load quiz and user data
     useEffect(() => {
         async function loadData() {
@@ -41,9 +47,18 @@ function QuizPage() {
                 }
                 setQuiz(quizConfig)
 
-                // Generate questions
-                const generatedQuestions = generateQuizQuestions(quizId)
-                setQuestions(generatedQuestions)
+                // Check for saved progress
+                const existingProgress = await getQuizProgress(user.id, quizId)
+                if (existingProgress) {
+                    setSavedProgress(existingProgress)
+                    setShowResumePrompt(true)
+                    // Use saved questions to maintain order
+                    setQuestions(existingProgress.questions)
+                } else {
+                    // Generate fresh questions
+                    const generatedQuestions = generateQuizQuestions(quizId)
+                    setQuestions(generatedQuestions)
+                }
 
                 // Load user profile and settings
                 const [profile, settings] = await Promise.all([
@@ -70,16 +85,68 @@ function QuizPage() {
         return challenges.includes('adhd') || challenges.includes('anxiety')
     }
 
-    // Start the quiz
-    const handleStartQuiz = () => {
+    // Start fresh quiz (ignore saved progress)
+    const handleStartFresh = async () => {
+        // Delete any saved progress
+        if (user?.id && savedProgress) {
+            await deleteQuizProgress(user.id, quizId)
+        }
+
         // Regenerate questions for fresh quiz
         const freshQuestions = generateQuizQuestions(quizId)
         setQuestions(freshQuestions)
+        setSavedProgress(null)
+        setShowResumePrompt(false)
+        setInitialQuizState(null)
+        setStartTime(new Date().toISOString())
         setQuizStarted(true)
         setQuizCompleted(false)
         setResults(null)
         setShowAnswerReview(false)
     }
+
+    // Resume from saved progress
+    const handleResumeQuiz = () => {
+        if (savedProgress) {
+            setInitialQuizState({
+                currentIndex: savedProgress.current_index,
+                answers: savedProgress.answers || []
+            })
+            setStartTime(savedProgress.start_time)
+        }
+        setShowResumePrompt(false)
+        setQuizStarted(true)
+        setQuizCompleted(false)
+        setResults(null)
+        setShowAnswerReview(false)
+    }
+
+    // Start the quiz (initial start, no saved progress)
+    const handleStartQuiz = () => {
+        setStartTime(new Date().toISOString())
+        setQuizStarted(true)
+        setQuizCompleted(false)
+        setResults(null)
+        setShowAnswerReview(false)
+    }
+
+    // Save progress during quiz (called by Quiz component)
+    const handleProgressUpdate = useCallback(async (currentIndex, answers) => {
+        if (!user?.id || !quiz) return
+
+        try {
+            await saveQuizProgress(user.id, {
+                quizId: quiz.id,
+                quizType: 'quiz',
+                currentIndex: currentIndex,
+                answers: answers,
+                questions: questions,
+                startTime: startTime || new Date().toISOString()
+            })
+        } catch (error) {
+            console.error('Error saving progress:', error)
+        }
+    }, [user?.id, quiz, questions, startTime])
 
     // Handle quiz completion
     const handleQuizComplete = async (quizResults) => {
@@ -87,7 +154,12 @@ function QuizPage() {
         setQuizCompleted(true)
         setQuizStarted(false)
 
-        // Save to database
+        // Delete saved progress on completion
+        if (user?.id) {
+            await deleteQuizProgress(user.id, quizId)
+        }
+
+        // Save final result to database
         if (user?.id) {
             setSaving(true)
             try {
@@ -213,13 +285,41 @@ function QuizPage() {
                                 </div>
                             )}
 
-                            <Button
-                                variant="primary"
-                                className="start-quiz-btn"
-                                onClick={handleStartQuiz}
-                            >
-                                Start Quiz
-                            </Button>
+                            {/* Resume Prompt */}
+                            {showResumePrompt && savedProgress ? (
+                                <div className="resume-prompt">
+                                    <div className="resume-info">
+                                        <RefreshCw size={20} />
+                                        <span>
+                                            You have a saved quiz in progress ({savedProgress.current_index + 1}/{questions.length} questions completed)
+                                        </span>
+                                    </div>
+                                    <div className="resume-actions">
+                                        <Button
+                                            variant="primary"
+                                            onClick={handleResumeQuiz}
+                                        >
+                                            <Play size={18} />
+                                            Resume Quiz
+                                        </Button>
+                                        <Button
+                                            variant="secondary"
+                                            onClick={handleStartFresh}
+                                        >
+                                            <RotateCcw size={18} />
+                                            Start Fresh
+                                        </Button>
+                                    </div>
+                                </div>
+                            ) : (
+                                <Button
+                                    variant="primary"
+                                    className="start-quiz-btn"
+                                    onClick={handleStartQuiz}
+                                >
+                                    Start Quiz
+                                </Button>
+                            )}
                         </div>
                     </div>
                 )}
@@ -233,6 +333,8 @@ function QuizPage() {
                         textToSpeech={userSettings?.text_to_speech ?? true}
                         speechRate={userSettings?.speech_rate ?? 1}
                         onComplete={handleQuizComplete}
+                        initialState={initialQuizState}
+                        onProgressUpdate={handleProgressUpdate}
                     />
                 )}
 

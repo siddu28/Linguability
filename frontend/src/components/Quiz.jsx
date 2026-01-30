@@ -8,14 +8,21 @@ function Quiz({
     hideTimer = false,
     textToSpeech = true,
     speechRate = 1,
-    onComplete
+    onComplete,
+    initialState = null,
+    onProgressUpdate = null
 }) {
-    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
+    // Initialize state from saved progress if resuming
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(
+        initialState?.currentIndex ?? 0
+    )
     const [selectedOption, setSelectedOption] = useState(null)
     const [isAnswered, setIsAnswered] = useState(false)
     const [isCorrect, setIsCorrect] = useState(null)
-    const [score, setScore] = useState(0)
-    const [answers, setAnswers] = useState([])
+    const [score, setScore] = useState(
+        initialState?.answers?.filter(a => a.isCorrect).length ?? 0
+    )
+    const [answers, setAnswers] = useState(initialState?.answers ?? [])
     const [timeRemaining, setTimeRemaining] = useState(quizConfig?.duration || 600)
     const [startTime] = useState(Date.now())
 
@@ -71,7 +78,7 @@ function Quiz({
         }
 
         // Record answer
-        setAnswers(prev => [...prev, {
+        const newAnswer = {
             questionId: currentQuestion.id,
             question: currentQuestion.question,
             selectedAnswer: option,
@@ -79,7 +86,15 @@ function Quiz({
             isCorrect: correct,
             category: currentQuestion.category,
             translation: currentQuestion.translation
-        }])
+        }
+
+        const updatedAnswers = [...answers, newAnswer]
+        setAnswers(updatedAnswers)
+
+        // Save progress after each answer
+        if (onProgressUpdate) {
+            onProgressUpdate(currentQuestionIndex + 1, updatedAnswers)
+        }
     }
 
     // Move to next question

@@ -284,3 +284,69 @@ export async function getPronunciationResults(userId) {
     }
     return data
 }
+
+// ============ QUIZ PROGRESS (SAVE/RESUME) ============
+
+export async function saveQuizProgress(userId, progressData) {
+    const { data, error } = await supabase
+        .from('quiz_progress')
+        .upsert({
+            user_id: userId,
+            quiz_id: progressData.quizId,
+            quiz_type: progressData.quizType,
+            current_index: progressData.currentIndex,
+            answers: progressData.answers,
+            questions: progressData.questions,
+            start_time: progressData.startTime,
+            updated_at: new Date().toISOString()
+        }, {
+            onConflict: 'user_id,quiz_id'
+        })
+        .select()
+        .single()
+
+    if (error) {
+        console.error('Error saving quiz progress:', error)
+        throw error
+    }
+    return data
+}
+
+export async function getQuizProgress(userId, quizId) {
+    const { data, error } = await supabase
+        .from('quiz_progress')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('quiz_id', quizId)
+        .single()
+
+    if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
+        console.error('Error fetching quiz progress:', error)
+    }
+    return data
+}
+
+export async function deleteQuizProgress(userId, quizId) {
+    const { error } = await supabase
+        .from('quiz_progress')
+        .delete()
+        .eq('user_id', userId)
+        .eq('quiz_id', quizId)
+
+    if (error) {
+        console.error('Error deleting quiz progress:', error)
+    }
+}
+
+export async function getAllQuizProgress(userId) {
+    const { data, error } = await supabase
+        .from('quiz_progress')
+        .select('quiz_id, quiz_type, current_index, updated_at')
+        .eq('user_id', userId)
+
+    if (error) {
+        console.error('Error fetching all quiz progress:', error)
+        return []
+    }
+    return data
+}

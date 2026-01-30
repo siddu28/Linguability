@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, Mic, Clock, Target, Volume2, CheckCircle2, XCircle, RotateCcw, Home } from 'lucide-react'
+import { ArrowLeft, Mic, Clock, Target, Volume2, CheckCircle2, XCircle, RotateCcw, Home, Play, RefreshCw } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import {
     getPronunciationTestById,
     generatePronunciationWords
 } from '../data/pronunciationData'
-import { savePronunciationResult } from '../lib/database'
+import { savePronunciationResult, saveQuizProgress, getQuizProgress, deleteQuizProgress } from '../lib/database'
 import Navbar from '../components/Navbar'
 import PronunciationTest from '../components/PronunciationTest'
 import Button from '../components/Button'
@@ -23,28 +23,101 @@ function PronunciationPage() {
     const [result, setResult] = useState(null)
     const [loading, setLoading] = useState(true)
 
-    // Load test configuration
-    useEffect(() => {
-        const config = getPronunciationTestById(testId)
-        if (config) {
-            setTestConfig(config)
-        }
-        setLoading(false)
-    }, [testId])
+    // Resume-related state
+    const [savedProgress, setSavedProgress] = useState(null)
+    const [showResumePrompt, setShowResumePrompt] = useState(false)
+    const [initialTestState, setInitialTestState] = useState(null)
+    const [startTime, setStartTime] = useState(null)
 
-    // Start test
+    // Load test configuration and check for saved progress
+    useEffect(() => {
+        async function loadData() {
+            const config = getPronunciationTestById(testId)
+            if (config) {
+                setTestConfig(config)
+            }
+
+            // Check for saved progress
+            if (user?.id) {
+                const existingProgress = await getQuizProgress(user.id, testId)
+                if (existingProgress) {
+                    setSavedProgress(existingProgress)
+                    setShowResumePrompt(true)
+                    setWords(existingProgress.questions)
+                }
+            }
+
+            setLoading(false)
+        }
+        loadData()
+    }, [testId, user])
+
+    // Start fresh test
+    const handleStartFresh = async () => {
+        if (user?.id && savedProgress) {
+            await deleteQuizProgress(user.id, testId)
+        }
+
+        const generatedWords = generatePronunciationWords(testId)
+        setWords(generatedWords)
+        setSavedProgress(null)
+        setShowResumePrompt(false)
+        setInitialTestState(null)
+        setStartTime(new Date().toISOString())
+        setTestState('active')
+    }
+
+    // Resume test
+    const handleResumeTest = () => {
+        if (savedProgress) {
+            setInitialTestState({
+                currentIndex: savedProgress.current_index,
+                results: savedProgress.answers || [],
+                totalScore: savedProgress.answers?.reduce((sum, r) => sum + r.score, 0) || 0
+            })
+            setStartTime(savedProgress.start_time)
+        }
+        setShowResumePrompt(false)
+        setTestState('active')
+    }
+
+    // Start test (no saved progress)
     const handleStartTest = () => {
         const generatedWords = generatePronunciationWords(testId)
         setWords(generatedWords)
+        setStartTime(new Date().toISOString())
         setTestState('active')
     }
+
+    // Save progress during test
+    const handleProgressUpdate = useCallback(async (currentIndex, results) => {
+        if (!user?.id || !testConfig) return
+
+        try {
+            await saveQuizProgress(user.id, {
+                quizId: testId,
+                quizType: 'speaking',
+                currentIndex: currentIndex,
+                answers: results,
+                questions: words,
+                startTime: startTime || new Date().toISOString()
+            })
+        } catch (error) {
+            console.error('Error saving progress:', error)
+        }
+    }, [user?.id, testId, testConfig, words, startTime])
 
     // Handle test completion
     const handleTestComplete = async (testResult) => {
         setResult(testResult)
         setTestState('complete')
 
-        // Save to database
+        // Delete saved progress
+        if (user?.id) {
+            await deleteQuizProgress(user.id, testId)
+        }
+
+        // Save final result to database
         if (user?.id && testConfig) {
             try {
                 await savePronunciationResult(user.id, {
@@ -67,6 +140,7 @@ function PronunciationPage() {
         const generatedWords = generatePronunciationWords(testId)
         setWords(generatedWords)
         setResult(null)
+        setStartTime(new Date().toISOString())
         setTestState('active')
     }
 
@@ -167,15 +241,43 @@ function PronunciationPage() {
                             <span>Please allow microphone access when prompted</span>
                         </div>
 
-                        <Button
-                            variant="primary"
-                            size="lg"
-                            onClick={handleStartTest}
-                            fullWidth
-                        >
-                            <Mic size={20} />
-                            Start Pronunciation Test
-                        </Button>
+                        {/* Resume Prompt or Start Button */}
+                        {showResumePrompt && savedProgress ? (
+                            <div className="resume-prompt">
+                                <div className="resume-info">
+                                    <RefreshCw size={20} />
+                                    <span>
+                                        You have a saved test in progress ({savedProgress.current_index}/{words.length} words completed)
+                                    </span>
+                                </div>
+                                <div className="resume-actions">
+                                    <Button
+                                        variant="primary"
+                                        onClick={handleResumeTest}
+                                    >
+                                        <Play size={18} />
+                                        Resume Test
+                                    </Button>
+                                    <Button
+                                        variant="secondary"
+                                        onClick={handleStartFresh}
+                                    >
+                                        <RotateCcw size={18} />
+                                        Start Fresh
+                                    </Button>
+                                </div>
+                            </div>
+                        ) : (
+                            <Button
+                                variant="primary"
+                                size="lg"
+                                onClick={handleStartTest}
+                                fullWidth
+                            >
+                                <Mic size={20} />
+                                Start Pronunciation Test
+                            </Button>
+                        )}
                     </div>
                 )}
 
@@ -185,6 +287,8 @@ function PronunciationPage() {
                         words={words}
                         testConfig={testConfig}
                         onComplete={handleTestComplete}
+                        initialState={initialTestState}
+                        onProgressUpdate={handleProgressUpdate}
                     />
                 )}
 

@@ -8,15 +8,20 @@ function PronunciationTest({
     testConfig,
     textToSpeech = true,
     speechRate = 0.8,
-    onComplete
+    onComplete,
+    initialState = null,
+    onProgressUpdate = null
 }) {
-    const [currentWordIndex, setCurrentWordIndex] = useState(0)
+    // Initialize from saved state if resuming
+    const [currentWordIndex, setCurrentWordIndex] = useState(
+        initialState?.currentIndex ?? 0
+    )
     const [isListening, setIsListening] = useState(false)
     const [spokenText, setSpokenText] = useState('')
     const [score, setScore] = useState(null)
     const [feedback, setFeedback] = useState(null)
-    const [results, setResults] = useState([])
-    const [totalScore, setTotalScore] = useState(0)
+    const [results, setResults] = useState(initialState?.results ?? [])
+    const [totalScore, setTotalScore] = useState(initialState?.totalScore ?? 0)
     const [showNext, setShowNext] = useState(false)
     const [error, setError] = useState(null)
     const [browserSupport, setBrowserSupport] = useState(true)
@@ -73,17 +78,25 @@ function PronunciationTest({
             }
 
             // Record result
-            setResults(prev => [...prev, {
+            const newResult = {
                 wordId: currentWord.id,
                 expected: currentWord.word,
                 spoken: transcript,
                 score: matchScore,
                 feedback: matchScore >= 60 ? 'pass' : 'fail'
-            }])
+            }
+            const updatedResults = [...results, newResult]
+            setResults(updatedResults)
 
             // Update total score
-            setTotalScore(prev => prev + matchScore)
+            const newTotalScore = totalScore + matchScore
+            setTotalScore(newTotalScore)
             setShowNext(true)
+
+            // Save progress after each word
+            if (onProgressUpdate) {
+                onProgressUpdate(currentWordIndex + 1, updatedResults)
+            }
         }
 
         recognition.onerror = (event) => {
@@ -159,16 +172,23 @@ function PronunciationTest({
 
     // Skip word (counts as 0)
     const handleSkipWord = () => {
-        setResults(prev => [...prev, {
+        const skippedResult = {
             wordId: currentWord.id,
             expected: currentWord.word,
             spoken: '(skipped)',
             score: 0,
             feedback: 'skipped'
-        }])
+        }
+        const updatedResults = [...results, skippedResult]
+        setResults(updatedResults)
         setShowNext(true)
         setScore(0)
         setFeedback('skipped')
+
+        // Save progress for skipped word
+        if (onProgressUpdate) {
+            onProgressUpdate(currentWordIndex + 1, updatedResults)
+        }
     }
 
     if (!currentWord) {
