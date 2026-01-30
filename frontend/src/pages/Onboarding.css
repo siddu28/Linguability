@@ -130,6 +130,9 @@
 /* Welcome Screen */
 .ob-welcome {
     max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .ob-welcome-icon {
@@ -139,8 +142,15 @@
 }
 
 @keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-10px); }
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
 }
 
 .ob-welcome-title {
@@ -562,12 +572,18 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.875rem 0;
+    padding: 0.75rem 0;
     border-bottom: 1px solid #f5f0f2;
+    gap: 1rem;
 }
 
 .ob-setting-row:last-child {
     border-bottom: none;
+    padding-bottom: 0;
+}
+
+.ob-setting-row:first-child {
+    padding-top: 0;
 }
 
 .ob-setting-info {
@@ -628,49 +644,49 @@
         border-radius: 20px;
         min-height: auto;
     }
-    
+
     .ob-header {
         flex-wrap: wrap;
         gap: 0.75rem;
     }
-    
+
     .ob-progress {
         order: 3;
         max-width: 100%;
         width: 100%;
     }
-    
+
     .ob-cards-grid {
         grid-template-columns: 1fr;
         gap: 0.75rem;
     }
-    
+
     .ob-card {
         padding: 1.25rem;
     }
-    
+
     .ob-card-icon {
         width: 40px;
         height: 40px;
     }
-    
+
     .ob-welcome-title {
         font-size: 1.5rem;
     }
-    
+
     .ob-step-title {
         font-size: 1.35rem;
     }
-    
+
     .ob-personalize-content {
         grid-template-columns: 1fr;
     }
-    
+
     .ob-footer {
         flex-direction: column-reverse;
         gap: 0.75rem;
     }
-    
+
     .ob-back-btn,
     .ob-primary-btn {
         width: 100%;
@@ -682,16 +698,16 @@
     .onboarding-page {
         padding: 0.5rem;
     }
-    
+
     .ob-container {
         padding: 1rem;
         border-radius: 16px;
     }
-    
+
     .ob-welcome-icon {
         font-size: 3rem;
     }
-    
+
     .ob-feature {
         padding: 0.75rem 1rem;
     }
@@ -702,7 +718,7 @@
     .ob-welcome-icon {
         animation: none;
     }
-    
+
     .ob-card,
     .ob-primary-btn,
     .ob-toggle-knob {

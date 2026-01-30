@@ -217,7 +217,7 @@ function Onboarding() {
     const [currentStep, setCurrentStep] = useState(STEPS.WELCOME)
     const [submitting, setSubmitting] = useState(false)
     const [showOnboarding, setShowOnboarding] = useState(false)
-    
+
     // User selections
     const [selections, setSelections] = useState({
         goal: null,
@@ -225,7 +225,7 @@ function Onboarding() {
         dailyTime: null,
         preferences: []
     })
-    
+
     // Settings for personalized experience (Step 6)
     const [settings, setSettings] = useState({
         focusMode: false,
@@ -301,14 +301,14 @@ function Onboarding() {
                 const learningChallenges = []
                 if (selections.preferences.includes('dyslexia')) learningChallenges.push('dyslexia')
                 if (selections.preferences.includes('audio')) learningChallenges.push('auditory')
-                
+
                 await updateProfile(user.id, {
                     learning_challenges: learningChallenges,
                     learning_goal: selections.goal,
                     experience_level: selections.level,
                     daily_goal_minutes: selections.dailyTime
                 })
-                
+
                 await upsertUserSettings(user.id, {
                     focus_mode: settings.focusMode,
                     font_size: settings.largerText ? 'large' : 'medium',
@@ -359,7 +359,7 @@ function Onboarding() {
             window.speechSynthesis.cancel()
             const utterance = new SpeechSynthesisUtterance(text)
             utterance.rate = 0.8
-            utterance.lang = 'hi-IN'
+            utterance.lang = 'ta-IN'
             window.speechSynthesis.speak(utterance)
         }
     }
@@ -390,7 +390,7 @@ function Onboarding() {
             <div className="ob-welcome-icon">🎓</div>
             <h1 className="ob-welcome-title">Let's Personalize Your Learning</h1>
             <p className="ob-welcome-subtitle">
-                Answer a few quick questions so we can customize your experience. 
+                Answer a few quick questions so we can customize your experience.
                 This takes about 2 minutes.
             </p>
             <div className="ob-welcome-features">
@@ -422,10 +422,10 @@ function Onboarding() {
             </div>
             <div className="ob-cards-grid">
                 {options.map(option => {
-                    const isSelected = isMulti 
+                    const isSelected = isMulti
                         ? selections.preferences.includes(option.id)
                         : selectedValue === option.id
-                    
+
                     return (
                         <button
                             key={option.id}
@@ -451,8 +451,8 @@ function Onboarding() {
             fontSize: settings.largerText ? '1.25rem' : '1rem',
             letterSpacing: selections.preferences.includes('dyslexia') ? '0.05em' : 'normal',
             lineHeight: selections.preferences.includes('dyslexia') ? '2' : '1.6',
-            fontFamily: selections.preferences.includes('dyslexia') 
-                ? '"OpenDyslexic", "Comic Sans MS", sans-serif' 
+            fontFamily: selections.preferences.includes('dyslexia')
+                ? '"OpenDyslexic", "Comic Sans MS", sans-serif'
                 : '"Poppins", sans-serif'
         })
 
@@ -479,7 +479,7 @@ function Onboarding() {
                         )}
                         <h3 className="ob-preview-title">Lesson Preview</h3>
                         <p className="ob-preview-desc">Here's what your lessons will look like:</p>
-                        
+
                         <div className="ob-preview-lesson" style={getLessonStyle()}>
                             <div className="ob-lesson-header-card">
                                 <span className="ob-lesson-icon">{icons.basics}</span>
@@ -489,12 +489,12 @@ function Onboarding() {
                                 </div>
                             </div>
                             <div className="ob-lesson-word">
-                                <span className="ob-word-target" style={getLessonStyle()}>Hola, ¿cómo estás?</span>
+                                <span className="ob-word-target" style={getLessonStyle()}>வணக்கம், எப்படி இருக்கிறீர்கள்?</span>
                                 <span className="ob-word-translation">Hello, how are you?</span>
                             </div>
-                            <button 
+                            <button
                                 className="ob-listen-btn"
-                                onClick={() => speakText('Hola, cómo estás')}
+                                onClick={() => speakText('வணக்கம், எப்படி இருக்கிறீர்கள்')}
                             >
                                 <span className="ob-listen-icon">{icons.speaker}</span>
                                 Listen to pronunciation
@@ -506,14 +506,14 @@ function Onboarding() {
                     <div className="ob-settings-panel">
                         <h3 className="ob-settings-title">Your Settings</h3>
                         <p className="ob-settings-desc">Customize your experience anytime</p>
-                        
+
                         <div className="ob-settings-list">
                             <div className="ob-setting-row">
                                 <div className="ob-setting-info">
                                     <span className="ob-setting-name">Focus Mode</span>
                                     <span className="ob-setting-desc">Reduce distractions</span>
                                 </div>
-                                <button 
+                                <button
                                     className={`ob-toggle ${settings.focusMode ? 'active' : ''}`}
                                     onClick={() => toggleSetting('focusMode')}
                                 >
@@ -526,7 +526,7 @@ function Onboarding() {
                                     <span className="ob-setting-name">Larger Text</span>
                                     <span className="ob-setting-desc">Increase font size</span>
                                 </div>
-                                <button 
+                                <button
                                     className={`ob-toggle ${settings.largerText ? 'active' : ''}`}
                                     onClick={() => toggleSetting('largerText')}
                                 >
@@ -539,7 +539,7 @@ function Onboarding() {
                                     <span className="ob-setting-name">High Contrast</span>
                                     <span className="ob-setting-desc">Better visibility</span>
                                 </div>
-                                <button 
+                                <button
                                     className={`ob-toggle ${settings.highContrast ? 'active' : ''}`}
                                     onClick={() => toggleSetting('highContrast')}
                                 >
@@ -552,7 +552,7 @@ function Onboarding() {
                                     <span className="ob-setting-name">Reduced Motion</span>
                                     <span className="ob-setting-desc">Less animations</span>
                                 </div>
-                                <button 
+                                <button
                                     className={`ob-toggle ${settings.reducedMotion ? 'active' : ''}`}
                                     onClick={() => toggleSetting('reducedMotion')}
                                 >
@@ -565,7 +565,7 @@ function Onboarding() {
                                     <span className="ob-setting-name">Auto-Play Audio</span>
                                     <span className="ob-setting-desc">Play sounds automatically</span>
                                 </div>
-                                <button 
+                                <button
                                     className={`ob-toggle ${settings.autoPlayAudio ? 'active' : ''}`}
                                     onClick={() => toggleSetting('autoPlayAudio')}
                                 >
@@ -634,12 +634,12 @@ function Onboarding() {
                             <span>L</span>
                         </div>
                     </div>
-                    
+
                     <div className="ob-progress">
                         <span className="ob-progress-text">Step {currentStep + 1} of {totalSteps}</span>
                         <div className="ob-progress-bar">
-                            <div 
-                                className="ob-progress-fill" 
+                            <div
+                                className="ob-progress-fill"
                                 style={{ width: `${progress}%` }}
                             />
                         </div>
@@ -663,9 +663,9 @@ function Onboarding() {
                             <span className="ob-btn-icon">{icons.arrowLeft}</span>
                             Back
                         </button>
-                        
+
                         {currentStep === STEPS.PERSONALIZE ? (
-                            <button 
+                            <button
                                 className="ob-primary-btn"
                                 onClick={handleComplete}
                                 disabled={submitting}
@@ -674,7 +674,7 @@ function Onboarding() {
                                 {!submitting && <span className="ob-btn-icon">{icons.arrowRight}</span>}
                             </button>
                         ) : (
-                            <button 
+                            <button
                                 className="ob-primary-btn"
                                 onClick={handleNext}
                                 disabled={!canContinue()}
