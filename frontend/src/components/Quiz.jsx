@@ -97,22 +97,11 @@ function Quiz({
     // Complete the quiz
     const handleQuizComplete = () => {
         const timeTaken = Math.round((Date.now() - startTime) / 1000)
-        const finalScore = answers.filter(a => a.isCorrect).length + (isCorrect ? 1 : 0)
-        const scorePercentage = Math.round((finalScore / questions.length) * 100)
 
-        // Include current answer if not yet added
-        let finalAnswers = [...answers]
-        if (isAnswered && answers.length < questions.length) {
-            finalAnswers.push({
-                questionId: currentQuestion.id,
-                question: currentQuestion.question,
-                selectedAnswer: currentQuestion.options[selectedOption],
-                correctAnswer: currentQuestion.correctAnswer,
-                isCorrect: isCorrect,
-                category: currentQuestion.category,
-                translation: currentQuestion.translation
-            })
-        }
+        // Use the answers array - it already contains all answers including the last one
+        const finalAnswers = [...answers]
+        const finalScore = finalAnswers.filter(a => a.isCorrect).length
+        const scorePercentage = Math.round((finalScore / questions.length) * 100)
 
         onComplete({
             score: finalScore,
