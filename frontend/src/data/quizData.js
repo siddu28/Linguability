@@ -1,5 +1,5 @@
 // Quiz configuration and question generation for vocabulary quizzes
-import { wordsData, lessonKeyMap } from './wordsData'
+import { wordsData, advancedWordsData, lessonKeyMap } from './wordsData'
 
 // Available quizzes configuration
 // Each quiz can have a 'prerequisite' field pointing to the quiz ID that must be completed first
@@ -15,7 +15,8 @@ export const quizzes = {
         questionsCount: 10,
         duration: 600, // 10 minutes in seconds
         type: 'quiz',
-        prerequisite: null // No prerequisite, always available
+        prerequisite: null, // No prerequisite, always available
+        useAdvanced: false
     },
     'tamil-basics': {
         id: 'tamil-basics',
@@ -27,7 +28,8 @@ export const quizzes = {
         questionsCount: 10,
         duration: 600,
         type: 'quiz',
-        prerequisite: null
+        prerequisite: null,
+        useAdvanced: false
     },
     'telugu-basics': {
         id: 'telugu-basics',
@@ -39,7 +41,8 @@ export const quizzes = {
         questionsCount: 10,
         duration: 600,
         type: 'quiz',
-        prerequisite: null
+        prerequisite: null,
+        useAdvanced: false
     },
 
     // =============== INTERMEDIATE (MEDIUM) ===============
@@ -53,7 +56,8 @@ export const quizzes = {
         questionsCount: 15,
         duration: 900, // 15 minutes
         type: 'quiz',
-        prerequisite: 'hindi-basics' // Must complete basics first
+        prerequisite: 'hindi-basics', // Must complete basics first
+        useAdvanced: false
     },
     'tamil-intermediate': {
         id: 'tamil-intermediate',
@@ -65,7 +69,8 @@ export const quizzes = {
         questionsCount: 15,
         duration: 900,
         type: 'quiz',
-        prerequisite: 'tamil-basics'
+        prerequisite: 'tamil-basics',
+        useAdvanced: false
     },
     'telugu-intermediate': {
         id: 'telugu-intermediate',
@@ -77,7 +82,49 @@ export const quizzes = {
         questionsCount: 15,
         duration: 900,
         type: 'quiz',
-        prerequisite: 'telugu-basics'
+        prerequisite: 'telugu-basics',
+        useAdvanced: false
+    },
+
+    // =============== ADVANCED (HARD) ===============
+    'hindi-advanced': {
+        id: 'hindi-advanced',
+        title: 'Hindi Advanced Quiz',
+        description: 'Master difficult Hindi vocabulary: emotions, nature, actions & more',
+        language: 'hindi',
+        level: 'advanced',
+        categories: ['emotions', 'nature', 'actions', 'body', 'time'],
+        questionsCount: 20,
+        duration: 1200, // 20 minutes
+        type: 'quiz',
+        prerequisite: 'hindi-intermediate', // Must complete intermediate first
+        useAdvanced: true // Uses advanced vocabulary
+    },
+    'tamil-advanced': {
+        id: 'tamil-advanced',
+        title: 'Tamil Advanced Quiz',
+        description: 'Master difficult Tamil vocabulary: emotions, nature, actions & more',
+        language: 'tamil',
+        level: 'advanced',
+        categories: ['emotions', 'nature', 'actions', 'body', 'time'],
+        questionsCount: 20,
+        duration: 1200,
+        type: 'quiz',
+        prerequisite: 'tamil-intermediate',
+        useAdvanced: true
+    },
+    'telugu-advanced': {
+        id: 'telugu-advanced',
+        title: 'Telugu Advanced Quiz',
+        description: 'Master difficult Telugu vocabulary: emotions, nature, actions & more',
+        language: 'telugu',
+        level: 'advanced',
+        categories: ['emotions', 'nature', 'actions', 'body', 'time'],
+        questionsCount: 20,
+        duration: 1200,
+        type: 'quiz',
+        prerequisite: 'telugu-intermediate',
+        useAdvanced: true
     }
 }
 
@@ -91,9 +138,29 @@ function shuffleArray(array) {
     return shuffled
 }
 
-// Get all words for a language from specified categories
+// Get all words for a language from specified categories (basic/intermediate)
 function getWordsForLanguage(languageId, categories) {
     const languageData = wordsData[languageId]
+    if (!languageData) return []
+
+    const allWords = []
+    categories.forEach(category => {
+        const categoryWords = languageData[category]
+        if (categoryWords) {
+            categoryWords.forEach(word => {
+                allWords.push({
+                    ...word,
+                    category
+                })
+            })
+        }
+    })
+    return allWords
+}
+
+// Get advanced words for a language (for hard quizzes)
+function getAdvancedWordsForLanguage(languageId, categories) {
+    const languageData = advancedWordsData[languageId]
     if (!languageData) return []
 
     const allWords = []
@@ -129,7 +196,11 @@ export function generateQuizQuestions(quizId) {
     const quiz = quizzes[quizId]
     if (!quiz) return []
 
-    const allWords = getWordsForLanguage(quiz.language, quiz.categories)
+    // Use advanced or basic vocabulary based on quiz configuration
+    const allWords = quiz.useAdvanced
+        ? getAdvancedWordsForLanguage(quiz.language, quiz.categories)
+        : getWordsForLanguage(quiz.language, quiz.categories)
+
     if (allWords.length < quiz.questionsCount) {
         console.warn(`Not enough words for quiz: ${quizId}`)
     }
@@ -202,5 +273,8 @@ export const lessonToQuizMap = {
     'Telugu Basics Quiz': 'telugu-basics',
     'Hindi Intermediate Quiz': 'hindi-intermediate',
     'Tamil Intermediate Quiz': 'tamil-intermediate',
-    'Telugu Intermediate Quiz': 'telugu-intermediate'
+    'Telugu Intermediate Quiz': 'telugu-intermediate',
+    'Hindi Advanced Quiz': 'hindi-advanced',
+    'Tamil Advanced Quiz': 'tamil-advanced',
+    'Telugu Advanced Quiz': 'telugu-advanced'
 }
