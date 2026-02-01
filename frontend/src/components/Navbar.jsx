@@ -14,21 +14,18 @@ import {
     Settings,
     LogOut
 } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
 import './Navbar.css'
 
 function Navbar() {
     const navigate = useNavigate()
+    const { user } = useAuth()
     const [showProfileMenu, setShowProfileMenu] = useState(false)
     const [isDarkMode, setIsDarkMode] = useState(() => {
         const saved = localStorage.getItem('theme')
         return saved === 'dark'
     })
     const profileMenuRef = useRef(null)
-
-    // Mock user data - replace with actual user data later
-    const user = {
-        email: 'siddukasam28@gmail.com'
-    }
 
     const navLinks = [
         { to: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -130,7 +127,10 @@ function Navbar() {
                     {showProfileMenu && (
                         <div className="profile-menu">
                             <div className="profile-menu-header">
-                                {user.email}
+                                {user?.user_metadata?.full_name && (
+                                    <div className="profile-menu-name">{user.user_metadata.full_name}</div>
+                                )}
+                                <div className="profile-menu-email">{user?.email || 'User'}</div>
                             </div>
                             <div className="profile-menu-divider" />
                             <button className="profile-menu-item" onClick={handleProfileClick}>
