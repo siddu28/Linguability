@@ -1,0 +1,732 @@
+/* ===================================
+   Onboarding - New Card-Based Design
+   =================================== */
+
+/* Base Page */
+.onboarding-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #fdf3f5 0%, #fce4ec 50%, #f8bbd9 100%);
+    padding: 1rem;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.onboarding-loading {
+    text-align: center;
+    padding: 3rem;
+    color: #666;
+    font-size: 1.1rem;
+}
+
+/* Container */
+.ob-container {
+    width: 100%;
+    max-width: 900px;
+    background: linear-gradient(180deg, #fdf6f8 0%, #ffffff 100%);
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(233, 30, 99, 0.1), 0 8px 24px rgba(0, 0, 0, 0.05);
+    padding: 2rem 2.5rem;
+    min-height: 600px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.ob-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+    gap: 1rem;
+}
+
+.ob-brand {
+    flex-shrink: 0;
+}
+
+.ob-logo {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.ob-progress {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+    max-width: 400px;
+}
+
+.ob-progress-text {
+    font-size: 0.85rem;
+    color: #666;
+    white-space: nowrap;
+}
+
+.ob-progress-bar {
+    flex: 1;
+    height: 8px;
+    background: #f0e4e8;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.ob-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #e91e63 0%, #c2185b 100%);
+    border-radius: 4px;
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ob-progress-percent {
+    font-size: 0.85rem;
+    color: #888;
+    min-width: 36px;
+    text-align: right;
+}
+
+.ob-skip-btn {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.ob-skip-btn:hover {
+    color: #e91e63;
+    background: rgba(233, 30, 99, 0.05);
+}
+
+.ob-skip-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Main Content Area */
+.ob-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+/* Welcome Screen */
+.ob-welcome {
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.ob-welcome-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+.ob-welcome-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 0.75rem;
+    line-height: 1.2;
+}
+
+.ob-welcome-subtitle {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.ob-welcome-features {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+
+.ob-feature {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    text-align: left;
+}
+
+.ob-feature-emoji {
+    font-size: 1.5rem;
+}
+
+.ob-feature span:last-child {
+    color: #333;
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+/* Step Container */
+.ob-step {
+    width: 100%;
+    max-width: 700px;
+}
+
+.ob-step-header {
+    margin-bottom: 2rem;
+}
+
+.ob-step-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 0.5rem;
+}
+
+.ob-step-subtitle {
+    font-size: 1rem;
+    color: #666;
+}
+
+/* Cards Grid */
+.ob-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.ob-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.5rem;
+    background: white;
+    border: 2px solid #f0e4e8;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: left;
+}
+
+.ob-card:hover {
+    border-color: #e91e63;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(233, 30, 99, 0.1);
+}
+
+.ob-card.selected {
+    border-color: #e91e63;
+    background: linear-gradient(135deg, #fff5f7 0%, #fce4ec 100%);
+    box-shadow: 0 8px 24px rgba(233, 30, 99, 0.15);
+}
+
+.ob-card-check {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 24px;
+    height: 24px;
+    background: #e91e63;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.ob-card-check svg {
+    width: 14px;
+    height: 14px;
+}
+
+.ob-card-icon {
+    width: 48px;
+    height: 48px;
+    color: #e91e63;
+    margin-bottom: 1rem;
+    transition: transform 0.3s ease;
+}
+
+.ob-card:hover .ob-card-icon {
+    transform: scale(1.1);
+}
+
+.ob-card-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.ob-card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 0.25rem;
+}
+
+.ob-card-subtitle {
+    font-size: 0.9rem;
+    color: #888;
+}
+
+/* Footer */
+.ob-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+    border-top: 1px solid #f0e4e8;
+}
+
+.ob-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.5rem;
+    background: none;
+    border: 2px solid #e8e0e4;
+    border-radius: 12px;
+    color: #666;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ob-back-btn:hover {
+    border-color: #e91e63;
+    color: #e91e63;
+}
+
+.ob-back-btn .ob-btn-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.ob-back-btn .ob-btn-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.ob-primary-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 2rem;
+    background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 16px rgba(233, 30, 99, 0.3);
+}
+
+.ob-primary-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(233, 30, 99, 0.4);
+}
+
+.ob-primary-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.ob-primary-btn .ob-btn-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.ob-primary-btn .ob-btn-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* ===================================
+   Personalize Step (Step 6)
+   =================================== */
+.ob-personalize {
+    width: 100%;
+    max-width: 850px;
+}
+
+.ob-personalize-content {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+/* Lesson Preview */
+.ob-lesson-preview {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    border: 2px solid #f0e4e8;
+    transition: all 0.3s ease;
+}
+
+.ob-lesson-preview.focus-mode {
+    border-color: #e91e63;
+    box-shadow: 0 0 0 4px rgba(233, 30, 99, 0.1);
+}
+
+.ob-lesson-preview.high-contrast {
+    background: #1a1a2e;
+    border-color: #333;
+}
+
+.ob-lesson-preview.high-contrast .ob-preview-title,
+.ob-lesson-preview.high-contrast .ob-preview-desc,
+.ob-lesson-preview.high-contrast .ob-lesson-name,
+.ob-lesson-preview.high-contrast .ob-lesson-meta,
+.ob-lesson-preview.high-contrast .ob-word-target,
+.ob-lesson-preview.high-contrast .ob-word-translation {
+    color: white;
+}
+
+.ob-preview-badge {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);
+    color: #c2185b;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.ob-preview-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 0.25rem;
+}
+
+.ob-preview-desc {
+    font-size: 0.85rem;
+    color: #888;
+    margin-bottom: 1rem;
+}
+
+.ob-preview-lesson {
+    background: linear-gradient(135deg, #fdf6f8 0%, #fff 100%);
+    border-radius: 16px;
+    padding: 1.25rem;
+    border: 1px solid #f0e4e8;
+}
+
+.ob-lesson-preview.high-contrast .ob-preview-lesson {
+    background: #2a2a4e;
+    border-color: #444;
+}
+
+.ob-lesson-header-card {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #f0e4e8;
+}
+
+.ob-lesson-preview.high-contrast .ob-lesson-header-card {
+    border-color: #444;
+}
+
+.ob-lesson-icon {
+    width: 36px;
+    height: 36px;
+    color: #e91e63;
+}
+
+.ob-lesson-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.ob-lesson-name {
+    display: block;
+    font-weight: 600;
+    color: #1a1a2e;
+    font-size: 0.95rem;
+}
+
+.ob-lesson-meta {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.ob-lesson-word {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.ob-word-target {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1a1a2e;
+    margin-bottom: 0.35rem;
+}
+
+.ob-word-translation {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.ob-listen-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.75rem;
+    background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.ob-listen-btn:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(233, 30, 99, 0.3);
+}
+
+.ob-listen-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.ob-listen-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Settings Panel */
+.ob-settings-panel {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    border: 2px solid #f0e4e8;
+}
+
+.ob-settings-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 0.25rem;
+}
+
+.ob-settings-desc {
+    font-size: 0.85rem;
+    color: #888;
+    margin-bottom: 1.25rem;
+}
+
+.ob-settings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.ob-setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f5f0f2;
+    gap: 1rem;
+}
+
+.ob-setting-row:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.ob-setting-row:first-child {
+    padding-top: 0;
+}
+
+.ob-setting-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.ob-setting-name {
+    font-weight: 600;
+    color: #1a1a2e;
+    font-size: 0.95rem;
+}
+
+.ob-setting-desc {
+    font-size: 0.8rem;
+    color: #888;
+}
+
+/* iOS-style Toggle */
+.ob-toggle {
+    position: relative;
+    width: 52px;
+    height: 28px;
+    background: #e0e0e0;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    padding: 0;
+}
+
+.ob-toggle.active {
+    background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%);
+}
+
+.ob-toggle-knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 24px;
+    height: 24px;
+    background: white;
+    border-radius: 50%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ob-toggle.active .ob-toggle-knob {
+    transform: translateX(24px);
+}
+
+/* ===================================
+   Responsive Design
+   =================================== */
+@media (max-width: 768px) {
+    .ob-container {
+        padding: 1.5rem;
+        border-radius: 20px;
+        min-height: auto;
+    }
+
+    .ob-header {
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .ob-progress {
+        order: 3;
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .ob-cards-grid {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+
+    .ob-card {
+        padding: 1.25rem;
+    }
+
+    .ob-card-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .ob-welcome-title {
+        font-size: 1.5rem;
+    }
+
+    .ob-step-title {
+        font-size: 1.35rem;
+    }
+
+    .ob-personalize-content {
+        grid-template-columns: 1fr;
+    }
+
+    .ob-footer {
+        flex-direction: column-reverse;
+        gap: 0.75rem;
+    }
+
+    .ob-back-btn,
+    .ob-primary-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .onboarding-page {
+        padding: 0.5rem;
+    }
+
+    .ob-container {
+        padding: 1rem;
+        border-radius: 16px;
+    }
+
+    .ob-welcome-icon {
+        font-size: 3rem;
+    }
+
+    .ob-feature {
+        padding: 0.75rem 1rem;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    .ob-welcome-icon {
+        animation: none;
+    }
+
+    .ob-card,
+    .ob-primary-btn,
+    .ob-toggle-knob {
+        transition: none;
+    }
+}
+
+.ob-lesson-preview.reduced-motion * {
+    animation: none !important;
+    transition: none !important;
+}
