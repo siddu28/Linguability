@@ -72,7 +72,7 @@ export default function Practice() {
                                             fontSize: '1.5rem',
                                             fontWeight: 'bold',
                                             color: 'white',
-                                            marginBottom: '12px'
+                                            margin: '0 auto 12px auto'
                                         }}
                                     >
                                         {lang.flag}

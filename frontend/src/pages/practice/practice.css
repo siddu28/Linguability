@@ -5,10 +5,8 @@
 /* Main Container - Full Screen with Gradient */
 .practice-page {
     min-height: calc(100vh - 80px);
-    /* Adjust based on Navbar height */
     padding: var(--spacing-2xl) var(--spacing-md);
     background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
-    /* Fallback */
     background: radial-gradient(circle at top left, rgba(233, 30, 140, 0.05), transparent 40%),
         radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.05), transparent 40%),
         var(--color-background);
@@ -32,7 +30,6 @@
     padding: var(--spacing-2xl);
     border-radius: var(--radius-xl);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-    /* Soft colored shadow */
     width: 100%;
     max-width: 600px;
     text-align: center;
@@ -143,6 +140,289 @@
     animation: shake 0.4s ease-in-out;
 }
 
+/* =============================================
+   Listening Practice Quiz Styles
+   ============================================= */
+
+/* Progress Bar */
+.listening-progress {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
+}
+
+.listening-progress .progress-bar {
+    flex: 1;
+    height: 8px;
+    background-color: var(--color-border);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.listening-progress .progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, var(--color-primary), #3B82F6);
+    border-radius: var(--radius-full);
+    transition: width 0.3s ease;
+}
+
+.listening-progress .progress-text {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-secondary);
+    white-space: nowrap;
+}
+
+/* Listening Card */
+.listening-card {
+    background: var(--color-white);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-2xl);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--color-border);
+}
+
+[data-theme="dark"] .listening-card {
+    background: var(--color-surface);
+}
+
+/* Audio Section */
+.audio-section {
+    text-align: center;
+    padding: var(--spacing-xl) 0;
+    border-bottom: 1px solid var(--color-border);
+    margin-bottom: var(--spacing-xl);
+}
+
+.audio-section .instruction {
+    font-size: var(--font-size-lg);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-lg);
+}
+
+.audio-play-btn {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-xl) var(--spacing-2xl);
+    background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+    color: white;
+    border: none;
+    border-radius: var(--radius-xl);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+}
+
+.audio-play-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.4);
+}
+
+.audio-play-btn:active {
+    transform: translateY(0);
+}
+
+.hint-text {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    margin-top: var(--spacing-md);
+}
+
+/* Options Section */
+.options-section {
+    animation: fadeInScale 0.3s ease-out;
+}
+
+.options-label {
+    font-size: var(--font-size-base);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-lg);
+    text-align: center;
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+}
+
+.option-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-lg);
+    background: var(--color-background);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.option-btn:hover:not(:disabled) {
+    border-color: var(--color-primary);
+    background: rgba(233, 30, 140, 0.05);
+}
+
+.option-btn.selected {
+    border-color: var(--color-primary);
+    background: rgba(233, 30, 140, 0.1);
+    color: var(--color-primary);
+}
+
+.option-btn.correct {
+    border-color: var(--color-success);
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--color-success);
+}
+
+.option-btn.incorrect {
+    border-color: var(--color-error);
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--color-error);
+}
+
+.option-btn:disabled {
+    cursor: not-allowed;
+}
+
+.option-btn .result-icon {
+    flex-shrink: 0;
+}
+
+/* Result Message */
+.result-message {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-lg);
+    border-radius: var(--radius-lg);
+    margin: var(--spacing-xl) 0;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    animation: popIn 0.3s ease-out;
+}
+
+.result-message.correct {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--color-success);
+    border: 1px solid var(--color-success);
+}
+
+.result-message.incorrect {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--color-error);
+    border: 1px solid var(--color-error);
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-xl);
+}
+
+.check-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Completion Card */
+.completion-card {
+    background: var(--color-white);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-3xl);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid var(--color-border);
+    text-align: center;
+    animation: fadeInScale 0.5s ease-out;
+}
+
+[data-theme="dark"] .completion-card {
+    background: var(--color-surface);
+}
+
+.completion-icon {
+    font-size: 4rem;
+    margin-bottom: var(--spacing-lg);
+}
+
+.completion-card h2 {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-xl);
+}
+
+.final-score {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    margin-bottom: var(--spacing-lg);
+}
+
+.score-number {
+    font-size: 4rem;
+    font-weight: var(--font-weight-bold);
+    background: linear-gradient(135deg, var(--color-primary), #3B82F6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.score-divider {
+    font-size: 2rem;
+    color: var(--color-text-muted);
+}
+
+.score-total {
+    font-size: 2rem;
+    color: var(--color-text-secondary);
+}
+
+.score-message {
+    font-size: var(--font-size-lg);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-xl);
+}
+
+.completion-actions {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-md);
+}
+
+/* Back Button Override */
+.back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-secondary);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.back-btn:hover {
+    background-color: var(--color-white);
+    color: var(--color-primary);
+}
+
 /* Animations */
 @keyframes fadeInScale {
     from {
@@ -184,7 +464,7 @@
     }
 }
 
-/* Responsive Adjustments */
+/* Responsive */
 @media (max-width: 640px) {
     .practice-card {
         padding: var(--spacing-lg);
@@ -198,5 +478,13 @@
     .practice-card button {
         width: 100%;
         margin: var(--spacing-xs) 0;
+    }
+
+    .options-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .completion-actions {
+        flex-direction: column;
     }
 }
