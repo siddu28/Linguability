@@ -50,5 +50,25 @@ router.post('/check-pronunciation', (req, res) => {
     });
 });
 
+// GET all languages for practice (like lessons)
+router.get('/languages', (req, res) => {
+    const langs = Object.keys(practiceData).map(id => ({
+        id,
+        name: id.charAt(0).toUpperCase() + id.slice(1)
+    }))
+    res.json(langs)
+})
+
+// GET practice by language + type
+router.get('/:languageId/:type', (req, res) => {
+    const { languageId, type } = req.params
+
+    const lang = practiceData[languageId]
+    if (!lang) return res.status(404).json({ error: "Language not found" })
+
+    if (!lang[type]) return res.status(404).json({ error: "Practice type not found" })
+
+    res.json(lang[type])
+})
 
 module.exports = router;

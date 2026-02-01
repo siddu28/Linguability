@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import "./practice.css";
 
@@ -7,24 +8,51 @@ function PronunciationPractice() {
     const [index, setIndex] = useState(0);
     const [spoken, setSpoken] = useState("");
     const [result, setResult] = useState(null);
+    const [searchParams] = useSearchParams();
+    const lang = searchParams.get("lang") || "english";
 
     useEffect(() => {
-        fetch("http://localhost:3001/api/practice")
+        fetch(`http://localhost:3001/api/practice/${lang}/pronunciation`)
             .then(res => res.json())
-            .then(data => setWords(data.english.pronunciation));
-    }, []);
+            .then(data => {
+                if (Array.isArray(data)) {
+                    setWords(data);
+                } else {
+                    console.error("Invalid data format received");
+                    setWords([]);
+                }
+            })
+            .catch(err => console.error("Error fetching practice data:", err));
+    }, [lang]);
 
     const startRecognition = () => {
         const SpeechRecognition =
             window.SpeechRecognition || window.webkitSpeechRecognition;
 
+        if (!SpeechRecognition) {
+            alert("Speech recognition is not supported in this browser.");
+            return;
+        }
+
         const recognition = new SpeechRecognition();
-        recognition.lang = "en-US";
+
+        // Map language IDs to BCP 47 language tags for recognition
+        const langMap = {
+            'english': 'en-US',
+            'hindi': 'hi-IN',
+            'tamil': 'ta-IN',
+            'telugu': 'te-IN'
+        };
+        recognition.lang = langMap[lang] || "en-US";
 
         recognition.onresult = (event) => {
             const text = event.results[0][0].transcript;
             setSpoken(text);
             checkPronunciation(text);
+        };
+
+        recognition.onerror = (event) => {
+            console.error("Speech recognition error", event.error);
         };
 
         recognition.start();
@@ -33,14 +61,18 @@ function PronunciationPractice() {
     const checkPronunciation = async (spokenText) => {
         const current = words[index];
 
-        const res = await fetch("http://localhost:3001/api/practice/check-pronunciation", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ expected: current.text, spoken: spokenText }),
-        });
+        try {
+            const res = await fetch("http://localhost:3001/api/practice/check-pronunciation", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ expected: current.text, spoken: spokenText }),
+            });
 
-        const data = await res.json();
-        setResult(data.isMatch);
+            const data = await res.json();
+            setResult(data.isMatch);
+        } catch (error) {
+            console.error("Error checking pronunciation:", error);
+        }
     };
 
     const next = () => {
@@ -49,14 +81,21 @@ function PronunciationPractice() {
         setResult(null);
     };
 
-    if (!words.length) return <p>Loading...</p>;
+    if (!words.length) return (
+        <>
+            <Navbar />
+            <div className="practice-page">
+                <p>Loading {lang} pronunciation...</p>
+            </div>
+        </>
+    );
 
     return (
         <>
             <Navbar />
             <div className="practice-page">
                 <div className="practice-card">
-                    <h2>🎤 Pronunciation Practice</h2>
+                    <h2>🎤 Pronunciation Practice ({lang})</h2>
                     <h3>Say: {words[index].text}</h3>
 
                     <button onClick={startRecognition} className="record-btn">
@@ -70,12 +109,11 @@ function PronunciationPractice() {
                         </p>
                     )}
 
-                    <button onClick={next}>Next ➡</button>
+                    <button className="next-btn" onClick={next}>Next ➡</button>
                 </div>
             </div>
         </>
     );
 }
-
 
 export default PronunciationPractice;
