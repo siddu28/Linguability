@@ -12,7 +12,7 @@ import {
     Lock
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { getAssessmentStats, getAssessmentResults } from '../lib/database'
+import { getAssessmentStats, getAssessmentResults, getAllQuizProgress } from '../lib/database'
 import { getAllQuizzes, isQuizUnlocked, quizzes } from '../data/quizData'
 import {
     getAllPronunciationTests,
@@ -35,20 +35,23 @@ function Assessments() {
         completedQuizIds: []
     })
     const [completedResults, setCompletedResults] = useState([])
+    const [savedProgress, setSavedProgress] = useState([])
 
-    // Load stats and results from database
+    // Load stats, results, and saved progress from database
     useEffect(() => {
         async function loadData() {
             if (!user?.id) return
 
             setLoading(false)
             try {
-                const [statsData, resultsData] = await Promise.all([
+                const [statsData, resultsData, progressData] = await Promise.all([
                     getAssessmentStats(user.id),
-                    getAssessmentResults(user.id)
+                    getAssessmentResults(user.id),
+                    getAllQuizProgress(user.id)
                 ])
                 setStats(statsData)
                 setCompletedResults(resultsData)
+                setSavedProgress(progressData || [])
             } catch (error) {
                 console.error('Error loading assessment data:', error)
             } finally {
@@ -111,8 +114,25 @@ function Assessments() {
     // Combine all assessments
     const allAssessments = [...categorizedQuizzes, ...categorizedPronunciation]
 
-    // Available = Unlocked AND Not Completed
-    const availableAssessments = allAssessments.filter(q => q.isUnlocked && !q.isCompleted)
+    // Get IDs of quizzes with saved progress
+    const savedQuizIds = savedProgress.map(p => p.quiz_id)
+
+    // Resume = Has saved progress (in-progress quizzes)
+    const resumeAssessments = allAssessments
+        .filter(q => savedQuizIds.includes(q.id))
+        .map(q => {
+            const progress = savedProgress.find(p => p.quiz_id === q.id)
+            return {
+                ...q,
+                savedProgress: progress,
+                progressPercent: progress ? Math.round((progress.current_index / q.questions) * 100) : 0
+            }
+        })
+
+    // Available = Unlocked AND Not Completed AND Not in Resume
+    const availableAssessments = allAssessments.filter(q =>
+        q.isUnlocked && !q.isCompleted && !savedQuizIds.includes(q.id)
+    )
 
     // Completed = Already done
     const completedAssessments = allAssessments.filter(q => q.isCompleted)
@@ -120,7 +140,14 @@ function Assessments() {
     // Locked = Has prerequisite that's not completed
     const lockedAssessments = allAssessments.filter(q => !q.isUnlocked)
 
-    const currentList = activeTab === 'available' ? availableAssessments : completedAssessments
+    const getCurrentList = () => {
+        switch (activeTab) {
+            case 'resume': return resumeAssessments
+            case 'completed': return completedAssessments
+            default: return availableAssessments
+        }
+    }
+    const currentList = getCurrentList()
 
     // Stats cards data
     const statsCards = [
@@ -215,6 +242,15 @@ function Assessments() {
                     >
                         Available ({availableAssessments.length})
                     </button>
+                    {resumeAssessments.length > 0 && (
+                        <button
+                            className={`filter-tab resume-tab ${activeTab === 'resume' ? 'active' : ''}`}
+                            onClick={() => setActiveTab('resume')}
+                        >
+                            <Play size={14} />
+                            Resume ({resumeAssessments.length})
+                        </button>
+                    )}
                     <button
                         className={`filter-tab ${activeTab === 'completed' ? 'active' : ''}`}
                         onClick={() => setActiveTab('completed')}
