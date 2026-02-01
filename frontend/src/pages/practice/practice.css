@@ -1,0 +1,202 @@
+/* =============================================
+   Practice Module Styles
+   ============================================= */
+
+/* Main Container - Full Screen with Gradient */
+.practice-page {
+    min-height: calc(100vh - 80px);
+    /* Adjust based on Navbar height */
+    padding: var(--spacing-2xl) var(--spacing-md);
+    background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+    /* Fallback */
+    background: radial-gradient(circle at top left, rgba(233, 30, 140, 0.05), transparent 40%),
+        radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.05), transparent 40%),
+        var(--color-background);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+[data-theme="dark"] .practice-page {
+    background: radial-gradient(circle at top left, rgba(233, 30, 140, 0.1), transparent 40%),
+        radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.1), transparent 40%),
+        var(--color-background);
+}
+
+/* Glassmorphism Card */
+.practice-card {
+    background: rgba(255, 255, 255, 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    padding: var(--spacing-2xl);
+    border-radius: var(--radius-xl);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    /* Soft colored shadow */
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+    transition: transform var(--transition-base), box-shadow var(--transition-base);
+    animation: fadeInScale 0.5s ease-out;
+}
+
+[data-theme="dark"] .practice-card {
+    background: rgba(30, 30, 30, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.practice-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* Typography */
+.practice-card h2 {
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
+    background: linear-gradient(135deg, var(--color-primary), #3B82F6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: var(--spacing-lg);
+    letter-spacing: -0.02em;
+}
+
+.practice-card h3 {
+    font-size: var(--font-size-2xl);
+    color: var(--color-text-primary);
+    margin: var(--spacing-xl) 0 var(--spacing-lg);
+    font-weight: var(--font-weight-medium);
+}
+
+.practice-card p {
+    font-size: var(--font-size-lg);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-md);
+    line-height: 1.6;
+}
+
+.practice-card b {
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-semibold);
+}
+
+/* Interactive Elements */
+.practice-card button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-xl);
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: all var(--transition-base);
+    border: none;
+    margin: 0 var(--spacing-sm);
+}
+
+/* Primary Action Button (Next) */
+.practice-card button:last-child {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    color: white;
+    box-shadow: 0 4px 12px rgba(233, 30, 140, 0.3);
+}
+
+.practice-card button:last-child:hover {
+    box-shadow: 0 6px 16px rgba(233, 30, 140, 0.4);
+    transform: translateY(-2px);
+}
+
+.practice-card button:last-child:active {
+    transform: translateY(0);
+}
+
+/* Secondary Action Buttons (Play, Show Meaning) */
+.practice-card button:not(:last-child) {
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+}
+
+.practice-card button:not(:last-child):hover {
+    background-color: var(--color-border);
+    transform: translateY(-2px);
+}
+
+/* Feedback States */
+.correct {
+    color: var(--color-success);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-lg);
+    margin: var(--spacing-md) 0;
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.wrong {
+    color: var(--color-error);
+    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-lg);
+    margin: var(--spacing-md) 0;
+    animation: shake 0.4s ease-in-out;
+}
+
+/* Animations */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes popIn {
+    from {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-5px);
+    }
+
+    75% {
+        transform: translateX(5px);
+    }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 640px) {
+    .practice-card {
+        padding: var(--spacing-lg);
+        width: 100%;
+    }
+
+    .practice-card h2 {
+        font-size: var(--font-size-2xl);
+    }
+
+    .practice-card button {
+        width: 100%;
+        margin: var(--spacing-xs) 0;
+    }
+}

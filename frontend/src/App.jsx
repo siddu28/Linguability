@@ -12,6 +12,9 @@ import StudyRooms from './pages/StudyRooms'
 import StudyRoom from './pages/StudyRoom'
 import { AuthProvider } from './context/AuthContext'
 import ProtectedRoute from './components/ProtectedRoute'
+import VocabularyPractice from "./pages/practice/VocabularyPractice";
+import ListeningPractice from "./pages/practice/ListeningPractice";
+import PronunciationPractice from "./pages/practice/PronunciationPractice";
 
 function App() {
     return (
@@ -62,6 +65,34 @@ function App() {
                             </ProtectedRoute>
                         }
                     />
+
+                    <Route
+                        path="/practice/vocabulary"
+                        element={
+                            <ProtectedRoute>
+                                <VocabularyPractice />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/practice/listening"
+                        element={
+                            <ProtectedRoute>
+                                <ListeningPractice />
+                            </ProtectedRoute>
+                        }
+                    />
+
+                    <Route
+                        path="/practice/pronunciation"
+                        element={
+                            <ProtectedRoute>
+                                <PronunciationPractice />
+                            </ProtectedRoute>
+                        }
+                    />
+
                     <Route
                         path="/profile"
                         element={

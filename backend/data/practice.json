@@ -1,0 +1,80 @@
+{
+    "english": {
+        "pronunciation": [
+            {
+                "id": 1,
+                "text": "Hello"
+            },
+            {
+                "id": 2,
+                "text": "Good morning"
+            },
+            {
+                "id": 3,
+                "text": "How are you"
+            },
+            {
+                "id": 4,
+                "text": "Thank you"
+            },
+            {
+                "id": 5,
+                "text": "See you later"
+            }
+        ],
+        "listening": [
+            {
+                "id": 1,
+                "text": "Welcome to the lesson"
+            },
+            {
+                "id": 2,
+                "text": "Please repeat after me"
+            },
+            {
+                "id": 3,
+                "text": "Practice makes perfect"
+            },
+            {
+                "id": 4,
+                "text": "You are doing great"
+            },
+            {
+                "id": 5,
+                "text": "Let us begin the exercise"
+            }
+        ],
+        "vocabulary": [
+            {
+                "id": 1,
+                "word": "Apple",
+                "meaning": "A sweet fruit",
+                "example": "I ate an apple."
+            },
+            {
+                "id": 2,
+                "word": "Book",
+                "meaning": "Something you read",
+                "example": "This book is interesting."
+            },
+            {
+                "id": 3,
+                "word": "Teacher",
+                "meaning": "A person who teaches",
+                "example": "My teacher is kind."
+            },
+            {
+                "id": 4,
+                "word": "Happy",
+                "meaning": "Feeling joy",
+                "example": "She is happy today."
+            },
+            {
+                "id": 5,
+                "word": "Run",
+                "meaning": "To move fast",
+                "example": "I run every morning."
+            }
+        ]
+    }
+}
