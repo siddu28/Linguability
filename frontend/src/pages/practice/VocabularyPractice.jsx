@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
+import Button from "../../components/Button";
+import { ArrowLeft, ChevronRight, Eye } from "lucide-react";
 import "./practice.css";
 
 function VocabularyPractice() {
@@ -8,7 +10,16 @@ function VocabularyPractice() {
     const [index, setIndex] = useState(0);
     const [showAnswer, setShowAnswer] = useState(false);
     const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
     const lang = searchParams.get("lang") || "english";
+
+    // Language display names
+    const langNames = {
+        'english': 'English',
+        'hindi': 'Hindi',
+        'tamil': 'Tamil',
+        'telugu': 'Telugu'
+    };
 
     useEffect(() => {
         fetch(`http://localhost:3001/api/practice/${lang}/vocabulary`)
@@ -30,37 +41,89 @@ function VocabularyPractice() {
     };
 
     if (!words.length) return (
-        <>
+        <div className="practice-layout">
             <Navbar />
             <div className="practice-page">
-                <p>Loading {lang} vocabulary...</p>
+                <p>Loading {langNames[lang]} vocabulary...</p>
             </div>
-        </>
+        </div>
     );
 
     const current = words[index];
 
     return (
-        <>
+        <div className="practice-layout">
             <Navbar />
+
             <div className="practice-page">
+                {/* Top Progress Bar */}
+                <div className="practice-top-progress">
+                    <span>Word {index + 1} of {words.length}</span>
+                    <div className="top-progress-bar">
+                        <div
+                            className="top-progress-fill"
+                            style={{
+                                width: `${((index + 1) / words.length) * 100}%`,
+                                backgroundColor: '#10b981'
+                            }}
+                        />
+                    </div>
+                    <span>{Math.round(((index + 1) / words.length) * 100)}% complete</span>
+                </div>
+
                 <div className="practice-card">
-                    <h2>📚 Vocabulary Practice ({lang})</h2>
-                    <h3>{current.word}</h3>
+                    <div className="practice-header-nav">
+                        <button className="back-btn" onClick={() => navigate(`/practice?lang=${lang}`)}>
+                            <ArrowLeft size={16} /> Back to Practice
+                        </button>
+                    </div>
 
-                    {showAnswer ? (
-                        <>
-                            <p><b>Meaning:</b> {current.meaning}</p>
-                            <p><b>Example:</b> {current.example}</p>
-                        </>
-                    ) : (
-                        <button onClick={() => setShowAnswer(true)}>Show Meaning</button>
-                    )}
+                    <div className="word-display">
+                        <h2>{current.word}</h2>
+                    </div>
 
-                    <button className="next-btn" onClick={nextWord}>Next ➡</button>
+                    <div className="vocabulary-content" style={{ minHeight: '200px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        {showAnswer ? (
+                            <div className="answer-section" style={{ width: '100%', textAlign: 'center', animation: 'premiumFadeIn 0.5s ease' }}>
+                                <div style={{ padding: '2rem', borderRadius: '16px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                                    <div style={{ marginBottom: '1.5rem' }}>
+                                        <h4 style={{ color: 'var(--color-primary)', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Meaning</h4>
+                                        <p style={{ fontSize: '1.5rem', fontWeight: '600', color: '#1e293b' }}>{current.meaning}</p>
+                                    </div>
+                                    <div>
+                                        <h4 style={{ color: '#64748b', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Example</h4>
+                                        <p style={{ fontSize: '1.125rem', fontStyle: 'italic', color: '#475569' }}>"{current.example}"</p>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div style={{ textAlign: 'center' }}>
+                                <div className="minimalist-btn-group">
+                                    <button
+                                        className="listen-btn"
+                                        onClick={() => setShowAnswer(true)}
+                                        style={{ width: '90px', height: '90px' }}
+                                    >
+                                        <Eye size={36} />
+                                    </button>
+                                    <span className="minimalist-btn-label">Show Meaning</span>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="action-buttons" style={{ marginTop: '3rem' }}>
+                        <Button
+                            variant="primary"
+                            onClick={nextWord}
+                            style={{ minWidth: '200px' }}
+                        >
+                            Next Word <ChevronRight size={18} />
+                        </Button>
+                    </div>
                 </div>
             </div>
-        </>
+        </div>
     );
 }
 

@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
 import Button from "../../components/Button";
-import Card from "../../components/Card";
 import { Volume2, ChevronRight, CheckCircle, XCircle, ArrowLeft } from "lucide-react";
 import "./practice.css";
 
@@ -17,7 +16,6 @@ function ListeningPractice() {
     const navigate = useNavigate();
     const lang = searchParams.get("lang") || "english";
 
-    // Language display names
     const langNames = {
         'english': 'English',
         'hindi': 'Hindi',
@@ -25,7 +23,6 @@ function ListeningPractice() {
         'telugu': 'Telugu'
     };
 
-    // Map language IDs to BCP 47 language tags
     const langMap = {
         'english': 'en-US',
         'hindi': 'hi-IN',
@@ -38,7 +35,6 @@ function ListeningPractice() {
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) {
-                    // Shuffle options for each item
                     const shuffledData = data.map(item => ({
                         ...item,
                         shuffledOptions: shuffleArray([...item.options])
@@ -52,7 +48,6 @@ function ListeningPractice() {
             .catch(err => console.error("Error fetching practice data:", err));
     }, [lang]);
 
-    // Shuffle array helper
     const shuffleArray = (array) => {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -64,14 +59,14 @@ function ListeningPractice() {
     const speak = (text) => {
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = langMap[lang] || 'en-US';
-        utterance.rate = 0.8; // Slightly slower for clarity
+        utterance.rate = 0.8;
         speechSynthesis.cancel();
         speechSynthesis.speak(utterance);
         setHasPlayed(true);
     };
 
     const handleOptionSelect = (option) => {
-        if (showResult) return; // Prevent changing after result shown
+        if (showResult) return;
         setSelectedOption(option);
     };
 
@@ -98,7 +93,6 @@ function ListeningPractice() {
         setShowResult(false);
         setScore(0);
         setHasPlayed(false);
-        // Re-shuffle options
         setList(prev => prev.map(item => ({
             ...item,
             shuffledOptions: shuffleArray([...item.options])
@@ -106,64 +100,69 @@ function ListeningPractice() {
     };
 
     if (!list.length) return (
-        <div className="lessons-page">
+        <div className="practice-layout">
             <Navbar />
-            <main className="lessons-content">
+            <div className="practice-page">
                 <p>Loading {langNames[lang]} listening practice...</p>
-            </main>
+            </div>
         </div>
     );
 
     const current = list[index];
-    const isCorrect = selectedOption === current.text;
     const isLastQuestion = index === list.length - 1;
     const isComplete = isLastQuestion && showResult;
 
     return (
-        <div className="lessons-page">
+        <div className="practice-layout">
             <Navbar />
 
-            <main className="lessons-content">
-                <div className="lessons-header">
-                    <button className="back-btn" onClick={() => navigate(`/practice?lang=${lang}`)}>
-                        <ArrowLeft size={16} /> Back to Practice
-                    </button>
-                    <h1 className="lessons-title">🎧 Listening Practice</h1>
-                    <p className="lessons-subtitle">{langNames[lang]} • Question {index + 1} of {list.length}</p>
-                </div>
-
-                {/* Progress Bar */}
-                <div className="listening-progress">
-                    <div className="progress-bar">
+            <div className="practice-page">
+                {/* Top Progress Bar */}
+                <div className="practice-top-progress">
+                    <span>Question {index + 1} of {list.length}</span>
+                    <div className="top-progress-bar">
                         <div
-                            className="progress-fill"
-                            style={{ width: `${((index + (showResult ? 1 : 0)) / list.length) * 100}%` }}
+                            className="top-progress-fill"
+                            style={{
+                                width: `${((index + (showResult ? 1 : 0)) / list.length) * 100}%`,
+                                backgroundColor: '#10b981'
+                            }}
                         />
                     </div>
-                    <span className="progress-text">Score: {score}/{showResult ? index + 1 : index}</span>
+                    <span>Score: {score}/{list.length}</span>
                 </div>
 
-                {!isComplete ? (
-                    <div className="listening-card">
-                        {/* Audio Section */}
-                        <div className="audio-section">
-                            <p className="instruction">Listen carefully and select what you hear</p>
-                            <button
-                                onClick={() => speak(current.text)}
-                                className="audio-play-btn"
-                            >
-                                <Volume2 size={32} />
-                                <span>Play Audio</span>
-                            </button>
-                            {!hasPlayed && (
-                                <p className="hint-text">Click to play the audio first</p>
-                            )}
-                        </div>
+                <div className="practice-card">
+                    <div className="practice-header-nav">
+                        <button className="back-btn" onClick={() => navigate(`/practice?lang=${lang}`)}>
+                            <ArrowLeft size={16} /> Back to Practice
+                        </button>
+                    </div>
 
-                        {/* Options Section */}
-                        {hasPlayed && (
-                            <div className="options-section">
-                                <p className="options-label">Select what you heard:</p>
+                    {!isComplete ? (
+                        <div className="listening-standard-content">
+                            <div className="audio-section">
+                                <p style={{ color: '#64748b', marginBottom: '1.5rem', textAlign: 'center' }}>
+                                    Listen carefully and select what you hear
+                                </p>
+                                <div className="minimalist-btn-group">
+                                    <button
+                                        onClick={() => speak(current.text)}
+                                        className="listen-btn"
+                                        style={{ width: '100px', height: '100px' }}
+                                    >
+                                        <Volume2 size={40} strokeWidth={2.5} />
+                                    </button>
+                                    <span className="minimalist-btn-label">Listen</span>
+                                </div>
+                                {!hasPlayed && (
+                                    <p style={{ marginTop: '1rem', color: '#94a3b8', fontSize: '0.875rem' }}>
+                                        Click the button to play audio
+                                    </p>
+                                )}
+                            </div>
+
+                            {hasPlayed && (
                                 <div className="options-grid">
                                     {current.shuffledOptions.map((option, i) => (
                                         <button
@@ -181,84 +180,63 @@ function ListeningPractice() {
                                         >
                                             {option}
                                             {showResult && option === current.text && (
-                                                <CheckCircle size={20} className="result-icon" />
+                                                <CheckCircle size={20} style={{ position: 'absolute', right: '15px' }} />
                                             )}
                                             {showResult && selectedOption === option && option !== current.text && (
-                                                <XCircle size={20} className="result-icon" />
+                                                <XCircle size={20} style={{ position: 'absolute', right: '15px' }} />
                                             )}
                                         </button>
                                     ))}
                                 </div>
-                            </div>
-                        )}
+                            )}
 
-                        {/* Result Message */}
-                        {showResult && (
-                            <div className={`result-message ${isCorrect ? 'correct' : 'incorrect'}`}>
-                                {isCorrect ? (
-                                    <>
-                                        <CheckCircle size={24} />
-                                        <span>Correct! Well done! 🎉</span>
-                                    </>
+                            <div className="action-buttons">
+                                {!showResult ? (
+                                    <Button
+                                        variant="primary"
+                                        onClick={checkAnswer}
+                                        disabled={!selectedOption}
+                                        style={{ minWidth: '220px' }}
+                                    >
+                                        Check Answer
+                                    </Button>
                                 ) : (
-                                    <>
-                                        <XCircle size={24} />
-                                        <span>Not quite. The answer was: <strong>{current.text}</strong></span>
-                                    </>
+                                    <Button
+                                        variant="primary"
+                                        onClick={next}
+                                        style={{ minWidth: '220px' }}
+                                    >
+                                        {isLastQuestion ? 'See Results' : 'Next Question'} <ChevronRight size={18} />
+                                    </Button>
                                 )}
                             </div>
-                        )}
-
-                        {/* Action Buttons */}
-                        <div className="action-buttons">
-                            {!showResult ? (
-                                <Button
-                                    variant="primary"
-                                    onClick={checkAnswer}
-                                    disabled={!selectedOption}
-                                    className="check-btn"
-                                >
-                                    Check Answer
+                        </div>
+                    ) : (
+                        <div className="completion-card" style={{ textAlign: 'center', width: '100%' }}>
+                            <div style={{ fontSize: '4rem', marginBottom: '1.5rem' }}>🎉</div>
+                            <h2 style={{ fontSize: '2rem', marginBottom: '1rem' }}>Practice Complete!</h2>
+                            <div style={{ fontSize: '3rem', fontWeight: '700', color: '#10b981', marginBottom: '1.5rem' }}>
+                                {score} / {list.length}
+                            </div>
+                            <p style={{ color: '#64748b', marginBottom: '2.5rem', fontSize: '1.125rem' }}>
+                                {score === list.length
+                                    ? "Perfect! You got all answers correct!"
+                                    : score >= list.length / 2
+                                        ? "Good job! Keep practicing to improve."
+                                        : "Keep practicing! You'll get better with time."}
+                            </p>
+                            <div className="action-buttons">
+                                <Button variant="primary" onClick={restart}>
+                                    Practice Again
                                 </Button>
-                            ) : (
-                                <Button
-                                    variant="primary"
-                                    onClick={next}
-                                    className="next-btn"
-                                >
-                                    {isLastQuestion ? 'See Results' : 'Next Question'} <ChevronRight size={18} />
+                                <Button variant="secondary" onClick={() => navigate(`/practice`)}>
+                                    Back to Practice
                                 </Button>
-                            )}
+                            </div>
                         </div>
-                    </div>
-                ) : (
-                    /* Completion Screen */
-                    <div className="completion-card">
-                        <div className="completion-icon">🎉</div>
-                        <h2>Practice Complete!</h2>
-                        <div className="final-score">
-                            <span className="score-number">{score}</span>
-                            <span className="score-divider">/</span>
-                            <span className="score-total">{list.length}</span>
-                        </div>
-                        <p className="score-message">
-                            {score === list.length
-                                ? "Perfect! You got all answers correct!"
-                                : score >= list.length / 2
-                                    ? "Good job! Keep practicing to improve."
-                                    : "Keep practicing! You'll get better with time."}
-                        </p>
-                        <div className="completion-actions">
-                            <Button variant="primary" onClick={restart}>
-                                Practice Again
-                            </Button>
-                            <Button variant="secondary" onClick={() => navigate(`/practice`)}>
-                                Back to Practice
-                            </Button>
-                        </div>
-                    </div>
-                )}
-            </main>
+                    )}
+                </div>
+            </div>
         </div>
     );
 }

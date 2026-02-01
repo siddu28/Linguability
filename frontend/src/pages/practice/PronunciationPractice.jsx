@@ -1,15 +1,27 @@
 import { useEffect, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar";
+import Button from "../../components/Button";
+import { ArrowLeft, Mic, Volume2, ChevronRight, RefreshCw } from "lucide-react";
 import "./practice.css";
 
 function PronunciationPractice() {
     const [words, setWords] = useState([]);
     const [index, setIndex] = useState(0);
     const [spoken, setSpoken] = useState("");
-    const [result, setResult] = useState(null);
+    const [result, setResult] = useState(null); // { isMatch, score, expected, spoken }
+    const [isRecording, setIsRecording] = useState(false);
     const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
     const lang = searchParams.get("lang") || "english";
+
+    // Language display names
+    const langNames = {
+        'english': 'English',
+        'hindi': 'Hindi',
+        'tamil': 'Tamil',
+        'telugu': 'Telugu'
+    };
 
     useEffect(() => {
         fetch(`http://localhost:3001/api/practice/${lang}/pronunciation`)
@@ -25,6 +37,19 @@ function PronunciationPractice() {
             .catch(err => console.error("Error fetching practice data:", err));
     }, [lang]);
 
+    const speak = (text) => {
+        const utterance = new SpeechSynthesisUtterance(text);
+        const langMap = {
+            'english': 'en-US',
+            'hindi': 'hi-IN',
+            'tamil': 'ta-IN',
+            'telugu': 'te-IN'
+        };
+        utterance.lang = langMap[lang] || 'en-US';
+        speechSynthesis.cancel();
+        speechSynthesis.speak(utterance);
+    };
+
     const startRecognition = () => {
         const SpeechRecognition =
             window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -35,8 +60,6 @@ function PronunciationPractice() {
         }
 
         const recognition = new SpeechRecognition();
-
-        // Map language IDs to BCP 47 language tags for recognition
         const langMap = {
             'english': 'en-US',
             'hindi': 'hi-IN',
@@ -44,15 +67,29 @@ function PronunciationPractice() {
             'telugu': 'te-IN'
         };
         recognition.lang = langMap[lang] || "en-US";
+        recognition.continuous = false;
+        recognition.interimResults = false;
+
+        recognition.onstart = () => {
+            setIsRecording(true);
+            setResult(null);
+            setSpoken("");
+        };
 
         recognition.onresult = (event) => {
             const text = event.results[0][0].transcript;
             setSpoken(text);
             checkPronunciation(text);
+            setIsRecording(false);
         };
 
         recognition.onerror = (event) => {
             console.error("Speech recognition error", event.error);
+            setIsRecording(false);
+        };
+
+        recognition.onend = () => {
+            setIsRecording(false);
         };
 
         recognition.start();
@@ -69,7 +106,7 @@ function PronunciationPractice() {
             });
 
             const data = await res.json();
-            setResult(data.isMatch);
+            setResult(data);
         } catch (error) {
             console.error("Error checking pronunciation:", error);
         }
@@ -82,37 +119,126 @@ function PronunciationPractice() {
     };
 
     if (!words.length) return (
-        <>
+        <div className="practice-layout">
             <Navbar />
             <div className="practice-page">
-                <p>Loading {lang} pronunciation...</p>
+                <p>Loading {langNames[lang]} pronunciation...</p>
             </div>
-        </>
+        </div>
     );
 
+    const current = words[index];
+
+    const getScoreColor = (score) => {
+        if (score >= 80) return "var(--color-success)";
+        if (score >= 50) return "#F59E0B";
+        return "var(--color-error)";
+    };
+
     return (
-        <>
+        <div className="practice-layout">
             <Navbar />
+
             <div className="practice-page">
+                {/* Top Progress Bar */}
+                <div className="practice-top-progress">
+                    <span>Item {index + 1} of {words.length}</span>
+                    <div className="top-progress-bar">
+                        <div
+                            className="top-progress-fill"
+                            style={{ width: `${((index + 1) / words.length) * 100}%` }}
+                        />
+                    </div>
+                    <span>{Math.round(((index + 1) / words.length) * 100)}% complete</span>
+                </div>
+
                 <div className="practice-card">
-                    <h2>🎤 Pronunciation Practice ({lang})</h2>
-                    <h3>Say: {words[index].text}</h3>
+                    <div className="practice-header-nav">
+                        <button className="back-btn" onClick={() => navigate(`/practice?lang=${lang}`)}>
+                            <ArrowLeft size={16} /> Back to Practice
+                        </button>
+                    </div>
 
-                    <button onClick={startRecognition} className="record-btn">
-                        🎤 Speak
-                    </button>
+                    <div className="word-display">
+                        <h2>{current.text}</h2>
 
-                    {spoken && <p>You said: {spoken}</p>}
-                    {result !== null && (
-                        <p className={result ? "correct" : "wrong"}>
-                            {result ? "Correct ✅" : "Try Again ❌"}
+                        <div className="minimalist-btn-group">
+                            <button
+                                className="listen-btn"
+                                onClick={() => speak(current.text)}
+                                title="Listen to pronunciation"
+                            >
+                                <Volume2 size={28} />
+                            </button>
+                            <span className="minimalist-btn-label">Listen</span>
+                        </div>
+                    </div>
+
+                    <div className="record-btn-container">
+                        <div className="minimalist-btn-group">
+                            <button
+                                onClick={startRecognition}
+                                className={`record-btn-circular ${isRecording ? 'recording' : ''}`}
+                                disabled={isRecording}
+                            >
+                                <Mic size={32} />
+                            </button>
+                            <span className="minimalist-btn-label">Speak</span>
+                        </div>
+                        <p style={{ marginTop: '1rem', color: '#94a3b8', fontSize: '0.875rem' }}>
+                            {isRecording ? 'Listening...' : 'Tap the microphone to practice'}
                         </p>
+                    </div>
+
+                    {spoken && (
+                        <div className="result-section">
+                            <p className="spoken-text" style={{ marginBottom: '1rem', color: '#64748b' }}>
+                                You said: <span style={{ color: '#0f172a', fontWeight: '600' }}>"{spoken}"</span>
+                            </p>
+
+                            {result && (
+                                <div className="score-display-minimal">
+                                    <span className="score-value-text" style={{ color: getScoreColor(result.score) }}>
+                                        {result.score}%
+                                    </span>
+                                    <div className="score-message">
+                                        <h4 style={{ color: getScoreColor(result.score), margin: '0 0 5px 0' }}>
+                                            {result.score >= 80 ? "Excellent!" : result.score >= 50 ? "Good Try!" : "Keep Practicing"}
+                                        </h4>
+                                        <p style={{ margin: 0, fontSize: '0.875rem' }}>
+                                            {result.isMatch ? "Great pronunciation!" : "Try to match the pronunciation exactly."}
+                                        </p>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     )}
 
-                    <button className="next-btn" onClick={next}>Next ➡</button>
+                    <div className="action-buttons">
+                        {result && (
+                            <Button
+                                variant="secondary"
+                                onClick={() => {
+                                    setSpoken("");
+                                    setResult(null);
+                                    startRecognition();
+                                }}
+                                className="retry-btn"
+                            >
+                                <RefreshCw size={18} /> Retry
+                            </Button>
+                        )}
+                        <Button
+                            variant="primary"
+                            onClick={next}
+                            className="next-btn"
+                        >
+                            Next Word <ChevronRight size={18} />
+                        </Button>
+                    </div>
                 </div>
             </div>
-        </>
+        </div>
     );
 }
 
