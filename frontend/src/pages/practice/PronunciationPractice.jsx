@@ -11,6 +11,8 @@ function PronunciationPractice() {
     const [spoken, setSpoken] = useState("");
     const [result, setResult] = useState(null); // { isMatch, score, expected, spoken }
     const [isRecording, setIsRecording] = useState(false);
+    const [difficulty, setDifficulty] = useState("simple"); // simple, medium, hard
+    const [allData, setAllData] = useState(null);
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const lang = searchParams.get("lang") || "english";
@@ -27,15 +29,27 @@ function PronunciationPractice() {
         fetch(`http://localhost:3001/api/practice/${lang}/pronunciation`)
             .then(res => res.json())
             .then(data => {
-                if (Array.isArray(data)) {
+                setAllData(data);
+                // Load initial difficulty level
+                if (data && data.simple) {
+                    setWords(data.simple);
+                } else if (Array.isArray(data)) {
+                    // Fallback for old format
                     setWords(data);
-                } else {
-                    console.error("Invalid data format received");
-                    setWords([]);
                 }
             })
             .catch(err => console.error("Error fetching practice data:", err));
     }, [lang]);
+
+    const handleDifficultyChange = (newDifficulty) => {
+        setDifficulty(newDifficulty);
+        setIndex(0);
+        setSpoken("");
+        setResult(null);
+        if (allData && allData[newDifficulty]) {
+            setWords(allData[newDifficulty]);
+        }
+    };
 
     const speak = (text) => {
         const utterance = new SpeechSynthesisUtterance(text);
@@ -140,9 +154,58 @@ function PronunciationPractice() {
             <Navbar />
 
             <div className="practice-page">
+                {/* Difficulty Selection */}
+                <div style={{ padding: '1rem', backgroundColor: '#f1f5f9', borderRadius: '0.5rem', marginBottom: '1rem', display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                    <button
+                        onClick={() => handleDifficultyChange("simple")}
+                        style={{
+                            padding: '0.5rem 1rem',
+                            borderRadius: '0.375rem',
+                            border: 'none',
+                            cursor: 'pointer',
+                            backgroundColor: difficulty === "simple" ? '#3b82f6' : '#cbd5e1',
+                            color: difficulty === "simple" ? 'white' : '#475569',
+                            fontWeight: difficulty === "simple" ? '600' : '500',
+                            fontSize: '0.875rem'
+                        }}
+                    >
+                        Simple
+                    </button>
+                    <button
+                        onClick={() => handleDifficultyChange("medium")}
+                        style={{
+                            padding: '0.5rem 1rem',
+                            borderRadius: '0.375rem',
+                            border: 'none',
+                            cursor: 'pointer',
+                            backgroundColor: difficulty === "medium" ? '#3b82f6' : '#cbd5e1',
+                            color: difficulty === "medium" ? 'white' : '#475569',
+                            fontWeight: difficulty === "medium" ? '600' : '500',
+                            fontSize: '0.875rem'
+                        }}
+                    >
+                        Medium
+                    </button>
+                    <button
+                        onClick={() => handleDifficultyChange("hard")}
+                        style={{
+                            padding: '0.5rem 1rem',
+                            borderRadius: '0.375rem',
+                            border: 'none',
+                            cursor: 'pointer',
+                            backgroundColor: difficulty === "hard" ? '#3b82f6' : '#cbd5e1',
+                            color: difficulty === "hard" ? 'white' : '#475569',
+                            fontWeight: difficulty === "hard" ? '600' : '500',
+                            fontSize: '0.875rem'
+                        }}
+                    >
+                        Hard
+                    </button>
+                </div>
+
                 {/* Top Progress Bar */}
                 <div className="practice-top-progress">
-                    <span>Item {index + 1} of {words.length}</span>
+                    <span>Item {index + 1} of {words.length} ({difficulty.toUpperCase()})</span>
                     <div className="top-progress-bar">
                         <div
                             className="top-progress-fill"

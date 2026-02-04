@@ -1,27 +1,43 @@
 {
     "english": {
-        "pronunciation": [
-            {
-                "id": 1,
-                "text": "Hello"
-            },
-            {
-                "id": 2,
-                "text": "Good morning"
-            },
-            {
-                "id": 3,
-                "text": "How are you"
-            },
-            {
-                "id": 4,
-                "text": "Thank you"
-            },
-            {
-                "id": 5,
-                "text": "See you later"
-            }
-        ],
+        "pronunciation": {
+            "simple": [
+                { "id": 1, "text": "Hello", "difficulty": "simple" },
+                { "id": 2, "text": "Hi", "difficulty": "simple" },
+                { "id": 3, "text": "Cat", "difficulty": "simple" },
+                { "id": 4, "text": "Dog", "difficulty": "simple" },
+                { "id": 5, "text": "Yes", "difficulty": "simple" },
+                { "id": 6, "text": "No", "difficulty": "simple" },
+                { "id": 7, "text": "Good", "difficulty": "simple" },
+                { "id": 8, "text": "Bad", "difficulty": "simple" },
+                { "id": 9, "text": "Big", "difficulty": "simple" },
+                { "id": 10, "text": "Small", "difficulty": "simple" }
+            ],
+            "medium": [
+                { "id": 11, "text": "Good morning", "difficulty": "medium" },
+                { "id": 12, "text": "How are you", "difficulty": "medium" },
+                { "id": 13, "text": "Thank you", "difficulty": "medium" },
+                { "id": 14, "text": "See you later", "difficulty": "medium" },
+                { "id": 15, "text": "What is your name", "difficulty": "medium" },
+                { "id": 16, "text": "Nice to meet you", "difficulty": "medium" },
+                { "id": 17, "text": "I am happy", "difficulty": "medium" },
+                { "id": 18, "text": "Please help me", "difficulty": "medium" },
+                { "id": 19, "text": "Where is the bathroom", "difficulty": "medium" },
+                { "id": 20, "text": "I like this food", "difficulty": "medium" }
+            ],
+            "hard": [
+                { "id": 21, "text": "Although I am tired, I will help you", "difficulty": "hard" },
+                { "id": 22, "text": "Because I was late, I missed the bus", "difficulty": "hard" },
+                { "id": 23, "text": "The book that I read was very interesting", "difficulty": "hard" },
+                { "id": 24, "text": "If it rains tomorrow, we will stay home", "difficulty": "hard" },
+                { "id": 25, "text": "She speaks English fluently", "difficulty": "hard" },
+                { "id": 26, "text": "I have been studying this language for three months", "difficulty": "hard" },
+                { "id": 27, "text": "Would you like to come to my party", "difficulty": "hard" },
+                { "id": 28, "text": "The weather is beautiful this morning", "difficulty": "hard" },
+                { "id": 29, "text": "I apologize for being late to the meeting", "difficulty": "hard" },
+                { "id": 30, "text": "Could you please repeat that more slowly", "difficulty": "hard" }
+            ]
+        },
         "listening": [
             {
                 "id": 1,
@@ -108,28 +124,43 @@
         ]
     },
     "hindi": {
-        "pronunciation": [
-            {
-                "id": 1,
-                "text": "नमस्ते"
-            },
-            {
-                "id": 2,
-                "text": "सुप्रभात"
-            },
-            {
-                "id": 3,
-                "text": "आप कैसे हैं"
-            },
-            {
-                "id": 4,
-                "text": "धन्यवाद"
-            },
-            {
-                "id": 5,
-                "text": "फिर मिलेंगे"
-            }
-        ],
+        "pronunciation": {
+            "simple": [
+                { "id": 1, "text": "नमस्ते", "difficulty": "simple" },
+                { "id": 2, "text": "हाँ", "difficulty": "simple" },
+                { "id": 3, "text": "नहीं", "difficulty": "simple" },
+                { "id": 4, "text": "धन्यवाद", "difficulty": "simple" },
+                { "id": 6, "text": "बिल्ली", "difficulty": "simple" },
+                { "id": 7, "text": "कुत्ता", "difficulty": "simple" },
+                { "id": 8, "text": "अच्छा", "difficulty": "simple" },
+                { "id": 9, "text": "बुरा", "difficulty": "simple" },
+                { "id": 10, "text": "बड़ा", "difficulty": "simple" }
+            ],
+            "medium": [
+                { "id": 11, "text": "सुप्रभात", "difficulty": "medium" },
+                { "id": 12, "text": "आप कैसे हैं", "difficulty": "medium" },
+                { "id": 13, "text": "फिर मिलेंगे", "difficulty": "medium" },
+                { "id": 14, "text": "आपका नाम क्या है", "difficulty": "medium" },
+                { "id": 15, "text": "आपसे मिलकर खुशी हुई", "difficulty": "medium" },
+                { "id": 16, "text": "मैं खुश हूँ", "difficulty": "medium" },
+                { "id": 17, "text": "कृपया मेरी मदद करें", "difficulty": "medium" },
+                { "id": 18, "text": "शौचालय कहाँ है", "difficulty": "medium" },
+                { "id": 19, "text": "मुझे यह खाना पसंद है", "difficulty": "medium" },
+                { "id": 20, "text": "यह कितने का है", "difficulty": "medium" }
+            ],
+            "hard": [
+                { "id": 21, "text": "हालांकि मैं थका हूँ, मैं मदद करूंगा", "difficulty": "hard" },
+                { "id": 22, "text": "क्योंकि मुझे देर हो गई, मैं बस छूट गई", "difficulty": "hard" },
+                { "id": 23, "text": "जो किताब मैंने पढ़ी वह दिलचस्प थी", "difficulty": "hard" },
+                { "id": 24, "text": "अगर बारिश होगी तो मैं घर रहूँगा", "difficulty": "hard" },
+                { "id": 25, "text": "वह हिंदी बहुत अच्छी बोलती है", "difficulty": "hard" },
+                { "id": 26, "text": "मैं तीन महीने से यह भाषा सीख रहा हूँ", "difficulty": "hard" },
+                { "id": 27, "text": "क्या आप मेरी पार्टी में आना पसंद करेंगे", "difficulty": "hard" },
+                { "id": 28, "text": "इस सुबह मौसम बहुत सुंदर है", "difficulty": "hard" },
+                { "id": 29, "text": "मीटिंग में देर से आने के लिए मुझे माफ करें", "difficulty": "hard" },
+                { "id": 30, "text": "क्या आप इसे और धीरे से दोहरा सकते हैं", "difficulty": "hard" }
+            ]
+        },
         "listening": [
             {
                 "id": 1,
@@ -216,28 +247,44 @@
         ]
     },
     "tamil": {
-        "pronunciation": [
-            {
-                "id": 1,
-                "text": "வணக்கம்"
-            },
-            {
-                "id": 2,
-                "text": "காலை வணக்கம்"
-            },
-            {
-                "id": 3,
-                "text": "எப்படி இருக்கிறீர்கள்"
-            },
-            {
-                "id": 4,
-                "text": "நன்றி"
-            },
-            {
-                "id": 5,
-                "text": "பிறகு சந்திப்போம்"
-            }
-        ],
+        "pronunciation": {
+            "simple": [
+                { "id": 1, "text": "வணக்கம்", "difficulty": "simple" },
+                { "id": 2, "text": "ஆமாம்", "difficulty": "simple" },
+                { "id": 3, "text": "இல்லை", "difficulty": "simple" },
+                { "id": 4, "text": "நன்றி", "difficulty": "simple" },
+                { "id": 5, "text": "பூனை", "difficulty": "simple" },
+                { "id": 6, "text": "நாய்", "difficulty": "simple" },
+                { "id": 7, "text": "நல்லது", "difficulty": "simple" },
+                { "id": 8, "text": "கெட்டது", "difficulty": "simple" },
+                { "id": 9, "text": "பெரியது", "difficulty": "simple" },
+                { "id": 10, "text": "சிறியது", "difficulty": "simple" }
+            ],
+            "medium": [
+                { "id": 11, "text": "காலை வணக்கம்", "difficulty": "medium" },
+                { "id": 12, "text": "நீங்கள் எப்படி இருக்கிறீர்கள்", "difficulty": "medium" },
+                { "id": 13, "text": "பின்னர் சந்திப்போம்", "difficulty": "medium" },
+                { "id": 14, "text": "உங்கள் பெயர் என்ன", "difficulty": "medium" },
+                { "id": 15, "text": "உங்களை சந்தித்ததில் மகிழ்ச்சி", "difficulty": "medium" },
+                { "id": 16, "text": "நான் சந்தோஷமாக இருக்கிறேன்", "difficulty": "medium" },
+                { "id": 17, "text": "தயவுசெய்து என்னை உதவுங்கள்", "difficulty": "medium" },
+                { "id": 18, "text": "கழிவறை எங்கே", "difficulty": "medium" },
+                { "id": 19, "text": "எனக்கு இந்த உணவு பிடிக்கும்", "difficulty": "medium" },
+                { "id": 20, "text": "இதன் விலை என்ன", "difficulty": "medium" }
+            ],
+            "hard": [
+                { "id": 21, "text": "நான் களைப்பாக இருந்தாலும், உதவுவேன்", "difficulty": "hard" },
+                { "id": 22, "text": "நான் தாமதமாக வந்ததால், பேருந்தை தவறவிட்டேன்", "difficulty": "hard" },
+                { "id": 23, "text": "நான் படித்த புத்தகம் சுவாரஸ்யமாக இருந்தது", "difficulty": "hard" },
+                { "id": 24, "text": "மழை பெய்தால், நான் வீட்டில் இருப்பேன்", "difficulty": "hard" },
+                { "id": 25, "text": "அவள் ஆங்கிலம் நன்றாக பேசுகிறாள்", "difficulty": "hard" },
+                { "id": 26, "text": "நான் மூன்று மாதமாக இந்த மொழி கற்றுக்கொண்டிருக்கிறேன்", "difficulty": "hard" },
+                { "id": 27, "text": "என் பார்टிக்கு வர விரும்புகிறீர்களா", "difficulty": "hard" },
+                { "id": 28, "text": "இன்று காலை வானிலை அழகாக இருக்கிறது", "difficulty": "hard" },
+                { "id": 29, "text": "சந்திப்பில் தாமதமாக வந்ததற்கு மன்னிக்கவும்", "difficulty": "hard" },
+                { "id": 30, "text": "தயவுசெய்து இதை மெதுவாக மீண்டும் சொல்லலாம்", "difficulty": "hard" }
+            ]
+        },
         "listening": [
             {
                 "id": 1,
@@ -324,28 +371,44 @@
         ]
     },
     "telugu": {
-        "pronunciation": [
-            {
-                "id": 1,
-                "text": "నమస్కారం"
-            },
-            {
-                "id": 2,
-                "text": "శుభోదయం"
-            },
-            {
-                "id": 3,
-                "text": "మీరు ఎలా ఉన్నారు"
-            },
-            {
-                "id": 4,
-                "text": "ధన్యవాదాలు"
-            },
-            {
-                "id": 5,
-                "text": "మళ్ళీ కలుద్దాం"
-            }
-        ],
+        "pronunciation": {
+            "simple": [
+                { "id": 1, "text": "నమస్కారం", "difficulty": "simple" },
+                { "id": 2, "text": "అవును", "difficulty": "simple" },
+                { "id": 3, "text": "కాదు", "difficulty": "simple" },
+                { "id": 4, "text": "ధన్యవాదాలు", "difficulty": "simple" },
+                { "id": 5, "text": "పిల్లి", "difficulty": "simple" },
+                { "id": 6, "text": "కుక్క", "difficulty": "simple" },
+                { "id": 7, "text": "బాగుంది", "difficulty": "simple" },
+                { "id": 8, "text": "చెడ్డది", "difficulty": "simple" },
+                { "id": 9, "text": "పెద్దదైనది", "difficulty": "simple" },
+                { "id": 10, "text": "చిన్నది", "difficulty": "simple" }
+            ],
+            "medium": [
+                { "id": 11, "text": "శుభోదయం", "difficulty": "medium" },
+                { "id": 12, "text": "మీరు ఎలా ఉన్నారు", "difficulty": "medium" },
+                { "id": 13, "text": "మళ్ళీ కలుద్దాం", "difficulty": "medium" },
+                { "id": 14, "text": "మీ పేరు ఏమిటి", "difficulty": "medium" },
+                { "id": 15, "text": "మిమ్మల్ని కలిసినందుకు సంతోషం", "difficulty": "medium" },
+                { "id": 16, "text": "నేను సంతోషంగా ఉన్నాను", "difficulty": "medium" },
+                { "id": 17, "text": "దయచేసి నన్ను సహాయం చేయండి", "difficulty": "medium" },
+                { "id": 18, "text": "బాత్రూమ్ ఎక్కడ ఉంది", "difficulty": "medium" },
+                { "id": 19, "text": "నాకు ఈ ఆహారం చాలా ఇష్టం", "difficulty": "medium" },
+                { "id": 20, "text": "దీని ధర ఎంత", "difficulty": "medium" }
+            ],
+            "hard": [
+                { "id": 21, "text": "నేను అలసిపోయినా, సహాయం చేస్తాను", "difficulty": "hard" },
+                { "id": 22, "text": "నేను ఆలస్యంగా వచ్చినందున, బస్సు మిస్సయ్యాను", "difficulty": "hard" },
+                { "id": 23, "text": "నేను చదివిన పుస్తకం ఆసక్తికరంగా ఉంది", "difficulty": "hard" },
+                { "id": 24, "text": "వర్షం పడితే, నేను ఇంట్లో ఉంటాను", "difficulty": "hard" },
+                { "id": 25, "text": "ఆమె ఆంగ్లం చాలా బాగా మాట్లాడుతుంది", "difficulty": "hard" },
+                { "id": 26, "text": "నేను మూడు నెలలుగా ఈ భాషను నేర్చుకుంటున్నాను", "difficulty": "hard" },
+                { "id": 27, "text": "నా పార్టీకి రావాలనుకుంటున్నారా", "difficulty": "hard" },
+                { "id": 28, "text": "ఈ ఉదయం వాతావరణం చాలా అందంగా ఉంది", "difficulty": "hard" },
+                { "id": 29, "text": "సమావేశానికి ఆలస్యంగా రావడానికి క్షమించండి", "difficulty": "hard" },
+                { "id": 30, "text": "దయచేసి దీన్ని మరింత నెమ్మదిగా చెప్పండి", "difficulty": "hard" }
+            ]
+        },
         "listening": [
             {
                 "id": 1,
