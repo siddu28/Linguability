@@ -31,6 +31,40 @@ function Settings() {
     const [settings, setSettings] = useState(defaultSettings)
     const [learningChallenges, setLearningChallenges] = useState([])
 
+    // Learning preferences state (from onboarding)
+    const [learningGoal, setLearningGoal] = useState(null)
+    const [experienceLevel, setExperienceLevel] = useState(null)
+    const [dailyTime, setDailyTime] = useState(null)
+
+    // Learning preference options
+    const goalOptions = [
+        { id: 'travel', title: 'Travel & Explore', subtitle: 'Communicate while abroad' },
+        { id: 'career', title: 'Career Growth', subtitle: 'Professional development' },
+        { id: 'academic', title: 'Academic Study', subtitle: 'School or university' },
+        { id: 'personal', title: 'Personal Interest', subtitle: 'Just for fun' }
+    ]
+
+    const levelOptions = [
+        { id: 'beginner', title: 'Complete Beginner', subtitle: 'Starting from scratch' },
+        { id: 'basics', title: 'Know the Basics', subtitle: 'Can say simple phrases' },
+        { id: 'intermediate', title: 'Intermediate', subtitle: 'Can hold conversations' },
+        { id: 'advanced', title: 'Advanced', subtitle: 'Looking to master it' }
+    ]
+
+    const timeOptions = [
+        { id: 5, title: '5 minutes/day', subtitle: 'Quick daily practice' },
+        { id: 15, title: '15 minutes/day', subtitle: 'Steady progress' },
+        { id: 30, title: '30 minutes/day', subtitle: 'Committed learner' },
+        { id: 60, title: '60+ minutes/day', subtitle: 'Intensive learning' }
+    ]
+
+    const preferenceOptions = [
+        { id: 'audio', title: 'Audio Focus', subtitle: 'Prefer listening exercises' },
+        { id: 'visual', title: 'Visual Learning', subtitle: 'Learn better with images' },
+        { id: 'dyslexia', title: 'Dyslexia Support', subtitle: 'Specialized fonts & spacing' },
+        { id: 'tts', title: 'Text-to-Speech', subtitle: 'Have content read aloud' }
+    ]
+
     // Load settings from Supabase
     useEffect(() => {
         async function loadSettings() {
@@ -55,10 +89,21 @@ function Settings() {
                     })
                 }
 
-                // Load learning challenges from profile
+                // Load learning challenges and learning preferences from profile
                 const profile = await getProfile(user.id)
-                if (profile?.learning_challenges) {
-                    setLearningChallenges(profile.learning_challenges)
+                if (profile) {
+                    if (profile.learning_challenges) {
+                        setLearningChallenges(profile.learning_challenges)
+                    }
+                    if (profile.learning_goal) {
+                        setLearningGoal(profile.learning_goal)
+                    }
+                    if (profile.experience_level) {
+                        setExperienceLevel(profile.experience_level)
+                    }
+                    if (profile.daily_goal_minutes) {
+                        setDailyTime(profile.daily_goal_minutes)
+                    }
                 }
             } catch (err) {
                 console.error('Error loading settings:', err)
@@ -119,6 +164,39 @@ function Settings() {
             await updateProfile(user.id, { learning_challenges: newChallenges })
         } catch (err) {
             console.error('Error saving challenges:', err)
+        }
+    }
+
+    // Save learning goal to profile
+    const handleGoalChange = async (goalId) => {
+        if (!user?.id) return
+        setLearningGoal(goalId)
+        try {
+            await updateProfile(user.id, { learning_goal: goalId })
+        } catch (err) {
+            console.error('Error saving learning goal:', err)
+        }
+    }
+
+    // Save experience level to profile
+    const handleLevelChange = async (levelId) => {
+        if (!user?.id) return
+        setExperienceLevel(levelId)
+        try {
+            await updateProfile(user.id, { experience_level: levelId })
+        } catch (err) {
+            console.error('Error saving experience level:', err)
+        }
+    }
+
+    // Save daily time to profile
+    const handleDailyTimeChange = async (timeId) => {
+        if (!user?.id) return
+        setDailyTime(timeId)
+        try {
+            await updateProfile(user.id, { daily_goal_minutes: timeId })
+        } catch (err) {
+            console.error('Error saving daily time:', err)
         }
     }
 
@@ -394,6 +472,89 @@ function Settings() {
                                 </div>
                             </Card>
                         </div>
+
+                        {/* Learning Preferences Section */}
+                        <div className="section-header-row" style={{ marginTop: 'var(--spacing-xl)' }}>
+                            <div>
+                                <h2 className="section-title">Learning Preferences</h2>
+                                <p className="section-subtitle">Customize your learning path and goals</p>
+                            </div>
+                        </div>
+
+                        {/* Learning Goal */}
+                        <Card className="settings-card learning-pref-card">
+                            <h3 className="card-title">What's your main goal?</h3>
+                            <p className="card-subtitle">This helps us tailor your learning path</p>
+                            <div className="learning-options-grid">
+                                {goalOptions.map((option) => (
+                                    <button
+                                        key={option.id}
+                                        className={`learning-option-card ${learningGoal === option.id ? 'selected' : ''}`}
+                                        onClick={() => handleGoalChange(option.id)}
+                                    >
+                                        <span className="learning-option-title">{option.title}</span>
+                                        <span className="learning-option-subtitle">{option.subtitle}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </Card>
+
+                        {/* Experience Level */}
+                        <Card className="settings-card learning-pref-card">
+                            <h3 className="card-title">What's your experience level?</h3>
+                            <p className="card-subtitle">We'll start you at the right level</p>
+                            <div className="learning-options-grid">
+                                {levelOptions.map((option) => (
+                                    <button
+                                        key={option.id}
+                                        className={`learning-option-card ${experienceLevel === option.id ? 'selected' : ''}`}
+                                        onClick={() => handleLevelChange(option.id)}
+                                    >
+                                        <span className="learning-option-title">{option.title}</span>
+                                        <span className="learning-option-subtitle">{option.subtitle}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </Card>
+
+                        {/* Daily Time Commitment */}
+                        <Card className="settings-card learning-pref-card">
+                            <h3 className="card-title">How much time can you dedicate?</h3>
+                            <p className="card-subtitle">We'll create a schedule that works for you</p>
+                            <div className="learning-options-grid">
+                                {timeOptions.map((option) => (
+                                    <button
+                                        key={option.id}
+                                        className={`learning-option-card ${dailyTime === option.id ? 'selected' : ''}`}
+                                        onClick={() => handleDailyTimeChange(option.id)}
+                                    >
+                                        <span className="learning-option-title">{option.title}</span>
+                                        <span className="learning-option-subtitle">{option.subtitle}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </Card>
+
+                        {/* Learning Style Preferences */}
+                        <Card className="settings-card learning-pref-card">
+                            <h3 className="card-title">Any learning preferences?</h3>
+                            <p className="card-subtitle">Select all that apply to customize your experience</p>
+                            <div className="learning-options-grid">
+                                {preferenceOptions.map((option) => {
+                                    const isSelected = learningChallenges.includes(option.id)
+                                    return (
+                                        <button
+                                            key={option.id}
+                                            className={`learning-option-card ${isSelected ? 'selected' : ''}`}
+                                            onClick={() => handleChallengeToggle(option.id)}
+                                        >
+                                            <span className="learning-option-title">{option.title}</span>
+                                            <span className="learning-option-subtitle">{option.subtitle}</span>
+                                        </button>
+                                    )
+                                })}
+                            </div>
+                        </Card>
                     </>
                 )}
 
