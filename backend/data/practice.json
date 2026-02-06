@@ -2,496 +2,220 @@
     "english": {
         "pronunciation": {
             "simple": [
-                { "id": 1, "text": "Hello", "difficulty": "simple" },
-                { "id": 2, "text": "Hi", "difficulty": "simple" },
-                { "id": 3, "text": "Cat", "difficulty": "simple" },
-                { "id": 4, "text": "Dog", "difficulty": "simple" },
-                { "id": 5, "text": "Yes", "difficulty": "simple" },
-                { "id": 6, "text": "No", "difficulty": "simple" },
-                { "id": 7, "text": "Good", "difficulty": "simple" },
-                { "id": 8, "text": "Bad", "difficulty": "simple" },
-                { "id": 9, "text": "Big", "difficulty": "simple" },
-                { "id": 10, "text": "Small", "difficulty": "simple" }
+                { "id": 1, "text": "Hello" },
+                { "id": 2, "text": "Thank you" },
+                { "id": 3, "text": "Please" }
             ],
             "medium": [
-                { "id": 11, "text": "Good morning", "difficulty": "medium" },
-                { "id": 12, "text": "How are you", "difficulty": "medium" },
-                { "id": 13, "text": "Thank you", "difficulty": "medium" },
-                { "id": 14, "text": "See you later", "difficulty": "medium" },
-                { "id": 15, "text": "What is your name", "difficulty": "medium" },
-                { "id": 16, "text": "Nice to meet you", "difficulty": "medium" },
-                { "id": 17, "text": "I am happy", "difficulty": "medium" },
-                { "id": 18, "text": "Please help me", "difficulty": "medium" },
-                { "id": 19, "text": "Where is the bathroom", "difficulty": "medium" },
-                { "id": 20, "text": "I like this food", "difficulty": "medium" }
+                { "id": 4, "text": "Good morning" },
+                { "id": 5, "text": "See you later" },
+                { "id": 6, "text": "How are you doing" }
             ],
             "hard": [
-                { "id": 21, "text": "Although I am tired, I will help you", "difficulty": "hard" },
-                { "id": 22, "text": "Because I was late, I missed the bus", "difficulty": "hard" },
-                { "id": 23, "text": "The book that I read was very interesting", "difficulty": "hard" },
-                { "id": 24, "text": "If it rains tomorrow, we will stay home", "difficulty": "hard" },
-                { "id": 25, "text": "She speaks English fluently", "difficulty": "hard" },
-                { "id": 26, "text": "I have been studying this language for three months", "difficulty": "hard" },
-                { "id": 27, "text": "Would you like to come to my party", "difficulty": "hard" },
-                { "id": 28, "text": "The weather is beautiful this morning", "difficulty": "hard" },
-                { "id": 29, "text": "I apologize for being late to the meeting", "difficulty": "hard" },
-                { "id": 30, "text": "Could you please repeat that more slowly", "difficulty": "hard" }
+                { "id": 7, "text": "Although I am tired, I will help you" },
+                { "id": 8, "text": "The experiment yielded unexpected results" }
             ]
         },
-        "listening": [
-            {
-                "id": 1,
-                "text": "Apple",
-                "options": [
-                    "Apple",
-                    "Orange",
-                    "Banana",
-                    "Grape"
-                ]
-            },
-            {
-                "id": 2,
-                "text": "Book",
-                "options": [
-                    "Look",
-                    "Book",
-                    "Cook",
-                    "Hook"
-                ]
-            },
-            {
-                "id": 3,
-                "text": "Water",
-                "options": [
-                    "Weather",
-                    "Water",
-                    "Waiter",
-                    "Winter"
-                ]
-            },
-            {
-                "id": 4,
-                "text": "Happy",
-                "options": [
-                    "Happen",
-                    "Happy",
-                    "Hippy",
-                    "Hoppy"
-                ]
-            },
-            {
-                "id": 5,
-                "text": "School",
-                "options": [
-                    "Stool",
-                    "Cool",
-                    "School",
-                    "Pool"
-                ]
-            }
-        ],
+        "listening": {
+            "words": [
+                { "id": 1, "text": "Apple", "options": ["Apple", "Orange", "Banana", "Grape"], "category": "Food" },
+                { "id": 2, "text": "River", "options": ["River", "Mountain", "Desert", "Forest"], "category": "Nature" },
+                { "id": 3, "text": "Run", "options": ["Run", "Walk", "Sit", "Eat"], "category": "Actions" },
+                { "id": 4, "text": "School", "options": ["Hospital", "School", "Market", "Station"], "category": "Places" },
+                { "id": 5, "text": "Book", "options": ["Book", "Pen", "Paper", "Notebook"], "category": "Objects" },
+                { "id": 6, "text": "Happy", "options": ["Happy", "Sad", "Angry", "Tired"], "category": "Feelings" },
+                { "id": 7, "text": "Blue", "options": ["Blue", "Red", "Green", "Yellow"], "category": "Colors" },
+                { "id": 8, "text": "Mother", "options": ["Mother", "Father", "Sister", "Brother"], "category": "Family" },
+                { "id": 9, "text": "Bread", "options": ["Bread", "Rice", "Milk", "Cheese"], "category": "Food" },
+                { "id": 10, "text": "Garden", "options": ["Garden", "Park", "Beach", "Road"], "category": "Places" },
+                { "id": 11, "text": "Teacher", "options": ["Teacher", "Doctor", "Engineer", "Farmer"], "category": "Occupation" },
+                { "id": 12, "text": "Water", "options": ["Water", "Juice", "Tea", "Coffee"], "category": "Drinks" },
+                { "id": 13, "text": "Window", "options": ["Window", "Door", "Wall", "Floor"], "category": "Objects" },
+                { "id": 14, "text": "Green", "options": ["Green", "Yellow", "Purple", "Pink"], "category": "Colors" },
+                { "id": 15, "text": "Dance", "options": ["Dance", "Sing", "Jump", "Sleep"], "category": "Actions" }
+            ],
+            "sentences": [
+                { "id": 1, "text": "I am happy", "options": ["I am happy", "We are happy", "He is happy", "They are happy"], "category": "Feelings" },
+                { "id": 2, "text": "We are happy", "options": ["We are happy", "I am happy", "She is happy", "You are happy"], "category": "Feelings" },
+                { "id": 3, "text": "She is happy", "options": ["She is happy", "He is happy", "I am happy", "They are happy"], "category": "Feelings" },
+                { "id": 4, "text": "This is my book", "options": ["This is my book", "This is your book", "This is his book", "This is her book"], "category": "Possession" },
+                { "id": 5, "text": "This is your book", "options": ["This is your book", "This is my book", "This is his book", "This is her book"], "category": "Possession" },
+                { "id": 6, "text": "This is his book", "options": ["This is his book", "This is my book", "This is your book", "This is her book"], "category": "Possession" },
+                { "id": 7, "text": "The weather is nice", "options": ["The weather is nice", "The weather is bad", "The weather is cold", "The weather is hot"], "category": "Weather" },
+                { "id": 8, "text": "I like coffee", "options": ["I like coffee", "I like tea", "I like juice", "I like water"], "category": "Food" },
+                { "id": 9, "text": "We like coffee", "options": ["We like coffee", "We like tea", "We like juice", "We like water"], "category": "Food" },
+                { "id": 10, "text": "They like coffee", "options": ["They like coffee", "They like tea", "They like juice", "They like water"], "category": "Food" },
+                { "id": 11, "text": "She is my friend", "options": ["She is my friend", "She is my sister", "She is my mother", "She is my teacher"], "category": "Relationships" },
+                { "id": 12, "text": "He is my friend", "options": ["He is my friend", "He is my brother", "He is my father", "He is my teacher"], "category": "Relationships" },
+                { "id": 13, "text": "I live in a house", "options": ["I live in a house", "I live in a flat", "I live in a hotel", "I live in a school"], "category": "Places" },
+                { "id": 14, "text": "We live in a house", "options": ["We live in a house", "We live in a flat", "We live in a hotel", "We live in a school"], "category": "Places" },
+                { "id": 15, "text": "They live in a house", "options": ["They live in a house", "They live in a flat", "They live in a hotel", "They live in a school"], "category": "Places" },
+                { "id": 16, "text": "I am tired", "options": ["I am tired", "We are tired", "He is tired", "She is tired"], "category": "Feelings" },
+                { "id": 17, "text": "He is tired", "options": ["He is tired", "I am tired", "We are tired", "They are tired"], "category": "Feelings" },
+                { "id": 18, "text": "I go to school", "options": ["I go to school", "We go to school", "He goes to school", "They go to school"], "category": "Activities" },
+                { "id": 19, "text": "She goes to school", "options": ["She goes to school", "I go to school", "We go to school", "They go to school"], "category": "Activities" },
+                { "id": 20, "text": "They go to school", "options": ["They go to school", "I go to school", "She goes to school", "He goes to school"], "category": "Activities" }
+            ]
+        },
         "vocabulary": [
-            {
-                "id": 1,
-                "word": "Apple",
-                "meaning": "A sweet fruit",
-                "example": "I ate an apple."
-            },
-            {
-                "id": 2,
-                "word": "Book",
-                "meaning": "Something you read",
-                "example": "This book is interesting."
-            },
-            {
-                "id": 3,
-                "word": "Teacher",
-                "meaning": "A person who teaches",
-                "example": "My teacher is kind."
-            },
-            {
-                "id": 4,
-                "word": "Happy",
-                "meaning": "Feeling joy",
-                "example": "She is happy today."
-            },
-            {
-                "id": 5,
-                "word": "Run",
-                "meaning": "To move fast",
-                "example": "I run every morning."
-            }
+            { "id": 1, "word": "Apple", "meaning": "A sweet fruit", "example": "I ate an apple.", "category": "Food" },
+            { "id": 2, "word": "River", "meaning": "A large natural stream of water", "example": "The river flows fast.", "category": "Nature" },
+            { "id": 3, "word": "Run", "meaning": "Move at a speed faster than a walk", "example": "I run every morning.", "category": "Actions" },
+            { "id": 4, "word": "School", "meaning": "A place for education", "example": "She goes to school.", "category": "Places" }
         ]
     },
     "hindi": {
         "pronunciation": {
-            "simple": [
-                { "id": 1, "text": "नमस्ते", "difficulty": "simple" },
-                { "id": 2, "text": "हाँ", "difficulty": "simple" },
-                { "id": 3, "text": "नहीं", "difficulty": "simple" },
-                { "id": 4, "text": "धन्यवाद", "difficulty": "simple" },
-                { "id": 6, "text": "बिल्ली", "difficulty": "simple" },
-                { "id": 7, "text": "कुत्ता", "difficulty": "simple" },
-                { "id": 8, "text": "अच्छा", "difficulty": "simple" },
-                { "id": 9, "text": "बुरा", "difficulty": "simple" },
-                { "id": 10, "text": "बड़ा", "difficulty": "simple" }
+            "simple": [ { "id": 1, "text": "नमस्ते" }, { "id": 2, "text": "धन्यवाद" } ],
+            "medium": [ { "id": 3, "text": "शुभ प्रभात" }, { "id": 4, "text": "फिर मिलेंगे" } ],
+            "hard": [ { "id": 5, "text": "हालाँकि मैं थका हूँ, मैं मदद करूँगा" } ]
+        },
+        "listening": {
+            "words": [
+                { "id": 1, "text": "सेब", "options": ["सेब", "केला", "संतरा", "अंगूर"], "category": "Food" },
+                { "id": 2, "text": "नदी", "options": ["नदी", "पहाड़", "रेगिस्तान", "जंगल"], "category": "Nature" },
+                { "id": 3, "text": "दौड़ना", "options": ["दौड़ना", "चलना", "बैठना", "खाना"], "category": "Actions" },
+                { "id": 4, "text": "स्कूल", "options": ["स्कूल", "अस्पताल", "बाज़ार", "स्टेशन"], "category": "Places" },
+                { "id": 5, "text": "किताब", "options": ["किताब", "कलम", "कागज़", "नोटबुक"], "category": "Objects" },
+                { "id": 6, "text": "खुश", "options": ["खुश", "दुःखी", "गुस्सा", "थका"], "category": "Feelings" },
+                { "id": 7, "text": "नीला", "options": ["नीला", "लाल", "हरा", "पीला"], "category": "Colors" },
+                { "id": 8, "text": "माँ", "options": ["माँ", "पिता", "बहन", "भाई"], "category": "Family" },
+                { "id": 9, "text": "रोटी", "options": ["रोटी", "चावल", "दूध", "पनीर"], "category": "Food" },
+                { "id": 10, "text": "बाग़", "options": ["बाग़", "पार्क", "समुद्र तट", "सड़क"], "category": "Places" },
+                { "id": 11, "text": "शिक्षक", "options": ["शिक्षक", "डॉक्टर", "इंजीनियर", "किसान"], "category": "Occupation" },
+                { "id": 12, "text": "पानी", "options": ["पानी", "जूस", "चाय", "कॉफी"], "category": "Drinks" },
+                { "id": 13, "text": "खिड़की", "options": ["खिड़की", "दरवाज़ा", "दीवार", "फर्श"], "category": "Objects" },
+                { "id": 14, "text": "हरा", "options": ["हरा", "पीला", "बैंगनी", "गुलाबी"], "category": "Colors" },
+                { "id": 15, "text": "नाचना", "options": ["नाचना", "गाना", "कूदना", "सोना"], "category": "Actions" }
             ],
-            "medium": [
-                { "id": 11, "text": "सुप्रभात", "difficulty": "medium" },
-                { "id": 12, "text": "आप कैसे हैं", "difficulty": "medium" },
-                { "id": 13, "text": "फिर मिलेंगे", "difficulty": "medium" },
-                { "id": 14, "text": "आपका नाम क्या है", "difficulty": "medium" },
-                { "id": 15, "text": "आपसे मिलकर खुशी हुई", "difficulty": "medium" },
-                { "id": 16, "text": "मैं खुश हूँ", "difficulty": "medium" },
-                { "id": 17, "text": "कृपया मेरी मदद करें", "difficulty": "medium" },
-                { "id": 18, "text": "शौचालय कहाँ है", "difficulty": "medium" },
-                { "id": 19, "text": "मुझे यह खाना पसंद है", "difficulty": "medium" },
-                { "id": 20, "text": "यह कितने का है", "difficulty": "medium" }
-            ],
-            "hard": [
-                { "id": 21, "text": "हालांकि मैं थका हूँ, मैं मदद करूंगा", "difficulty": "hard" },
-                { "id": 22, "text": "क्योंकि मुझे देर हो गई, मैं बस छूट गई", "difficulty": "hard" },
-                { "id": 23, "text": "जो किताब मैंने पढ़ी वह दिलचस्प थी", "difficulty": "hard" },
-                { "id": 24, "text": "अगर बारिश होगी तो मैं घर रहूँगा", "difficulty": "hard" },
-                { "id": 25, "text": "वह हिंदी बहुत अच्छी बोलती है", "difficulty": "hard" },
-                { "id": 26, "text": "मैं तीन महीने से यह भाषा सीख रहा हूँ", "difficulty": "hard" },
-                { "id": 27, "text": "क्या आप मेरी पार्टी में आना पसंद करेंगे", "difficulty": "hard" },
-                { "id": 28, "text": "इस सुबह मौसम बहुत सुंदर है", "difficulty": "hard" },
-                { "id": 29, "text": "मीटिंग में देर से आने के लिए मुझे माफ करें", "difficulty": "hard" },
-                { "id": 30, "text": "क्या आप इसे और धीरे से दोहरा सकते हैं", "difficulty": "hard" }
+            "sentences": [
+                { "id": 1, "text": "मैं खुश हूँ", "options": ["मैं खुश हूँ", "हम खुश हैं", "वह खुश है", "वे खुश हैं"], "category": "Feelings" },
+                { "id": 2, "text": "हम खुश हैं", "options": ["हम खुश हैं", "मैं खुश हूँ", "वह खुश है", "आप खुश हैं"], "category": "Feelings" },
+                { "id": 3, "text": "वह खुश है", "options": ["वह खुश है", "मैं खुश हूँ", "हम खुश हैं", "वे खुश हैं"], "category": "Feelings" },
+                { "id": 4, "text": "यह मेरी किताब है", "options": ["यह मेरी किताब है", "यह आपकी किताब है", "यह उसकी किताब है", "यह उसकी किताब है"], "category": "Possession" },
+                { "id": 5, "text": "यह आपकी किताब है", "options": ["यह आपकी किताब है", "यह मेरी किताब है", "यह उसकी किताब है", "यह उसकी किताब है"], "category": "Possession" },
+                { "id": 6, "text": "यह उसकी किताब है", "options": ["यह उसकी किताब है", "यह मेरी किताब है", "यह आपकी किताब है", "यह उसकी किताब है"], "category": "Possession" },
+                { "id": 7, "text": "मौसम अच्छा है", "options": ["मौसम अच्छा है", "मौसम बुरा है", "मौसम ठंडा है", "मौसम गर्म है"], "category": "Weather" },
+                { "id": 8, "text": "मुझे कॉफी पसंद है", "options": ["मुझे कॉफी पसंद है", "मुझे चाय पसंद है", "मुझे जूस पसंद है", "मुझे पानी पसंद है"], "category": "Food" },
+                { "id": 9, "text": "हमें कॉफी पसंद है", "options": ["हमें कॉफी पसंद है", "हमें चाय पसंद है", "हमें जूस पसंद है", "हमें पानी पसंद है"], "category": "Food" },
+                { "id": 10, "text": "उन्हें कॉफी पसंद है", "options": ["उन्हें कॉफी पसंद है", "उन्हें चाय पसंद है", "उन्हें जूस पसंद है", "उन्हें पानी पसंद है"], "category": "Food" },
+                { "id": 11, "text": "वह मेरी दोस्त है", "options": ["वह मेरी दोस्त है", "वह मेरी बहन है", "वह मेरी माँ है", "वह मेरी शिक्षक है"], "category": "Relationships" },
+                { "id": 12, "text": "वह मेरा दोस्त है", "options": ["वह मेरा दोस्त है", "वह मेरा भाई है", "वह मेरा पिता है", "वह मेरा शिक्षक है"], "category": "Relationships" },
+                { "id": 13, "text": "मैं एक घर में रहता हूँ", "options": ["मैं एक घर में रहता हूँ", "मैं एक फ्लैट में रहता हूँ", "मैं एक होटल में रहता हूँ", "मैं एक स्कूल में रहता हूँ"], "category": "Places" },
+                { "id": 14, "text": "हम एक घर में रहते हैं", "options": ["हम एक घर में रहते हैं", "हम एक फ्लैट में रहते हैं", "हम एक होटल में रहते हैं", "हम एक स्कूल में रहते हैं"], "category": "Places" },
+                { "id": 15, "text": "वे एक घर में रहते हैं", "options": ["वे एक घर में रहते हैं", "वे एक फ्लैट में रहते हैं", "वे एक होटल में रहते हैं", "वे एक स्कूल में रहते हैं"], "category": "Places" },
+                { "id": 16, "text": "मैं थका हूँ", "options": ["मैं थका हूँ", "हम थके हैं", "वह थका है", "वह थकी है"], "category": "Feelings" },
+                { "id": 17, "text": "वह थका है", "options": ["वह थका है", "मैं थका हूँ", "हम थके हैं", "वे थके हैं"], "category": "Feelings" },
+                { "id": 18, "text": "मैं स्कूल जाता हूँ", "options": ["मैं स्कूल जाता हूँ", "हम स्कूल जाते हैं", "वह स्कूल जाता है", "वे स्कूल जाते हैं"], "category": "Activities" },
+                { "id": 19, "text": "वह स्कूल जाता है", "options": ["वह स्कूल जाता है", "मैं स्कूल जाता हूँ", "हम स्कूल जाते हैं", "वे स्कूल जाते हैं"], "category": "Activities" },
+                { "id": 20, "text": "वे स्कूल जाते हैं", "options": ["वे स्कूल जाते हैं", "मैं स्कूल जाता हूँ", "वह स्कूल जाता है", "हम स्कूल जाते हैं"], "category": "Activities" }
             ]
         },
-        "listening": [
-            {
-                "id": 1,
-                "text": "सेब",
-                "options": [
-                    "सेब",
-                    "केला",
-                    "संतरा",
-                    "अंगूर"
-                ]
-            },
-            {
-                "id": 2,
-                "text": "पानी",
-                "options": [
-                    "पानी",
-                    "दानी",
-                    "नानी",
-                    "रानी"
-                ]
-            },
-            {
-                "id": 3,
-                "text": "किताब",
-                "options": [
-                    "खिलाब",
-                    "किताब",
-                    "हिसाब",
-                    "जवाब"
-                ]
-            },
-            {
-                "id": 4,
-                "text": "घर",
-                "options": [
-                    "गर",
-                    "घर",
-                    "डर",
-                    "पर"
-                ]
-            },
-            {
-                "id": 5,
-                "text": "स्कूल",
-                "options": [
-                    "टूल",
-                    "पूल",
-                    "स्कूल",
-                    "कूल"
-                ]
-            }
-        ],
         "vocabulary": [
-            {
-                "id": 1,
-                "word": "सेब",
-                "meaning": "एक मीठा फल",
-                "example": "मैंने एक सेब खाया।"
-            },
-            {
-                "id": 2,
-                "word": "किताब",
-                "meaning": "जिसे आप पढ़ते हैं",
-                "example": "यह किताब रोचक है।"
-            },
-            {
-                "id": 3,
-                "word": "शिक्षक",
-                "meaning": "जो पढ़ाता है",
-                "example": "मेरे शिक्षक दयालु हैं।"
-            },
-            {
-                "id": 4,
-                "word": "खुश",
-                "meaning": "आनंद महसूस करना",
-                "example": "वह आज खुश है।"
-            },
-            {
-                "id": 5,
-                "word": "दौड़ना",
-                "meaning": "तेजी से चलना",
-                "example": "मैं हर सुबह दौड़ता हूँ।"
-            }
+            { "id": 1, "word": "सेब", "meaning": "एक मीठा फल", "example": "मैंने एक सेब खाया।", "category": "Food" },
+            { "id": 2, "word": "नदी", "meaning": "पानी का बड़ा प्रवाह", "example": "नदी तेजी से बह रही है।", "category": "Nature" }
         ]
     },
     "tamil": {
         "pronunciation": {
-            "simple": [
-                { "id": 1, "text": "வணக்கம்", "difficulty": "simple" },
-                { "id": 2, "text": "ஆமாம்", "difficulty": "simple" },
-                { "id": 3, "text": "இல்லை", "difficulty": "simple" },
-                { "id": 4, "text": "நன்றி", "difficulty": "simple" },
-                { "id": 5, "text": "பூனை", "difficulty": "simple" },
-                { "id": 6, "text": "நாய்", "difficulty": "simple" },
-                { "id": 7, "text": "நல்லது", "difficulty": "simple" },
-                { "id": 8, "text": "கெட்டது", "difficulty": "simple" },
-                { "id": 9, "text": "பெரியது", "difficulty": "simple" },
-                { "id": 10, "text": "சிறியது", "difficulty": "simple" }
+            "simple": [ { "id": 1, "text": "வணக்கம்" }, { "id": 2, "text": "நன்றி" } ],
+            "medium": [ { "id": 3, "text": "காலை வணக்கம்" } ],
+            "hard": [ { "id": 4, "text": "நான் சோர்ந்தாலும், உதவுவேன்" } ]
+        },
+        "listening": {
+            "words": [
+                { "id": 1, "text": "ஆப்பிள்", "options": ["ஆப்பிள்", "வாழைப் பழம்", "திராட்சை", "மாம்பழம்"], "category": "Food" },
+                { "id": 2, "text": "ஆறு", "options": ["ஆறு", "மலை", "அரணியம்", "காடு"], "category": "Nature" },
+                { "id": 3, "text": "ஓடு", "options": ["ஓடு", "நட", "உட்கார", "சாப்பிடு"], "category": "Actions" },
+                { "id": 4, "text": "பள்ளி", "options": ["பள்ளி", "மருத்துவமனை", "சந்தை", "நிலையம்"], "category": "Places" },
+                { "id": 5, "text": "புத்தகம்", "options": ["புத்தகம்", "பேனா", "காகிதம்", "நோட்டுப் புத்தகம்"], "category": "Objects" },
+                { "id": 6, "text": "சந்தோஷம்", "options": ["சந்தோஷம்", "கோபம்", "சோர்வு", "பசி"], "category": "Feelings" },
+                { "id": 7, "text": "நீலம்", "options": ["நீலம்", "சிவப்பு", "பச்சை", "மஞ்சள்"], "category": "Colors" },
+                { "id": 8, "text": "அம்மா", "options": ["அம்மா", "அப்பா", "சகோதரி", "சகோதரன்"], "category": "Family" },
+                { "id": 9, "text": "சாதம்", "options": ["சாதம்", "மணி", "பால்", "பனீர்"], "category": "Food" },
+                { "id": 10, "text": "பூங்கா", "options": ["பூங்கா", "பூங்கா", "கடற்கரை", "சாலை"], "category": "Places" },
+                { "id": 11, "text": "மாமூல்", "options": ["மாமூல்", "தகப்பன்", "தாயன்", "கணவன்"], "category": "Family" },
+                { "id": 12, "text": "மரம்", "options": ["மரம்", "செடி", "பூ", "புல்"], "category": "Nature" },
+                { "id": 13, "text": "பாடு", "options": ["பாடு", "நாடு", "வாடு", "ஆடு"], "category": "Actions" },
+                { "id": 14, "text": "பெண்", "options": ["பெண்", "பையன்", "குழந்தை", "மூதையி"], "category": "People" },
+                { "id": 15, "text": "தண்ணீர்", "options": ["தண்ணீர்", "பால்", "கஞ்சி", "சர்பத்"], "category": "Drinks" }
             ],
-            "medium": [
-                { "id": 11, "text": "காலை வணக்கம்", "difficulty": "medium" },
-                { "id": 12, "text": "நீங்கள் எப்படி இருக்கிறீர்கள்", "difficulty": "medium" },
-                { "id": 13, "text": "பின்னர் சந்திப்போம்", "difficulty": "medium" },
-                { "id": 14, "text": "உங்கள் பெயர் என்ன", "difficulty": "medium" },
-                { "id": 15, "text": "உங்களை சந்தித்ததில் மகிழ்ச்சி", "difficulty": "medium" },
-                { "id": 16, "text": "நான் சந்தோஷமாக இருக்கிறேன்", "difficulty": "medium" },
-                { "id": 17, "text": "தயவுசெய்து என்னை உதவுங்கள்", "difficulty": "medium" },
-                { "id": 18, "text": "கழிவறை எங்கே", "difficulty": "medium" },
-                { "id": 19, "text": "எனக்கு இந்த உணவு பிடிக்கும்", "difficulty": "medium" },
-                { "id": 20, "text": "இதன் விலை என்ன", "difficulty": "medium" }
-            ],
-            "hard": [
-                { "id": 21, "text": "நான் களைப்பாக இருந்தாலும், உதவுவேன்", "difficulty": "hard" },
-                { "id": 22, "text": "நான் தாமதமாக வந்ததால், பேருந்தை தவறவிட்டேன்", "difficulty": "hard" },
-                { "id": 23, "text": "நான் படித்த புத்தகம் சுவாரஸ்யமாக இருந்தது", "difficulty": "hard" },
-                { "id": 24, "text": "மழை பெய்தால், நான் வீட்டில் இருப்பேன்", "difficulty": "hard" },
-                { "id": 25, "text": "அவள் ஆங்கிலம் நன்றாக பேசுகிறாள்", "difficulty": "hard" },
-                { "id": 26, "text": "நான் மூன்று மாதமாக இந்த மொழி கற்றுக்கொண்டிருக்கிறேன்", "difficulty": "hard" },
-                { "id": 27, "text": "என் பார்टிக்கு வர விரும்புகிறீர்களா", "difficulty": "hard" },
-                { "id": 28, "text": "இன்று காலை வானிலை அழகாக இருக்கிறது", "difficulty": "hard" },
-                { "id": 29, "text": "சந்திப்பில் தாமதமாக வந்ததற்கு மன்னிக்கவும்", "difficulty": "hard" },
-                { "id": 30, "text": "தயவுசெய்து இதை மெதுவாக மீண்டும் சொல்லலாம்", "difficulty": "hard" }
+            "sentences": [
+                { "id": 1, "text": "நான் சந்தோஷமாக இருக்கிறேன்", "options": ["நான் சந்தோஷமாக இருக்கிறேன்", "நாம் சந்தோஷமாக இருக்கிறோம்", "அவன் சந்தோஷமாக இருக்கிறான்", "அவர்கள் சந்தோஷமாக இருக்கிறார்கள்"], "category": "Feelings" },
+                { "id": 2, "text": "நாம் சந்தோஷமாக இருக்கிறோம்", "options": ["நாம் சந்தோஷமாக இருக்கிறோம்", "நான் சந்தோஷமாக இருக்கிறேன்", "அவள் சந்தோஷமாக இருக்கிறாள்", "நீங்கள் சந்தோஷமாக இருக்கிறீர்கள்"], "category": "Feelings" },
+                { "id": 3, "text": "அவள் சந்தோஷமாக இருக்கிறாள்", "options": ["அவள் சந்தோஷமாக இருக்கிறாள்", "அவன் சந்தோஷமாக இருக்கிறான்", "நான் சந்தோஷமாக இருக்கிறேன்", "அவர்கள் சந்தோஷமாக இருக்கிறார்கள்"], "category": "Feelings" },
+                { "id": 4, "text": "இது என் புத்தகம்", "options": ["இது என் புத்தகம்", "இது உங்கள் புத்தகம்", "இது அவனுடைய புத்தகம்", "இது அவளுடைய புத்தகம்"], "category": "Possession" },
+                { "id": 5, "text": "இது உங்கள் புத்தகம்", "options": ["இது உங்கள் புத்தகம்", "இது என் புத்தகம்", "இது அவனுடைய புத்தகம்", "இது அவளுடைய புத்தகம்"], "category": "Possession" },
+                { "id": 6, "text": "இது அவனுடைய புத்தகம்", "options": ["இது அவனுடைய புத்தகம்", "இது என் புத்தகம்", "இது உங்கள் புத்தகம்", "இது அவளுடைய புத்தகம்"], "category": "Possession" },
+                { "id": 7, "text": "வானிலை நல்லது", "options": ["வானிலை நல்லது", "வானிலை மோசம்", "வானிலை குளிர்ந்தது", "வானிலை சூடாக இருக்கிறது"], "category": "Weather" },
+                { "id": 8, "text": "நான் காபி விரும்புகிறேன்", "options": ["நான் காபி விரும்புகிறேன்", "நான் தேநீர் விரும்புகிறேன்", "நான் பழரச விரும்புகிறேன்", "நான் தண்ணீர் விரும்புகிறேன்"], "category": "Food" },
+                { "id": 9, "text": "நாம் காபி விரும்புகிறோம்", "options": ["நாம் காபி விரும்புகிறோம்", "நாம் தேநீர் விரும்புகிறோம்", "நாம் பழரச விரும்புகிறோம்", "நாம் தண்ணீர் விரும்புகிறோம்"], "category": "Food" },
+                { "id": 10, "text": "அவர்கள் காபி விரும்புகிறார்கள்", "options": ["அவர்கள் காபி விரும்புகிறார்கள்", "அவர்கள் தேநீர் விரும்புகிறார்கள்", "அவர்கள் பழரச விரும்புகிறார்கள்", "அவர்கள் தண்ணீர் விரும்புகிறார்கள்"], "category": "Food" },
+                { "id": 11, "text": "அவள் என் தோழி", "options": ["அவள் என் தோழி", "அவள் என் சகோதரி", "அவள் என் தாய்", "அவள் என் ஆசிரியர்"], "category": "Relationships" },
+                { "id": 12, "text": "அவன் என் நண்பன்", "options": ["அவன் என் நண்பன்", "அவன் என் சகோதரன்", "அவன் என் தகப்பன்", "அவன் என் ஆசிரியர்"], "category": "Relationships" },
+                { "id": 13, "text": "நான் ஒரு வீட்டில் வாழ்கிறேன்", "options": ["நான் ஒரு வீட்டில் வாழ்கிறேன்", "நான் ஒரு குடியிருப்பில் வாழ்கிறேன்", "நான் ஒரு ஹோட்டலில் வாழ்கிறேன்", "நான் ஒரு பள்ளியில் வாழ்கிறேன்"], "category": "Places" },
+                { "id": 14, "text": "நாம் ஒரு வீட்டில் வாழ்கிறோம்", "options": ["நாம் ஒரு வீட்டில் வாழ்கிறோம்", "நாம் ஒரு குடியிருப்பில் வாழ்கிறோம்", "நாம் ஒரு ஹோட்டலில் வாழ்கிறோம்", "நாம் ஒரு பள்ளியில் வாழ்கிறோம்"], "category": "Places" },
+                { "id": 15, "text": "அவர்கள் ஒரு வீட்டில் வாழ்கிறார்கள்", "options": ["அவர்கள் ஒரு வீட்டில் வாழ்கிறார்கள்", "அவர்கள் ஒரு குடியிருப்பில் வாழ்கிறார்கள்", "அவர்கள் ஒரு ஹோட்டலில் வாழ்கிறார்கள்", "அவர்கள் ஒரு பள்ளியில் வாழ்கிறார்கள்"], "category": "Places" },
+                { "id": 16, "text": "நான் சோர்ந்திருக்கிறேன்", "options": ["நான் சோர்ந்திருக்கிறேன்", "நாம் சோர்ந்திருக்கிறோம்", "அவன் சோர்ந்திருக்கிறான்", "அவள் சோர்ந்திருக்கிறாள்"], "category": "Feelings" },
+                { "id": 17, "text": "அவன் சோர்ந்திருக்கிறான்", "options": ["அவன் சோர்ந்திருக்கிறான்", "நான் சோர்ந்திருக்கிறேன்", "நாம் சோர்ந்திருக்கிறோம்", "அவர்கள் சோர்ந்திருக்கிறார்கள்"], "category": "Feelings" },
+                { "id": 18, "text": "நான் பள்ளிக்கு செல்கிறேன்", "options": ["நான் பள்ளிக்கு செல்கிறேன்", "நாம் பள்ளிக்கு செல்கிறோம்", "அவன் பள்ளிக்கு செல்கிறான்", "அவர்கள் பள்ளிக்கு செல்கிறார்கள்"], "category": "Activities" },
+                { "id": 19, "text": "அவள் பள்ளிக்கு செல்கிறாள்", "options": ["அவள் பள்ளிக்கு செல்கிறாள்", "நான் பள்ளிக்கு செல்கிறேன்", "நாம் பள்ளிக்கு செல்கிறோம்", "அவர்கள் பள்ளிக்கு செல்கிறார்கள்"], "category": "Activities" },
+                { "id": 20, "text": "அவர்கள் பள்ளிக்கு செல்கிறார்கள்", "options": ["அவர்கள் பள்ளிக்கு செல்கிறார்கள்", "நான் பள்ளிக்கு செல்கிறேன்", "அவள் பள்ளிக்கு செல்கிறாள்", "அவன் பள்ளிக்கு செல்கிறான்"], "category": "Activities" }
             ]
         },
-        "listening": [
-            {
-                "id": 1,
-                "text": "ஆப்பிள்",
-                "options": [
-                    "ஆப்பிள்",
-                    "வாழை",
-                    "திராட்சை",
-                    "மாம்பழம்"
-                ]
-            },
-            {
-                "id": 2,
-                "text": "தண்ணீர்",
-                "options": [
-                    "மண்ணீர்",
-                    "தண்ணீர்",
-                    "கண்ணீர்",
-                    "பன்னீர்"
-                ]
-            },
-            {
-                "id": 3,
-                "text": "புத்தகம்",
-                "options": [
-                    "பத்தகம்",
-                    "புத்தகம்",
-                    "சத்தகம்",
-                    "மத்தகம்"
-                ]
-            },
-            {
-                "id": 4,
-                "text": "வீடு",
-                "options": [
-                    "வீடு",
-                    "கூடு",
-                    "பாடு",
-                    "நாடு"
-                ]
-            },
-            {
-                "id": 5,
-                "text": "பள்ளி",
-                "options": [
-                    "வள்ளி",
-                    "கள்ளி",
-                    "பள்ளி",
-                    "தள்ளி"
-                ]
-            }
-        ],
         "vocabulary": [
-            {
-                "id": 1,
-                "word": "ஆப்பிள்",
-                "meaning": "ஒரு இனிமையான பழம்",
-                "example": "நான் ஒரு ஆப்பிள் சாப்பிட்டேன்."
-            },
-            {
-                "id": 2,
-                "word": "புத்தகம்",
-                "meaning": "நீங்கள் படிக்கும் ஒன்று",
-                "example": "இந்தப் புத்தகம் சுவாரஸ்யமானது."
-            },
-            {
-                "id": 3,
-                "word": "ஆசிரியர்",
-                "meaning": "கற்பிப்பவர்",
-                "example": "என் ஆசிரியர் அன்பானவர்."
-            },
-            {
-                "id": 4,
-                "word": "மகிழ்ச்சி",
-                "meaning": "மகிழ்ச்சியாக உணர்தல்",
-                "example": "அவள் இன்று மகிழ்ச்சியாக இருக்கிறாள்."
-            },
-            {
-                "id": 5,
-                "word": "ஓடு",
-                "meaning": "வேகமாக செல்",
-                "example": "நான் தினமும் காலையில் ஓடுகிறேன்."
-            }
+            { "id": 1, "word": "ஆப்பிள்", "meaning": "ஒரு இனிப்பு பழம்", "example": "நான் ஒரு ஆப்பிள் சாப்பிட்டேன்.", "category": "Food" }
         ]
     },
     "telugu": {
         "pronunciation": {
-            "simple": [
-                { "id": 1, "text": "నమస్కారం", "difficulty": "simple" },
-                { "id": 2, "text": "అవును", "difficulty": "simple" },
-                { "id": 3, "text": "కాదు", "difficulty": "simple" },
-                { "id": 4, "text": "ధన్యవాదాలు", "difficulty": "simple" },
-                { "id": 5, "text": "పిల్లి", "difficulty": "simple" },
-                { "id": 6, "text": "కుక్క", "difficulty": "simple" },
-                { "id": 7, "text": "బాగుంది", "difficulty": "simple" },
-                { "id": 8, "text": "చెడ్డది", "difficulty": "simple" },
-                { "id": 9, "text": "పెద్దదైనది", "difficulty": "simple" },
-                { "id": 10, "text": "చిన్నది", "difficulty": "simple" }
+            "simple": [ { "id": 1, "text": "నమస్కారం" }, { "id": 2, "text": "ధన్యవాదాలు" } ],
+            "medium": [ { "id": 3, "text": "శుభోదయం" } ],
+            "hard": [ { "id": 4, "text": "నేను అలసుకున్నప్పటికీ, సహాయం చేస్తాను" } ]
+        },
+        "listening": {
+            "words": [
+                { "id": 1, "text": "యాపిల్", "options": ["యాపిల్", "అరటి", "ద్రాక్ష", "మామిడి"], "category": "Food" },
+                { "id": 2, "text": "నది", "options": ["నది", "పర్వతం", "వనము", "మైదానం"], "category": "Nature" },
+                { "id": 3, "text": "పరిగెత్తు", "options": ["పరిగెత్తు", "నడుచు", "కూర్చోండి", "తిన్నుకో"], "category": "Actions" },
+                { "id": 4, "text": "పాఠశాల", "options": ["పాఠశాల", "ఆసుపత్రి", "మార్కెట్", "స్టేషన్"], "category": "Places" },
+                { "id": 5, "text": "పుస్తకం", "options": ["పుస్తకం", "కలం", "కాగితం", "నోట్‌బుక్"], "category": "Objects" },
+                { "id": 6, "text": "సంతోషం", "options": ["సంతోషం", "దుఃఖం", "కోపం", "అలసట"], "category": "Feelings" },
+                { "id": 7, "text": "నీలం", "options": ["నీలం", "ఎరుక", "ఆకుపచ్చ", "పసుపు"], "category": "Colors" },
+                { "id": 8, "text": "అమ్మ", "options": ["అమ్మ", "నాన్న", "సోదరి", "సోదరుడు"], "category": "Family" },
+                { "id": 9, "text": "అన్నం", "options": ["అన్నం", "పాలు", "రొట్టె", "పనీర్"], "category": "Food" },
+                { "id": 10, "text": "ఉద్యానవనం", "options": ["ఉద్యానవనం", "పార్క్", "సముద్ర తీరం", "రహదారి"], "category": "Places" },
+                { "id": 11, "text": "చెట్టు", "options": ["చెట్టు", "పూవు", "గడ్డి", "ఘాస్"], "category": "Nature" },
+                { "id": 12, "text": "నడకడం", "options": ["నడకడం", "పరిగెత్తు", "ఉపరుణ", "మారుదుం"], "category": "Actions" },
+                { "id": 13, "text": "ఆడవాడు", "options": ["ఆడవాడు", "బిడ్డ", "మహిళ", "వృద్ధ"], "category": "People" },
+                { "id": 14, "text": "నీరు", "options": ["నీరు", "పాలు", "రసం", "షర్బత్"], "category": "Drinks" },
+                { "id": 15, "text": "నాన్న", "options": ["నాన్న", "అమ్మ", "సోదరుడు", "భార్య"], "category": "Family" }
             ],
-            "medium": [
-                { "id": 11, "text": "శుభోదయం", "difficulty": "medium" },
-                { "id": 12, "text": "మీరు ఎలా ఉన్నారు", "difficulty": "medium" },
-                { "id": 13, "text": "మళ్ళీ కలుద్దాం", "difficulty": "medium" },
-                { "id": 14, "text": "మీ పేరు ఏమిటి", "difficulty": "medium" },
-                { "id": 15, "text": "మిమ్మల్ని కలిసినందుకు సంతోషం", "difficulty": "medium" },
-                { "id": 16, "text": "నేను సంతోషంగా ఉన్నాను", "difficulty": "medium" },
-                { "id": 17, "text": "దయచేసి నన్ను సహాయం చేయండి", "difficulty": "medium" },
-                { "id": 18, "text": "బాత్రూమ్ ఎక్కడ ఉంది", "difficulty": "medium" },
-                { "id": 19, "text": "నాకు ఈ ఆహారం చాలా ఇష్టం", "difficulty": "medium" },
-                { "id": 20, "text": "దీని ధర ఎంత", "difficulty": "medium" }
-            ],
-            "hard": [
-                { "id": 21, "text": "నేను అలసిపోయినా, సహాయం చేస్తాను", "difficulty": "hard" },
-                { "id": 22, "text": "నేను ఆలస్యంగా వచ్చినందున, బస్సు మిస్సయ్యాను", "difficulty": "hard" },
-                { "id": 23, "text": "నేను చదివిన పుస్తకం ఆసక్తికరంగా ఉంది", "difficulty": "hard" },
-                { "id": 24, "text": "వర్షం పడితే, నేను ఇంట్లో ఉంటాను", "difficulty": "hard" },
-                { "id": 25, "text": "ఆమె ఆంగ్లం చాలా బాగా మాట్లాడుతుంది", "difficulty": "hard" },
-                { "id": 26, "text": "నేను మూడు నెలలుగా ఈ భాషను నేర్చుకుంటున్నాను", "difficulty": "hard" },
-                { "id": 27, "text": "నా పార్టీకి రావాలనుకుంటున్నారా", "difficulty": "hard" },
-                { "id": 28, "text": "ఈ ఉదయం వాతావరణం చాలా అందంగా ఉంది", "difficulty": "hard" },
-                { "id": 29, "text": "సమావేశానికి ఆలస్యంగా రావడానికి క్షమించండి", "difficulty": "hard" },
-                { "id": 30, "text": "దయచేసి దీన్ని మరింత నెమ్మదిగా చెప్పండి", "difficulty": "hard" }
+            "sentences": [
+                { "id": 1, "text": "నేను సంతోషంగా ఉన్నాను", "options": ["నేను సంతోషంగా ఉన్నాను", "మేము సంతోషంగా ఉన్నాము", "అతను సంతోషంగా ఉన్నాడు", "వారు సంతోషంగా ఉన్నారు"], "category": "Feelings" },
+                { "id": 2, "text": "మేము సంతోషంగా ఉన్నాము", "options": ["మేము సంతోషంగా ఉన్నాము", "నేను సంతోషంగా ఉన్నాను", "ఆమె సంతోషంగా ఉందా", "మీరు సంతోషంగా ఉన్నారు"], "category": "Feelings" },
+                { "id": 3, "text": "ఆమె సంతోషంగా ఉందా", "options": ["ఆమె సంతోషంగా ఉందా", "అతను సంతోషంగా ఉన్నాడు", "నేను సంతోషంగా ఉన్నాను", "వారు సంతోషంగా ఉన్నారు"], "category": "Feelings" },
+                { "id": 4, "text": "ఇది నా పుస్తకం", "options": ["ఇది నా పుస్తకం", "ఇది మీ పుస్తకం", "ఇది అతని పుస్తకం", "ఇది ఆమె పుస్తకం"], "category": "Possession" },
+                { "id": 5, "text": "ఇది మీ పుస్తకం", "options": ["ఇది మీ పుస్తకం", "ఇది నా పుస్తకం", "ఇది అతని పుస్తకం", "ఇది ఆమె పుస్తకం"], "category": "Possession" },
+                { "id": 6, "text": "ఇది అతని పుస్తకం", "options": ["ఇది అతని పుస్తకం", "ఇది నా పుస్తకం", "ఇది మీ పుస్తకం", "ఇది ఆమె పుస్తకం"], "category": "Possession" },
+                { "id": 7, "text": "వాతావరణం చక్కగా ఉంది", "options": ["వాతావరణం చక్కగా ఉంది", "వాతావరణం చెడ్డది", "వాతావరణం చల్లగా ఉంది", "వాతావరణం వేడిగా ఉంది"], "category": "Weather" },
+                { "id": 8, "text": "నేను కాఫీ ఇష్టం చేస్తాను", "options": ["నేను కాఫీ ఇష్టం చేస్తాను", "నేను చాయ ఇష్టం చేస్తాను", "నేను రసం ఇష్టం చేస్తాను", "నేను నీరు ఇష్టం చేస్తాను"], "category": "Food" },
+                { "id": 9, "text": "మేము కాఫీ ఇష్టం చేస్తాము", "options": ["మేము కాఫీ ఇష్టం చేస్తాము", "మేము చాయ ఇష్టం చేస్తాము", "మేము రసం ఇష్టం చేస్తాము", "మేము నీరు ఇష్టం చేస్తాము"], "category": "Food" },
+                { "id": 10, "text": "వారు కాఫీ ఇష్టం చేస్తారు", "options": ["వారు కాఫీ ఇష్టం చేస్తారు", "వారు చాయ ఇష్టం చేస్తారు", "వారు రసం ఇష్టం చేస్తారు", "వారు నీరు ఇష్టం చేస్తారు"], "category": "Food" },
+                { "id": 11, "text": "ఆమె నా స్నేహితురాలు", "options": ["ఆమె నా స్నేహితురాలు", "ఆమె నా సోదరి", "ఆమె నా అమ్మ", "ఆమె నా ఉపాధ్యాయిక"], "category": "Relationships" },
+                { "id": 12, "text": "అతను నా స్నేహితుడు", "options": ["అతను నా స్నేహితుడు", "అతను నా సోదరుడు", "అతను నా నాన్న", "అతను నా ఉపాధ్యాయుడు"], "category": "Relationships" },
+                { "id": 13, "text": "నేను ఒక ఇంటిలో నివసిస్తున్నాను", "options": ["నేను ఒక ఇంటిలో నివసిస్తున్నాను", "నేను ఫ్లాట్‌లో నివసిస్తున్నాను", "నేను హోటల్‌లో నివసిస్తున్నాను", "నేను పాఠశాలలో నివసిస్తున్నాను"], "category": "Places" },
+                { "id": 14, "text": "మేము ఒక ఇంటిలో నివసిస్తున్నాము", "options": ["మేము ఒక ఇంటిలో నివసిస్తున్నాము", "మేము ఫ్లాట్‌లో నివసిస్తున్నాము", "మేము హోటల్‌లో నివసిస్తున్నాము", "మేము పాఠశాలలో నివసిస్తున్నాము"], "category": "Places" },
+                { "id": 15, "text": "వారు ఒక ఇంటిలో నివసిస్తారు", "options": ["వారు ఒక ఇంటిలో నివసిస్తారు", "వారు ఫ్లాట్‌లో నివసిస్తారు", "వారు హోటల్‌లో నివసిస్తారు", "వారు పాఠశాలలో నివసిస్తారు"], "category": "Places" },
+                { "id": 16, "text": "నేను అలసిపోయాను", "options": ["నేను అలసిపోయాను", "మేము అలసిపోయాము", "అతను అలసిపోయాడు", "ఆమె అలసిపోయిందా"], "category": "Feelings" },
+                { "id": 17, "text": "అతను అలసిపోయాడు", "options": ["అతను అలసిపోయాడు", "నేను అలసిపోయాను", "మేము అలసిపోయాము", "వారు అలసిపోయారు"], "category": "Feelings" },
+                { "id": 18, "text": "నేను పాఠశాలకు వెళ్తాను", "options": ["నేను పాఠశాలకు వెళ్తాను", "మేము పాఠశాలకు వెళ్తాము", "అతను పాఠశాలకు వెళ్తాడు", "వారు పాఠశాలకు వెళ్తారు"], "category": "Activities" },
+                { "id": 19, "text": "ఆమె పాఠశాలకు వెళ్తుంది", "options": ["ఆమె పాఠశాలకు వెళ్తుంది", "నేను పాఠశాలకు వెళ్తాను", "మేము పాఠశాలకు వెళ్తాము", "వారు పాఠశాలకు వెళ్తారు"], "category": "Activities" },
+                { "id": 20, "text": "వారు పాఠశాలకు వెళ్తారు", "options": ["వారు పాఠశాలకు వెళ్తారు", "నేను పాఠశాలకు వెళ్తాను", "ఆమె పాఠశాలకు వెళ్తుంది", "అతను పాఠశాలకు వెళ్తాడు"], "category": "Activities" }
             ]
         },
-        "listening": [
-            {
-                "id": 1,
-                "text": "యాపిల్",
-                "options": [
-                    "యాపిల్",
-                    "అరటి",
-                    "ద్రాక్ష",
-                    "మామిడి"
-                ]
-            },
-            {
-                "id": 2,
-                "text": "నీళ్ళు",
-                "options": [
-                    "నీళ్ళు",
-                    "కళ్ళు",
-                    "బళ్ళు",
-                    "గొళ్ళు"
-                ]
-            },
-            {
-                "id": 3,
-                "text": "పుస్తకం",
-                "options": [
-                    "పుస్తకం",
-                    "గుస్తకం",
-                    "దుస్తకం",
-                    "బస్తకం"
-                ]
-            },
-            {
-                "id": 4,
-                "text": "ఇల్లు",
-                "options": [
-                    "పిల్లు",
-                    "ఇల్లు",
-                    "కిల్లు",
-                    "గిల్లు"
-                ]
-            },
-            {
-                "id": 5,
-                "text": "బడి",
-                "options": [
-                    "పడి",
-                    "కడి",
-                    "బడి",
-                    "గడి"
-                ]
-            }
-        ],
         "vocabulary": [
-            {
-                "id": 1,
-                "word": "యాపిల్",
-                "meaning": "ఒక తీపి పండు",
-                "example": "నేను ఒక యాపిల్ తిన్నాను."
-            },
-            {
-                "id": 2,
-                "word": "పుస్తకం",
-                "meaning": "మీరు చదివేది",
-                "example": "ఈ పుస్తకం ఆసక్తికరంగా ఉంది."
-            },
-            {
-                "id": 3,
-                "word": "ఉపాధ్యాయుడు",
-                "meaning": "బోధించే వ్యక్తి",
-                "example": "నా ఉపాధ్యాయుడు దయగలవాడు."
-            },
-            {
-                "id": 4,
-                "word": "సంతోషం",
-                "meaning": "ఆనందంగా ఉండటం",
-                "example": "ఆమె ఈ రోజు సంతోషంగా ఉంది."
-            },
-            {
-                "id": 5,
-                "word": "పరుగు",
-                "meaning": "వేగంగా కదలడం",
-                "example": "నేను ప్రతి రోజు ఉదయం పరిగెడతాను."
-            }
+            { "id": 1, "word": "యాపిల్", "meaning": "ఒక తీపి ఫలం", "example": "నేను ఒక యాపిల్ తిన్నాను.", "category": "Food" }
         ]
     }
 }
