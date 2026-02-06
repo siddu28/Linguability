@@ -7,6 +7,9 @@ import "./practice.css";
 
 function ListeningPractice() {
     const [list, setList] = useState([]);
+    const [wordsSource, setWordsSource] = useState([]);
+    const [sentencesSource, setSentencesSource] = useState([]);
+    const [category, setCategory] = useState('words');
     const [index, setIndex] = useState(0);
     const [selectedOption, setSelectedOption] = useState(null);
     const [showResult, setShowResult] = useState(false);
@@ -34,14 +37,34 @@ function ListeningPractice() {
         fetch(`http://localhost:3001/api/practice/${lang}/listening`)
             .then(res => res.json())
             .then(data => {
+                // Normalize into separate word and sentence sources so UI can toggle between them
                 if (Array.isArray(data)) {
-                    const shuffledData = data.map(item => ({
+                    // Legacy: treat everything as words
+                    const ws = data.map(item => ({
                         ...item,
-                        shuffledOptions: shuffleArray([...item.options])
+                        shuffledOptions: shuffleArray(Array.isArray(item.options) ? [...item.options] : [])
                     }));
-                    setList(shuffledData);
+                    setWordsSource(ws);
+                    setSentencesSource([]);
+                    setList(ws);
+                } else if (data && (Array.isArray(data.words) || Array.isArray(data.sentences))) {
+                    const ws = (data.words || []).map(item => ({
+                        ...item,
+                        shuffledOptions: shuffleArray(Array.isArray(item.options) ? [...item.options] : [])
+                    }));
+                    const ss = (data.sentences || []).map(item => ({
+                        ...item,
+                        shuffledOptions: shuffleArray(Array.isArray(item.options) ? [...item.options] : [])
+                    }));
+                    setWordsSource(ws);
+                    setSentencesSource(ss);
+                    // default to words if available, else sentences
+                    setList(ws.length ? ws : ss);
+                    setCategory(ws.length ? 'words' : 'sentences');
                 } else {
-                    console.error("Invalid data format received");
+                    console.error("Invalid data format received for listening:", data);
+                    setWordsSource([]);
+                    setSentencesSource([]);
                     setList([]);
                 }
             })
@@ -99,6 +122,24 @@ function ListeningPractice() {
         })));
     };
 
+    const switchCategory = (cat) => {
+        if (cat === category) return;
+        setCategory(cat);
+        setIndex(0);
+        setSelectedOption(null);
+        setShowResult(false);
+        setScore(0);
+        setHasPlayed(false);
+
+        const source = cat === 'words' ? wordsSource : sentencesSource;
+        // ensure shuffledOptions are present
+        const prepared = source.map(item => ({
+            ...item,
+            shuffledOptions: shuffleArray(Array.isArray(item.options) ? [...item.options] : [])
+        }));
+        setList(prepared);
+    }
+
     if (!list.length) return (
         <div className="practice-layout">
             <Navbar />
@@ -137,6 +178,20 @@ function ListeningPractice() {
                         <button className="back-btn" onClick={() => navigate(`/practice?lang=${lang}`)}>
                             <ArrowLeft size={16} /> Back to Practice
                         </button>
+                        <div style={{ marginLeft: 'auto', display: 'flex', gap: '0.5rem' }}>
+                            <button
+                                className={`category-toggle ${category === 'words' ? 'active' : ''}`}
+                                onClick={() => switchCategory('words')}
+                            >
+                                Words
+                            </button>
+                            <button
+                                className={`category-toggle ${category === 'sentences' ? 'active' : ''}`}
+                                onClick={() => switchCategory('sentences')}
+                            >
+                                Sentences
+                            </button>
+                        </div>
                     </div>
 
                     {!isComplete ? (
