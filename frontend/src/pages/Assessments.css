@@ -368,3 +368,33 @@
 [data-theme="dark"] .locked-overlay {
     background: rgba(0, 0, 0, 0.75);
 }
+
+/* Dark Mode Styles */
+[data-theme="dark"] .assessments-page {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .assessments-title,
+[data-theme="dark"] .assessment-title,
+[data-theme="dark"] .stat-value {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .assessment-card {
+    background-color: #1E1E1E;
+    border: 2px solid #e91e63;
+}
+
+[data-theme="dark"] .filter-tab {
+    color: #ffffff;
+    border: 1px solid #e91e63;
+}
+
+[data-theme="dark"] .filter-tab:hover {
+    background-color: #2a2a2a;
+}
+
+[data-theme="dark"] .filter-tab.active {
+    background-color: #e91e63;
+    border-color: #e91e63;
+}

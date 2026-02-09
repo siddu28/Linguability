@@ -5,3 +5,10 @@
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--color-border);
 }
+
+/* Dark Mode */
+[data-theme="dark"] .card {
+    background-color: #1E1E1E;
+    border: 2px solid #e91e63;
+    color: #ffffff;
+}

@@ -205,10 +205,10 @@ const timeOptions = [
 ]
 
 const preferenceOptions = [
-    { id: 'audio', title: 'Audio Focus', subtitle: 'Prefer listening exercises', icon: icons.audio },
-    { id: 'visual', title: 'Visual Learning', subtitle: 'Learn better with images', icon: icons.visual },
-    { id: 'dyslexia', title: 'Dyslexia Support', subtitle: 'Specialized fonts & spacing', icon: icons.dyslexia },
-    { id: 'tts', title: 'Text-to-Speech', subtitle: 'Have content read aloud', icon: icons.tts }
+    { id: 'audio', title: 'Listen & Learn', subtitle: 'I absorb more through audio', icon: icons.audio },
+    { id: 'visual', title: 'See It to Learn It', subtitle: 'Images & visuals help me focus', icon: icons.visual },
+    { id: 'dyslexia', title: 'Reading Comfort', subtitle: 'Easier-to-read fonts & spacing', icon: icons.dyslexia },
+    { id: 'tts', title: 'Read Aloud', subtitle: 'Hear the content spoken to me', icon: icons.tts }
 ]
 
 function Onboarding() {

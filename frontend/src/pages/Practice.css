@@ -56,3 +56,18 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Dark Mode Styles */
+[data-theme="dark"] .practice-page {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .practice-title,
+[data-theme="dark"] .practice-card h2 {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .practice-card {
+    background-color: #1E1E1E;
+    border: 2px solid #e91e63;
+}

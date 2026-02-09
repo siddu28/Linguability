@@ -292,3 +292,24 @@
         gap: var(--spacing-md);
     }
 }
+
+/* Dark Mode Styles */
+[data-theme="dark"] .settings-page {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .settings-title,
+[data-theme="dark"] .settings-section-title,
+[data-theme="dark"] .setting-label,
+[data-theme="dark"] .info-value {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .settings-card {
+    background-color: #1E1E1E;
+    border: 2px solid #e91e63;
+}
+
+[data-theme="dark"] .info-row {
+    border-bottom-color: #e91e63;
+}

@@ -730,3 +730,64 @@
     animation: none !important;
     transition: none !important;
 }
+
+/* Dark Mode Styles */
+[data-theme="dark"] .onboarding-page {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #1a1a2e 100%);
+}
+
+[data-theme="dark"] .ob-container {
+    background: rgba(30, 30, 30, 0.95);
+    border: 2px solid #e91e63;
+}
+
+[data-theme="dark"] .ob-welcome-title,
+[data-theme="dark"] .ob-step-title,
+[data-theme="dark"] .ob-card-label {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .ob-welcome-subtitle,
+[data-theme="dark"] .ob-step-description {
+    color: #b0b0b0;
+}
+
+[data-theme="dark"] .ob-feature {
+    background: #2a2a2a;
+    border: 1px solid #e91e63;
+}
+
+[data-theme="dark"] .ob-feature span:last-child {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .ob-card {
+    background: #2a2a2a;
+    border: 2px solid #e91e63;
+}
+
+[data-theme="dark"] .ob-card:hover {
+    background: #3a3a3a;
+}
+
+[data-theme="dark"] .ob-card.selected {
+    background: rgba(233, 30, 99, 0.2);
+}
+
+[data-theme="dark"] .ob-toggle-container {
+    background: #2a2a2a;
+    border: 1px solid #e91e63;
+}
+
+[data-theme="dark"] .ob-toggle-label {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .ob-back-btn {
+    color: #ffffff;
+    border: 1px solid #e91e63;
+}
+
+[data-theme="dark"] .ob-back-btn:hover {
+    background: #2a2a2a;
+}

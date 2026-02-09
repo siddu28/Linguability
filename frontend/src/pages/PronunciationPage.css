@@ -423,3 +423,25 @@
         flex-direction: column;
     }
 }
+
+/* Dark Mode Styles */
+[data-theme="dark"] .pronunciation-page {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .pronunciation-title,
+[data-theme="dark"] .word-display,
+[data-theme="dark"] .results-title {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .pronunciation-intro-card,
+[data-theme="dark"] .pronunciation-results-card,
+[data-theme="dark"] .pronunciation-card {
+    background-color: #1E1E1E;
+    border: 2px solid #e91e63;
+}
+
+[data-theme="dark"] .record-btn {
+    border: 2px solid #e91e63;
+}

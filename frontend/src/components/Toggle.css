@@ -72,3 +72,12 @@
     outline: 2px solid var(--color-primary);
     outline-offset: 2px;
 }
+
+/* Dark Mode Styles */
+[data-theme="dark"] .toggle-label {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .toggle-slider {
+    background-color: #3a3a3a;
+}
