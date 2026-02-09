@@ -229,10 +229,9 @@ function Onboarding() {
     // Settings for personalized experience (Step 6)
     const [settings, setSettings] = useState({
         focusMode: false,
-        largerText: false,
-        highContrast: false,
-        reducedMotion: false,
-        autoPlayAudio: true
+        textSize: 'medium', // small, medium, large, extra-large
+        lineSpacing: 'normal', // compact, normal, relaxed, spacious
+        highContrast: false
     })
 
     const totalSteps = 6
@@ -260,8 +259,8 @@ function Onboarding() {
         setSettings(prev => ({
             ...prev,
             focusMode: prefs.includes('dyslexia') || prefs.includes('audio'),
-            largerText: prefs.includes('dyslexia') || prefs.includes('visual'),
-            autoPlayAudio: prefs.includes('audio') || prefs.includes('tts')
+            textSize: prefs.includes('dyslexia') || prefs.includes('visual') ? 'large' : 'medium',
+            lineSpacing: prefs.includes('dyslexia') ? 'spacious' : 'normal'
         }))
     }, [selections.preferences])
 
@@ -311,12 +310,11 @@ function Onboarding() {
 
                 await upsertUserSettings(user.id, {
                     focus_mode: settings.focusMode,
-                    font_size: settings.largerText ? 'large' : 'medium',
+                    font_size: settings.textSize,
+                    line_spacing: settings.lineSpacing,
                     font_family: selections.preferences.includes('dyslexia') ? 'opendyslexic' : 'poppins',
                     text_to_speech: selections.preferences.includes('tts'),
-                    high_contrast: settings.highContrast,
-                    reduced_motion: settings.reducedMotion,
-                    auto_play_audio: settings.autoPlayAudio
+                    high_contrast: settings.highContrast
                 })
             }
 
@@ -474,10 +472,13 @@ function Onboarding() {
 
     // Render Personalized Experience Step
     const renderPersonalize = () => {
+        const textSizeMap = { 'small': '0.875rem', 'medium': '1rem', 'large': '1.25rem', 'extra-large': '1.5rem' }
+        const lineSpacingMap = { 'compact': '1.4', 'normal': '1.6', 'relaxed': '1.8', 'spacious': '2.2' }
+
         const getLessonStyle = () => ({
-            fontSize: settings.largerText ? '1.25rem' : '1rem',
+            fontSize: textSizeMap[settings.textSize] || '1rem',
             letterSpacing: selections.preferences.includes('dyslexia') ? '0.05em' : 'normal',
-            lineHeight: selections.preferences.includes('dyslexia') ? '2' : '1.6',
+            lineHeight: lineSpacingMap[settings.lineSpacing] || '1.6',
             fontFamily: selections.preferences.includes('dyslexia')
                 ? '"OpenDyslexic", "Comic Sans MS", sans-serif'
                 : '"Poppins", sans-serif'
@@ -487,7 +488,6 @@ function Onboarding() {
             let classes = 'ob-lesson-preview'
             if (settings.focusMode) classes += ' focus-mode'
             if (settings.highContrast) classes += ' high-contrast'
-            if (settings.reducedMotion) classes += ' reduced-motion'
             return classes
         }
 
@@ -535,6 +535,7 @@ function Onboarding() {
                         <p className="ob-settings-desc">Customize your experience anytime</p>
 
                         <div className="ob-settings-list">
+                            {/* Focus Mode Toggle */}
                             <div className="ob-setting-row">
                                 <div className="ob-setting-info">
                                     <span className="ob-setting-name">Focus Mode</span>
@@ -548,19 +549,45 @@ function Onboarding() {
                                 </button>
                             </div>
 
-                            <div className="ob-setting-row">
+                            {/* Text Size Selector */}
+                            <div className="ob-setting-row ob-setting-column">
                                 <div className="ob-setting-info">
-                                    <span className="ob-setting-name">Larger Text</span>
-                                    <span className="ob-setting-desc">Increase font size</span>
+                                    <span className="ob-setting-name">Text Size</span>
+                                    <span className="ob-setting-desc">Choose your preferred reading size</span>
                                 </div>
-                                <button
-                                    className={`ob-toggle ${settings.largerText ? 'active' : ''}`}
-                                    onClick={() => toggleSetting('largerText')}
-                                >
-                                    <span className="ob-toggle-knob"></span>
-                                </button>
+                                <div className="ob-option-buttons">
+                                    {['small', 'medium', 'large', 'extra-large'].map(size => (
+                                        <button
+                                            key={size}
+                                            className={`ob-option-btn ${settings.textSize === size ? 'active' : ''}`}
+                                            onClick={() => setSettings(prev => ({ ...prev, textSize: size }))}
+                                        >
+                                            {size === 'extra-large' ? 'XL' : size.charAt(0).toUpperCase() + size.slice(1)}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
 
+                            {/* Line Spacing Selector */}
+                            <div className="ob-setting-row ob-setting-column">
+                                <div className="ob-setting-info">
+                                    <span className="ob-setting-name">Line Spacing</span>
+                                    <span className="ob-setting-desc">Adjust space between lines</span>
+                                </div>
+                                <div className="ob-option-buttons">
+                                    {['compact', 'normal', 'relaxed', 'spacious'].map(spacing => (
+                                        <button
+                                            key={spacing}
+                                            className={`ob-option-btn ${settings.lineSpacing === spacing ? 'active' : ''}`}
+                                            onClick={() => setSettings(prev => ({ ...prev, lineSpacing: spacing }))}
+                                        >
+                                            {spacing.charAt(0).toUpperCase() + spacing.slice(1)}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* High Contrast Toggle */}
                             <div className="ob-setting-row">
                                 <div className="ob-setting-info">
                                     <span className="ob-setting-name">High Contrast</span>
@@ -569,32 +596,6 @@ function Onboarding() {
                                 <button
                                     className={`ob-toggle ${settings.highContrast ? 'active' : ''}`}
                                     onClick={() => toggleSetting('highContrast')}
-                                >
-                                    <span className="ob-toggle-knob"></span>
-                                </button>
-                            </div>
-
-                            <div className="ob-setting-row">
-                                <div className="ob-setting-info">
-                                    <span className="ob-setting-name">Reduced Motion</span>
-                                    <span className="ob-setting-desc">Less animations</span>
-                                </div>
-                                <button
-                                    className={`ob-toggle ${settings.reducedMotion ? 'active' : ''}`}
-                                    onClick={() => toggleSetting('reducedMotion')}
-                                >
-                                    <span className="ob-toggle-knob"></span>
-                                </button>
-                            </div>
-
-                            <div className="ob-setting-row">
-                                <div className="ob-setting-info">
-                                    <span className="ob-setting-name">Auto-Play Audio</span>
-                                    <span className="ob-setting-desc">Play sounds automatically</span>
-                                </div>
-                                <button
-                                    className={`ob-toggle ${settings.autoPlayAudio ? 'active' : ''}`}
-                                    onClick={() => toggleSetting('autoPlayAudio')}
                                 >
                                     <span className="ob-toggle-knob"></span>
                                 </button>

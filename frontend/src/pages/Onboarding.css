@@ -635,6 +635,46 @@
     transform: translateX(24px);
 }
 
+/* Option Buttons (for Text Size, Line Spacing) */
+.ob-setting-column {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.ob-option-buttons {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.ob-option-btn {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    background: #f5f0f2;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #666;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+}
+
+.ob-option-btn:hover {
+    background: #fce4ec;
+    border-color: #f8bbd9;
+    color: #c2185b;
+}
+
+.ob-option-btn.active {
+    background: linear-gradient(135deg, #fce4ec 0%, #f8bbd9 100%);
+    border-color: #e91e63;
+    color: #c2185b;
+    font-weight: 600;
+}
+
 /* ===================================
    Responsive Design
    =================================== */
