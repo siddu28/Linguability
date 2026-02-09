@@ -1,0 +1,414 @@
+.achievements {
+    background-color: var(--color-white);
+    border-radius: var(--radius-lg);
+    padding: var(--spacing-lg);
+    border: 1px solid var(--color-border);
+}
+
+/* Header with XP and Level */
+.achievements-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.xp-display {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.xp-icon-wrapper {
+    width: 48px;
+    height: 48px;
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, #F59E0B, #D97706);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.xp-icon {
+    color: white;
+}
+
+.xp-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.xp-amount {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+}
+
+.xp-label {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+/* Level Display */
+.level-display {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.level-badge {
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-full);
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-dark));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(233, 30, 140, 0.3);
+}
+
+.level-number {
+    color: white;
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+}
+
+.level-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.level-title {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-primary);
+}
+
+.level-progress {
+    width: 100px;
+    height: 6px;
+    background-color: var(--color-background);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.level-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+    border-radius: var(--radius-full);
+    transition: width var(--transition-slow);
+}
+
+.level-next {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+/* Badges Count */
+.badges-count {
+    margin-bottom: var(--spacing-md);
+}
+
+.badges-unlocked {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
+}
+
+.badges-total {
+    font-size: var(--font-size-base);
+    color: var(--color-text-muted);
+}
+
+/* Badges Grid */
+.badges-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--spacing-md);
+}
+
+.badge-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-md);
+    border-radius: var(--radius-lg);
+    border: 2px solid var(--badge-color, var(--color-border));
+    background: var(--badge-bg, var(--color-background));
+    transition: all var(--transition-fast);
+    cursor: pointer;
+}
+
+.badge-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+}
+
+.badge-item.locked {
+    opacity: 0.5;
+    filter: grayscale(0.8);
+}
+
+.badge-item.locked:hover {
+    opacity: 0.7;
+    filter: grayscale(0.5);
+}
+
+.badge-icon-wrapper {
+    width: 56px;
+    height: 56px;
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--badge-bg);
+    border: 2px solid var(--badge-color);
+}
+
+.badge-item.unlocked .badge-icon-wrapper {
+    animation: badge-glow 2s ease-in-out infinite;
+}
+
+@keyframes badge-glow {
+
+    0%,
+    100% {
+        box-shadow: 0 0 8px var(--badge-color);
+    }
+
+    50% {
+        box-shadow: 0 0 20px var(--badge-color);
+    }
+}
+
+.badge-icon {
+    color: var(--badge-color);
+}
+
+.locked-icon {
+    color: var(--color-text-muted);
+}
+
+.badge-name {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-primary);
+    text-align: center;
+}
+
+.badge-xp {
+    font-size: var(--font-size-xs);
+    color: var(--badge-color);
+    font-weight: var(--font-weight-semibold);
+}
+
+/* Rarity Specific Styles */
+.badge-item.legendary .badge-icon-wrapper {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(234, 88, 12, 0.2));
+}
+
+.badge-item.epic .badge-icon-wrapper {
+    background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(139, 92, 246, 0.2));
+}
+
+/* Badge Modal */
+.badge-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.badge-modal {
+    background: var(--color-white);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-xl);
+    max-width: 320px;
+    width: 90%;
+    text-align: center;
+    position: relative;
+    border: 3px solid var(--badge-color);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.modal-close {
+    position: absolute;
+    top: var(--spacing-sm);
+    right: var(--spacing-md);
+    font-size: 24px;
+    color: var(--color-text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color var(--transition-fast);
+}
+
+.modal-close:hover {
+    color: var(--color-text-primary);
+}
+
+.modal-badge-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: var(--radius-full);
+    background: var(--badge-bg);
+    border: 3px solid var(--badge-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto var(--spacing-md);
+    color: var(--badge-color);
+}
+
+.modal-badge-icon.unlocked {
+    animation: unlockPulse 0.6s ease-out;
+}
+
+@keyframes unlockPulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.modal-badge-name {
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-primary);
+    margin-bottom: var(--spacing-xs);
+}
+
+.modal-rarity {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    padding: 4px 12px;
+    border-radius: var(--radius-full);
+    display: inline-block;
+    margin-bottom: var(--spacing-md);
+}
+
+.modal-rarity.common {
+    background: rgba(156, 163, 175, 0.15);
+    color: #6B7280;
+}
+
+.modal-rarity.uncommon {
+    background: rgba(34, 197, 94, 0.15);
+    color: #16A34A;
+}
+
+.modal-rarity.rare {
+    background: rgba(59, 130, 246, 0.15);
+    color: #2563EB;
+}
+
+.modal-rarity.epic {
+    background: rgba(168, 85, 247, 0.15);
+    color: #9333EA;
+}
+
+.modal-rarity.legendary {
+    background: rgba(245, 158, 11, 0.15);
+    color: #D97706;
+}
+
+.modal-badge-desc {
+    font-size: var(--font-size-base);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--spacing-md);
+}
+
+.modal-xp {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    color: #F59E0B;
+    font-weight: var(--font-weight-semibold);
+    margin-bottom: var(--spacing-md);
+}
+
+.modal-status {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-medium);
+}
+
+.modal-status.unlocked {
+    background: rgba(34, 197, 94, 0.15);
+    color: #16A34A;
+}
+
+.modal-status.locked {
+    background: var(--color-background);
+    color: var(--color-text-muted);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .badges-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .achievements-header {
+        flex-direction: column;
+        gap: var(--spacing-md);
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 480px) {
+    .badges-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .badge-item {
+        padding: var(--spacing-sm);
+    }
+
+    .badge-icon-wrapper {
+        width: 44px;
+        height: 44px;
+    }
+}

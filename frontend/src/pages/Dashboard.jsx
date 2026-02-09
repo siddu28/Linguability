@@ -17,6 +17,9 @@ import {
 import Navbar from '../components/Navbar'
 import Card from '../components/Card'
 import Button from '../components/Button'
+import StreakCalendar from '../components/StreakCalendar'
+import Achievements from '../components/Achievements'
+import ProgressRing from '../components/ProgressRing'
 import { useAuth } from '../context/AuthContext'
 import { getLessonProgress, getProfile } from '../lib/database'
 import './Dashboard.css'
@@ -30,11 +33,14 @@ function Dashboard() {
         bestStreak: 0,
         lessonsCompleted: 0,
         timeSpent: 0,
-        weeklyGoal: 0
+        weeklyGoal: 0,
+        languagesLearned: 0,
+        completedLanguages: 0
     })
     const [currentLesson, setCurrentLesson] = useState(null)
     const [recommendations, setRecommendations] = useState([])
     const [userName, setUserName] = useState('')
+    const [activityDates, setActivityDates] = useState([])
 
     // Lesson sections for mapping
     const lessonSections = {
@@ -122,12 +128,30 @@ function Dashboard() {
                 // Estimate time spent (5 min per completed lesson, 2 min per in-progress)
                 const timeSpent = (completedLessons.length * 5) + (inProgressLessons.length * 2)
 
+                // Extract activity dates for calendar
+                const allActivityDates = progress.map(p => p.last_accessed_at)
+                setActivityDates(allActivityDates)
+
+                // Calculate languages learned for achievements
+                const languagesWithProgress = new Set()
+                const languagesCompleted = {}
+                progress.forEach(p => {
+                    const [lang] = p.lesson_id.split('_')
+                    languagesWithProgress.add(lang)
+                    if (p.status === 'completed') {
+                        languagesCompleted[lang] = (languagesCompleted[lang] || 0) + 1
+                    }
+                })
+                const completedLanguagesCount = Object.values(languagesCompleted).filter(count => count >= 15).length
+
                 setStats({
                     streak,
                     bestStreak,
                     lessonsCompleted: completedLessons.length,
                     timeSpent,
-                    weeklyGoal
+                    weeklyGoal,
+                    languagesLearned: languagesWithProgress.size,
+                    completedLanguages: completedLanguagesCount
                 })
 
                 // Find most recent in-progress or completed lesson for "Continue Learning"
@@ -382,7 +406,36 @@ function Dashboard() {
                             ))}
                         </div>
                     </Card>
+
+                    {/* Weekly Progress Ring */}
+                    <Card className="progress-ring-card">
+                        <ProgressRing
+                            progress={stats.weeklyGoal}
+                            goal={7}
+                            current={Math.round((stats.weeklyGoal / 100) * 7)}
+                            label="Weekly Goal"
+                            sublabel="Complete 7 lessons this week"
+                            size={140}
+                        />
+                    </Card>
                 </div>
+
+                {/* Streak Calendar */}
+                <Card className="streak-calendar-card">
+                    <StreakCalendar
+                        activityDates={activityDates}
+                        currentStreak={stats.streak}
+                    />
+                </Card>
+
+                {/* Achievements */}
+                <Card className="achievements-card">
+                    <div className="section-header">
+                        <Trophy size={20} />
+                        <h2 className="section-title">Achievements</h2>
+                    </div>
+                    <Achievements stats={stats} />
+                </Card>
             </main>
         </div>
     )

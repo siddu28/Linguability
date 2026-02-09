@@ -80,8 +80,9 @@
 /* Dashboard Grid */
 .dashboard-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr auto;
     gap: var(--spacing-lg);
+    align-items: start;
 }
 
 .section-header {
@@ -213,6 +214,33 @@
     color: var(--color-text-muted);
 }
 
+/* Progress Ring Card */
+.progress-ring-card {
+    height: fit-content;
+}
+
+.progress-ring-card .progress-ring-container {
+    padding: var(--spacing-md);
+}
+
+/* Streak Calendar Card */
+.streak-calendar-card {
+    margin-top: var(--spacing-xl);
+}
+
+.streak-calendar-card .card-content {
+    padding: 0;
+}
+
+/* Achievements Card */
+.achievements-card {
+    margin-top: var(--spacing-xl);
+}
+
+.achievements-card .achievements {
+    margin-top: var(--spacing-md);
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
     .stats-grid {
@@ -220,7 +248,12 @@
     }
 
     .dashboard-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .progress-ring-card {
+        grid-column: span 2;
+        justify-self: center;
     }
 }
 
@@ -232,5 +265,13 @@
     .dashboard-header {
         flex-direction: column;
         gap: var(--spacing-md);
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .progress-ring-card {
+        grid-column: span 1;
     }
 }
