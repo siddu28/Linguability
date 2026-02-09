@@ -381,23 +381,28 @@
    =================================== */
 .ob-personalize {
     width: 100%;
-    max-width: 850px;
+    max-width: 900px;
 }
 
 .ob-personalize-content {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1.5rem;
-    margin-top: 1.5rem;
+    margin-top: 1rem;
+    align-items: start;
+    max-height: 420px;
 }
 
-/* Lesson Preview */
+/* Lesson Preview - Fixed/Sticky */
 .ob-lesson-preview {
     background: white;
     border-radius: 20px;
-    padding: 1.5rem;
+    padding: 1.25rem;
     border: 2px solid #f0e4e8;
     transition: all 0.3s ease;
+    position: sticky;
+    top: 0;
+    height: fit-content;
 }
 
 .ob-lesson-preview.focus-mode {
@@ -541,12 +546,30 @@
     height: 100%;
 }
 
-/* Settings Panel */
+/* Settings Panel - Scrollable */
 .ob-settings-panel {
     background: white;
     border-radius: 20px;
-    padding: 1.5rem;
+    padding: 1.25rem;
     border: 2px solid #f0e4e8;
+    max-height: 420px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #e91e63 #f5f0f2;
+}
+
+.ob-settings-panel::-webkit-scrollbar {
+    width: 6px;
+}
+
+.ob-settings-panel::-webkit-scrollbar-track {
+    background: #f5f0f2;
+    border-radius: 3px;
+}
+
+.ob-settings-panel::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%);
+    border-radius: 3px;
 }
 
 .ob-settings-title {
@@ -565,16 +588,16 @@
 .ob-settings-list {
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
+    gap: 0.15rem;
 }
 
 .ob-setting-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.75rem 0;
+    padding: 0.5rem 0;
     border-bottom: 1px solid #f5f0f2;
-    gap: 1rem;
+    gap: 0.75rem;
 }
 
 .ob-setting-row:last-child {
@@ -635,26 +658,44 @@
     transform: translateX(24px);
 }
 
+/* Settings Section Labels */
+.ob-settings-section-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #c2185b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 0.5rem 0 0.15rem 0;
+    margin-top: 0.35rem;
+    border-top: 1px solid #f5f0f2;
+}
+
+.ob-settings-section-label:first-child {
+    margin-top: 0;
+    border-top: none;
+    padding-top: 0;
+}
+
 /* Option Buttons (for Text Size, Line Spacing) */
 .ob-setting-column {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.75rem;
+    gap: 0.5rem;
 }
 
 .ob-option-buttons {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.35rem;
     width: 100%;
 }
 
 .ob-option-btn {
     flex: 1;
-    padding: 0.5rem 0.75rem;
+    padding: 0.4rem 0.5rem;
     background: #f5f0f2;
     border: 2px solid transparent;
-    border-radius: 8px;
-    font-size: 0.8rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
     font-weight: 500;
     color: #666;
     cursor: pointer;

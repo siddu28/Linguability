@@ -230,8 +230,12 @@ function Onboarding() {
     const [settings, setSettings] = useState({
         focusMode: false,
         textSize: 'medium', // small, medium, large, extra-large
+        fontFamily: 'system', // system, opendyslexic, serif
         lineSpacing: 'normal', // compact, normal, relaxed, spacious
-        highContrast: false
+        letterSpacing: 'normal', // tight, normal, wide, extra-wide
+        highContrast: false,
+        readingSpeed: 'normal', // slow, normal, fast, very-fast
+        screenReaderFriendly: false
     })
 
     const totalSteps = 6
@@ -260,7 +264,11 @@ function Onboarding() {
             ...prev,
             focusMode: prefs.includes('dyslexia') || prefs.includes('audio'),
             textSize: prefs.includes('dyslexia') || prefs.includes('visual') ? 'large' : 'medium',
-            lineSpacing: prefs.includes('dyslexia') ? 'spacious' : 'normal'
+            fontFamily: prefs.includes('dyslexia') ? 'opendyslexic' : 'system',
+            lineSpacing: prefs.includes('dyslexia') ? 'spacious' : 'normal',
+            letterSpacing: prefs.includes('dyslexia') ? 'wide' : 'normal',
+            readingSpeed: prefs.includes('tts') ? 'slow' : 'normal',
+            screenReaderFriendly: prefs.includes('tts') || prefs.includes('audio')
         }))
     }, [selections.preferences])
 
@@ -311,10 +319,13 @@ function Onboarding() {
                 await upsertUserSettings(user.id, {
                     focus_mode: settings.focusMode,
                     font_size: settings.textSize,
+                    font_family: settings.fontFamily,
                     line_spacing: settings.lineSpacing,
-                    font_family: selections.preferences.includes('dyslexia') ? 'opendyslexic' : 'poppins',
-                    text_to_speech: selections.preferences.includes('tts'),
-                    high_contrast: settings.highContrast
+                    letter_spacing: settings.letterSpacing,
+                    high_contrast: settings.highContrast,
+                    reading_speed: settings.readingSpeed,
+                    screen_reader_friendly: settings.screenReaderFriendly,
+                    text_to_speech: selections.preferences.includes('tts')
                 })
             }
 
@@ -474,14 +485,18 @@ function Onboarding() {
     const renderPersonalize = () => {
         const textSizeMap = { 'small': '0.875rem', 'medium': '1rem', 'large': '1.25rem', 'extra-large': '1.5rem' }
         const lineSpacingMap = { 'compact': '1.4', 'normal': '1.6', 'relaxed': '1.8', 'spacious': '2.2' }
+        const letterSpacingMap = { 'tight': '-0.025em', 'normal': '0', 'wide': '0.05em', 'extra-wide': '0.1em' }
+        const fontFamilyMap = {
+            'system': '"Poppins", -apple-system, BlinkMacSystemFont, sans-serif',
+            'opendyslexic': '"OpenDyslexic", "Comic Sans MS", sans-serif',
+            'serif': 'Georgia, "Times New Roman", serif'
+        }
 
         const getLessonStyle = () => ({
             fontSize: textSizeMap[settings.textSize] || '1rem',
-            letterSpacing: selections.preferences.includes('dyslexia') ? '0.05em' : 'normal',
+            letterSpacing: letterSpacingMap[settings.letterSpacing] || '0',
             lineHeight: lineSpacingMap[settings.lineSpacing] || '1.6',
-            fontFamily: selections.preferences.includes('dyslexia')
-                ? '"OpenDyslexic", "Comic Sans MS", sans-serif'
-                : '"Poppins", sans-serif'
+            fontFamily: fontFamilyMap[settings.fontFamily] || fontFamilyMap.system
         })
 
         const getPreviewClass = () => {
@@ -535,6 +550,9 @@ function Onboarding() {
                         <p className="ob-settings-desc">Customize your experience anytime</p>
 
                         <div className="ob-settings-list">
+                            {/* === VISUAL SETTINGS === */}
+                            <div className="ob-settings-section-label">👁️ Visual</div>
+
                             {/* Focus Mode Toggle */}
                             <div className="ob-setting-row">
                                 <div className="ob-setting-info">
@@ -549,11 +567,25 @@ function Onboarding() {
                                 </button>
                             </div>
 
+                            {/* High Contrast Toggle */}
+                            <div className="ob-setting-row">
+                                <div className="ob-setting-info">
+                                    <span className="ob-setting-name">High Contrast</span>
+                                    <span className="ob-setting-desc">Sharper text visibility</span>
+                                </div>
+                                <button
+                                    className={`ob-toggle ${settings.highContrast ? 'active' : ''}`}
+                                    onClick={() => toggleSetting('highContrast')}
+                                >
+                                    <span className="ob-toggle-knob"></span>
+                                </button>
+                            </div>
+
                             {/* Text Size Selector */}
                             <div className="ob-setting-row ob-setting-column">
                                 <div className="ob-setting-info">
                                     <span className="ob-setting-name">Text Size</span>
-                                    <span className="ob-setting-desc">Choose your preferred reading size</span>
+                                    <span className="ob-setting-desc">Choose your reading size</span>
                                 </div>
                                 <div className="ob-option-buttons">
                                     {['small', 'medium', 'large', 'extra-large'].map(size => (
@@ -568,11 +600,37 @@ function Onboarding() {
                                 </div>
                             </div>
 
+                            {/* === READING SETTINGS === */}
+                            <div className="ob-settings-section-label">📖 Reading</div>
+
+                            {/* Font Family Selector */}
+                            <div className="ob-setting-row ob-setting-column">
+                                <div className="ob-setting-info">
+                                    <span className="ob-setting-name">Font Style</span>
+                                    <span className="ob-setting-desc">Choose easier-to-read fonts</span>
+                                </div>
+                                <div className="ob-option-buttons">
+                                    {[
+                                        { id: 'system', label: 'Default' },
+                                        { id: 'opendyslexic', label: 'Dyslexic-Friendly' },
+                                        { id: 'serif', label: 'Serif' }
+                                    ].map(font => (
+                                        <button
+                                            key={font.id}
+                                            className={`ob-option-btn ${settings.fontFamily === font.id ? 'active' : ''}`}
+                                            onClick={() => setSettings(prev => ({ ...prev, fontFamily: font.id }))}
+                                        >
+                                            {font.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
                             {/* Line Spacing Selector */}
                             <div className="ob-setting-row ob-setting-column">
                                 <div className="ob-setting-info">
                                     <span className="ob-setting-name">Line Spacing</span>
-                                    <span className="ob-setting-desc">Adjust space between lines</span>
+                                    <span className="ob-setting-desc">Space between text lines</span>
                                 </div>
                                 <div className="ob-option-buttons">
                                     {['compact', 'normal', 'relaxed', 'spacious'].map(spacing => (
@@ -587,15 +645,66 @@ function Onboarding() {
                                 </div>
                             </div>
 
-                            {/* High Contrast Toggle */}
+                            {/* Letter Spacing Selector */}
+                            <div className="ob-setting-row ob-setting-column">
+                                <div className="ob-setting-info">
+                                    <span className="ob-setting-name">Letter Spacing</span>
+                                    <span className="ob-setting-desc">Space between letters</span>
+                                </div>
+                                <div className="ob-option-buttons">
+                                    {[
+                                        { id: 'tight', label: 'Tight' },
+                                        { id: 'normal', label: 'Normal' },
+                                        { id: 'wide', label: 'Wide' },
+                                        { id: 'extra-wide', label: 'Extra' }
+                                    ].map(spacing => (
+                                        <button
+                                            key={spacing.id}
+                                            className={`ob-option-btn ${settings.letterSpacing === spacing.id ? 'active' : ''}`}
+                                            onClick={() => setSettings(prev => ({ ...prev, letterSpacing: spacing.id }))}
+                                        >
+                                            {spacing.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* === AUDIO SETTINGS === */}
+                            <div className="ob-settings-section-label">🔊 Audio & Voice</div>
+
+                            {/* Reading Speed Selector */}
+                            <div className="ob-setting-row ob-setting-column">
+                                <div className="ob-setting-info">
+                                    <span className="ob-setting-name">Reading Speed</span>
+                                    <span className="ob-setting-desc">How fast text is read aloud</span>
+                                </div>
+                                <div className="ob-option-buttons">
+                                    {[
+                                        { id: 'slow', label: '0.75x' },
+                                        { id: 'normal', label: '1x' },
+                                        { id: 'fast', label: '1.25x' },
+                                        { id: 'very-fast', label: '1.5x' }
+                                    ].map(speed => (
+                                        <button
+                                            key={speed.id}
+                                            className={`ob-option-btn ${settings.readingSpeed === speed.id ? 'active' : ''}`}
+                                            onClick={() => setSettings(prev => ({ ...prev, readingSpeed: speed.id }))}
+                                        >
+                                            {speed.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Screen Reader Friendly Toggle */}
                             <div className="ob-setting-row">
                                 <div className="ob-setting-info">
-                                    <span className="ob-setting-name">High Contrast</span>
-                                    <span className="ob-setting-desc">Better visibility</span>
+                                    <span className="ob-setting-name">Screen Reader Mode</span>
+                                    <span className="ob-setting-desc">Optimized for assistive tech</span>
                                 </div>
                                 <button
-                                    className={`ob-toggle ${settings.highContrast ? 'active' : ''}`}
-                                    onClick={() => toggleSetting('highContrast')}
+                                    className={`ob-toggle ${settings.screenReaderFriendly ? 'active' : ''}`}
+                                    onClick={() => toggleSetting('screenReaderFriendly')}
                                 >
                                     <span className="ob-toggle-knob"></span>
                                 </button>
