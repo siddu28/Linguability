@@ -108,7 +108,7 @@ function StudyRooms() {
                     name: newRoomName.trim(),
                     description: newRoomDescription.trim() || 'A study session',
                     created_by: user.id,
-                    max_participants: 10
+                    max_participants: 2
                 })
                 .select()
                 .single()
@@ -183,31 +183,41 @@ function StudyRooms() {
                     </div>
                 ) : filteredRooms.length > 0 ? (
                     <div className="rooms-grid">
-                        {filteredRooms.map((room) => (
-                            <Card key={room.id} className="room-card">
-                                <div className="room-header">
-                                    <span className="live-badge">
-                                        <span className="live-dot"></span>
-                                        Live
-                                    </span>
-                                    <span className="participants-badge">
-                                        <Users size={14} />
-                                        {room.participants}/{room.max_participants}
-                                    </span>
-                                </div>
+                        {filteredRooms.map((room) => {
+                            const isFull = room.participants >= room.max_participants
+                            return (
+                                <Card key={room.id} className={`room-card ${isFull ? 'room-full' : ''}`}>
+                                    <div className="room-header">
+                                        {isFull ? (
+                                            <span className="full-badge">
+                                                Room Full
+                                            </span>
+                                        ) : (
+                                            <span className="live-badge">
+                                                <span className="live-dot"></span>
+                                                Live
+                                            </span>
+                                        )}
+                                        <span className="participants-badge">
+                                            <Users size={14} />
+                                            {room.participants}/{room.max_participants}
+                                        </span>
+                                    </div>
 
-                                <h3 className="room-name">{room.name}</h3>
-                                <p className="room-topic">{room.description}</p>
+                                    <h3 className="room-name">{room.name}</h3>
+                                    <p className="room-topic">{room.description}</p>
 
-                                <Button
-                                    variant="primary"
-                                    className="join-btn"
-                                    onClick={() => handleJoinRoom(room.id)}
-                                >
-                                    Join Room
-                                </Button>
-                            </Card>
-                        ))}
+                                    <Button
+                                        variant={isFull ? 'secondary' : 'primary'}
+                                        className="join-btn"
+                                        onClick={() => handleJoinRoom(room.id)}
+                                        disabled={isFull}
+                                    >
+                                        {isFull ? 'Room Full' : 'Join Room'}
+                                    </Button>
+                                </Card>
+                            )
+                        })}
                     </div>
                 ) : (
                     <div className="empty-state">

@@ -11,10 +11,12 @@ import {
     User,
     Trash2,
     Wifi,
-    WifiOff
+    WifiOff,
+    MessageCircle
 } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import TaskList from '../components/TaskList'
+import ChatPanel from '../components/ChatPanel'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
 import useWebRTC from '../hooks/useWebRTC'
@@ -44,6 +46,9 @@ function StudyRoom() {
 
     // Shared tasks state
     const [tasks, setTasks] = useState([])
+
+    // Chat state
+    const [isChatOpen, setIsChatOpen] = useState(true)
 
     // WebRTC
     const {
@@ -118,6 +123,24 @@ function StudyRoom() {
         if (!user) return
 
         try {
+            // First check if room is at capacity
+            const { data: currentParticipants, error: countError } = await supabase
+                .from('room_participants')
+                .select('id, user_id')
+                .eq('room_id', roomId)
+
+            if (countError) throw countError
+
+            // Check if user is already in the room
+            const isAlreadyInRoom = currentParticipants?.some(p => p.user_id === user.id)
+
+            // Check room capacity (max 2 participants)
+            if (!isAlreadyInRoom && currentParticipants && currentParticipants.length >= 2) {
+                alert('This room is full. Maximum 2 participants allowed.')
+                navigate('/study-rooms')
+                return
+            }
+
             const userName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Anonymous'
 
             const { error } = await supabase
@@ -136,7 +159,7 @@ function StudyRoom() {
         } catch (err) {
             console.error('Error joining room:', err)
         }
-    }, [roomId, user])
+    }, [roomId, user, navigate])
 
     // Leave room (remove participant)
     const leaveRoomFromDb = useCallback(async () => {
@@ -545,142 +568,167 @@ function StudyRoom() {
 
                 {/* Main Content Area */}
                 <div className="study-room-main">
-                    {/* Video Section */}
-                    <div className="video-section">
-                        {/* Video Grid */}
-                        <div className="video-grid">
-                            {/* Local Video */}
-                            <div className="video-container local">
-                                {mediaError ? (
-                                    <div className="video-placeholder error">
-                                        <p>{mediaError}</p>
+                    {/* Top Section: Video + Chat */}
+                    <div className="top-section">
+                        {/* Video Section */}
+                        <div className="video-section">
+                            {/* Video Grid */}
+                            <div className="video-grid">
+                                {/* Local Video */}
+                                <div className="video-container local">
+                                    {mediaError ? (
+                                        <div className="video-placeholder error">
+                                            <p>{mediaError}</p>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <video
+                                                ref={localVideoRef}
+                                                autoPlay
+                                                muted
+                                                playsInline
+                                                className={`video-element ${!isVideoEnabled ? 'hidden' : ''}`}
+                                            />
+                                            {!isVideoEnabled && (
+                                                <div className="video-placeholder camera-off">
+                                                    <User size={48} />
+                                                    <span>Camera Off</span>
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
+                                    <div className="video-label">
+                                        <span>You</span>
+                                        {!isAudioEnabled && <MicOff size={14} />}
                                     </div>
-                                ) : (
-                                    <>
-                                        <video
-                                            ref={localVideoRef}
-                                            autoPlay
-                                            muted
-                                            playsInline
-                                            className={`video-element ${!isVideoEnabled ? 'hidden' : ''}`}
-                                        />
-                                        {!isVideoEnabled && (
-                                            <div className="video-placeholder camera-off">
-                                                <User size={48} />
-                                                <span>Camera Off</span>
-                                            </div>
-                                        )}
-                                    </>
-                                )}
-                                <div className="video-label">
-                                    <span>You</span>
-                                    {!isAudioEnabled && <MicOff size={14} />}
                                 </div>
-                            </div>
 
-                            {/* Remote participants */}
-                            {otherParticipants.map((participant) => {
-                                const remoteData = remoteStreams[participant.user_id]
-                                const status = connectionStatus[participant.user_id]
-                                const isConnected = status === 'connected'
-                                const hasStream = remoteData?.stream
+                                {/* Remote participants */}
+                                {otherParticipants.map((participant) => {
+                                    const remoteData = remoteStreams[participant.user_id]
+                                    const status = connectionStatus[participant.user_id]
+                                    const isConnected = status === 'connected'
+                                    const hasStream = remoteData?.stream
 
-                                return (
-                                    <div key={participant.id} className="video-container remote">
-                                        {hasStream ? (
-                                            <>
-                                                <video
-                                                    ref={el => remoteVideoRefs.current[participant.user_id] = el}
-                                                    autoPlay
-                                                    playsInline
-                                                    className={`video-element ${!participant.is_video_enabled ? 'hidden' : ''}`}
-                                                />
-                                                {!participant.is_video_enabled && (
-                                                    <div className="video-placeholder camera-off remote-user">
-                                                        <User size={48} />
-                                                        <span className="remote-user-name">{participant.user_name}</span>
-                                                        <span className="remote-user-status">Camera Off</span>
-                                                    </div>
-                                                )}
-                                            </>
-                                        ) : (
-                                            <div className={`video-placeholder remote-user ${status === 'connecting' || status === 'new' ? 'connecting' : ''}`}>
-                                                <User size={48} />
-                                                <span className="remote-user-name">{participant.user_name}</span>
-                                                <span className="remote-user-status">
-                                                    {status === 'connecting' || status === 'new' ? (
-                                                        <>Connecting...</>
-                                                    ) : status === 'failed' || status === 'disconnected' ? (
-                                                        <>
-                                                            <WifiOff size={14} />
-                                                            Connection failed
-                                                        </>
-                                                    ) : (
-                                                        <>Establishing connection...</>
+                                    return (
+                                        <div key={participant.id} className="video-container remote">
+                                            {hasStream ? (
+                                                <>
+                                                    <video
+                                                        ref={el => remoteVideoRefs.current[participant.user_id] = el}
+                                                        autoPlay
+                                                        playsInline
+                                                        className={`video-element ${!participant.is_video_enabled ? 'hidden' : ''}`}
+                                                    />
+                                                    {!participant.is_video_enabled && (
+                                                        <div className="video-placeholder camera-off remote-user">
+                                                            <User size={48} />
+                                                            <span className="remote-user-name">{participant.user_name}</span>
+                                                            <span className="remote-user-status">Camera Off</span>
+                                                        </div>
                                                     )}
-                                                </span>
+                                                </>
+                                            ) : (
+                                                <div className={`video-placeholder remote-user ${status === 'connecting' || status === 'new' ? 'connecting' : ''}`}>
+                                                    <User size={48} />
+                                                    <span className="remote-user-name">{participant.user_name}</span>
+                                                    <span className="remote-user-status">
+                                                        {status === 'connecting' || status === 'new' ? (
+                                                            <>Connecting...</>
+                                                        ) : status === 'failed' || status === 'disconnected' ? (
+                                                            <>
+                                                                <WifiOff size={14} />
+                                                                Connection failed
+                                                            </>
+                                                        ) : (
+                                                            <>Establishing connection...</>
+                                                        )}
+                                                    </span>
+                                                </div>
+                                            )}
+                                            <div className="video-label">
+                                                <span>{participant.user_name}</span>
+                                                {!participant.is_audio_enabled && <MicOff size={14} />}
+                                                {!participant.is_video_enabled && <VideoOff size={14} />}
+                                                {isConnected && <Wifi size={14} className="connected" />}
                                             </div>
-                                        )}
-                                        <div className="video-label">
-                                            <span>{participant.user_name}</span>
-                                            {!participant.is_audio_enabled && <MicOff size={14} />}
-                                            {!participant.is_video_enabled && <VideoOff size={14} />}
-                                            {isConnected && <Wifi size={14} className="connected" />}
+                                        </div>
+                                    )
+                                })}
+
+                                {/* Waiting for others */}
+                                {otherParticipants.length === 0 && (
+                                    <div className="video-container waiting">
+                                        <div className="video-placeholder">
+                                            <Users size={48} />
+                                            <span>Waiting for others to join...</span>
+                                            <span className="share-hint">Share this room from the Study Rooms page</span>
                                         </div>
                                     </div>
-                                )
-                            })}
+                                )}
+                            </div>
 
-                            {/* Waiting for others */}
-                            {otherParticipants.length === 0 && (
-                                <div className="video-container waiting">
-                                    <div className="video-placeholder">
-                                        <Users size={48} />
-                                        <span>Waiting for others to join...</span>
-                                        <span className="share-hint">Share this room from the Study Rooms page</span>
-                                    </div>
-                                </div>
-                            )}
+                            {/* Control Bar */}
+                            <div className="control-bar">
+                                <button
+                                    className={`control-btn ${!isAudioEnabled ? 'off' : ''}`}
+                                    onClick={toggleAudio}
+                                    aria-label={isAudioEnabled ? 'Mute microphone' : 'Unmute microphone'}
+                                >
+                                    {isAudioEnabled ? <Mic size={20} /> : <MicOff size={20} />}
+                                    <span>{isAudioEnabled ? 'Mute' : 'Unmute'}</span>
+                                </button>
+
+                                <button
+                                    className={`control-btn ${!isVideoEnabled ? 'off' : ''}`}
+                                    onClick={toggleVideo}
+                                    aria-label={isVideoEnabled ? 'Turn off camera' : 'Turn on camera'}
+                                >
+                                    {isVideoEnabled ? <Video size={20} /> : <VideoOff size={20} />}
+                                    <span>{isVideoEnabled ? 'Camera Off' : 'Camera On'}</span>
+                                </button>
+
+                                <button
+                                    className={`control-btn ${isChatOpen ? 'active' : ''}`}
+                                    onClick={() => setIsChatOpen(!isChatOpen)}
+                                    aria-label={isChatOpen ? 'Close chat' : 'Open chat'}
+                                >
+                                    <MessageCircle size={20} />
+                                    <span>{isChatOpen ? 'Hide Chat' : 'Chat'}</span>
+                                </button>
+
+                                <button
+                                    className="control-btn leave"
+                                    onClick={leaveRoom}
+                                    aria-label="Leave room"
+                                >
+                                    <LogOut size={20} />
+                                    <span>Leave Room</span>
+                                </button>
+                            </div>
                         </div>
 
-                        {/* Control Bar */}
-                        <div className="control-bar">
-                            <button
-                                className={`control-btn ${!isAudioEnabled ? 'off' : ''}`}
-                                onClick={toggleAudio}
-                                aria-label={isAudioEnabled ? 'Mute microphone' : 'Unmute microphone'}
-                            >
-                                {isAudioEnabled ? <Mic size={20} /> : <MicOff size={20} />}
-                                <span>{isAudioEnabled ? 'Mute' : 'Unmute'}</span>
-                            </button>
-
-                            <button
-                                className={`control-btn ${!isVideoEnabled ? 'off' : ''}`}
-                                onClick={toggleVideo}
-                                aria-label={isVideoEnabled ? 'Turn off camera' : 'Turn on camera'}
-                            >
-                                {isVideoEnabled ? <Video size={20} /> : <VideoOff size={20} />}
-                                <span>{isVideoEnabled ? 'Camera Off' : 'Camera On'}</span>
-                            </button>
-
-                            <button
-                                className="control-btn leave"
-                                onClick={leaveRoom}
-                                aria-label="Leave room"
-                            >
-                                <LogOut size={20} />
-                                <span>Leave Room</span>
-                            </button>
-                        </div>
+                        {/* Chat Section */}
+                        {isChatOpen && (
+                            <div className="chat-section">
+                                <ChatPanel
+                                    roomId={roomId}
+                                    user={user}
+                                    isOpen={isChatOpen}
+                                />
+                            </div>
+                        )}
                     </div>
 
-                    {/* Task List Section */}
-                    <div className="task-section">
-                        <TaskList
-                            tasks={transformedTasks}
-                            onAddTask={handleAddTask}
-                            onToggleTask={handleToggleTask}
-                        />
+                    {/* Bottom Section: Tasks */}
+                    <div className="bottom-section">
+                        <div className="task-section">
+                            <TaskList
+                                tasks={transformedTasks}
+                                onAddTask={handleAddTask}
+                                onToggleTask={handleToggleTask}
+                            />
+                        </div>
                     </div>
                 </div>
 
