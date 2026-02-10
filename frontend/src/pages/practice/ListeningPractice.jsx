@@ -6,6 +6,7 @@ import { Volume2, ChevronRight, CheckCircle, XCircle, ArrowLeft } from "lucide-r
 import "./practice.css";
 
 function ListeningPractice() {
+    const [playbackRate, setPlaybackRate] = useState(1);
     const [list, setList] = useState([]);
     const [wordsSource, setWordsSource] = useState([]);
     const [sentencesSource, setSentencesSource] = useState([]);
@@ -79,13 +80,86 @@ function ListeningPractice() {
         return array;
     };
 
-    const speak = (text) => {
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = langMap[lang] || 'en-US';
-        utterance.rate = 0.8;
-        speechSynthesis.cancel();
-        speechSynthesis.speak(utterance);
-        setHasPlayed(true);
+    // Google Translate TTS language codes
+    const gttsLangMap = {
+        'english': 'en',
+        'hindi': 'hi',
+        'tamil': 'ta',
+        'telugu': 'te'
+    };
+
+    // Pre-warm speech synthesis to detect available voices
+    const [availableVoices, setAvailableVoices] = useState([]);
+    useEffect(() => {
+        const loadVoices = () => {
+            const voices = window.speechSynthesis.getVoices();
+            setAvailableVoices(voices);
+        };
+        loadVoices();
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+        return () => { window.speechSynthesis.onvoiceschanged = null; };
+    }, []);
+
+    // Check if a system voice exists for the current language
+    const hasSystemVoice = (lCode) => {
+        const normalizedLCode = lCode.toLowerCase().replace('_', '-');
+        const root = normalizedLCode.split('-')[0];
+        return availableVoices.some(v => {
+            const vLang = v.lang.toLowerCase().replace('_', '-');
+            return vLang === normalizedLCode || vLang.startsWith(root);
+        }) || availableVoices.some(v => v.name.toLowerCase().includes(lang.toLowerCase()));
+    };
+
+    // Fallback: Use backend TTS proxy (bypasses CORS)
+    const speakWithGoogleTTS = (text, rate = 1) => {
+        const gttsLang = gttsLangMap[lang] || 'en';
+        const encodedText = encodeURIComponent(text);
+        const url = `http://localhost:3001/api/practice/tts?text=${encodedText}&lang=${gttsLang}`;
+        const audio = new Audio(url);
+        audio.playbackRate = rate;
+        audio.play().then(() => {
+            setHasPlayed(true);
+        }).catch(err => {
+            console.error('TTS proxy fallback failed:', err);
+        });
+    };
+
+    const speak = (text, rate = playbackRate) => {
+        const lCode = langMap[lang] || 'en-US';
+
+        // If no system voice exists, use Google TTS fallback
+        if (!hasSystemVoice(lCode)) {
+            speakWithGoogleTTS(text, rate);
+            return;
+        }
+
+        const performSpeak = () => {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = lCode;
+            utterance.rate = rate;
+
+            const voices = window.speechSynthesis.getVoices();
+            const normalizedLCode = lCode.toLowerCase().replace('_', '-');
+            let selectedVoice = voices.find(v => v.lang.toLowerCase().replace('_', '-') === normalizedLCode);
+            if (!selectedVoice) {
+                const root = normalizedLCode.split('-')[0];
+                selectedVoice = voices.find(v => v.lang.toLowerCase().startsWith(root));
+            }
+            if (!selectedVoice) {
+                selectedVoice = voices.find(v => v.name.toLowerCase().includes(lang.toLowerCase()));
+            }
+            if (selectedVoice) {
+                utterance.voice = selectedVoice;
+            }
+
+            window.speechSynthesis.cancel();
+            setTimeout(() => {
+                window.speechSynthesis.speak(utterance);
+                setHasPlayed(true);
+            }, 50);
+        };
+
+        performSpeak();
     };
 
     const handleOptionSelect = (option) => {
@@ -109,6 +183,35 @@ function ListeningPractice() {
             setHasPlayed(false);
         }
     };
+
+    const togglePlaybackRate = () => {
+        const newRate = playbackRate === 1 ? 0.6 : 1;
+        setPlaybackRate(newRate);
+    };
+
+    // Keyboard shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            const key = e.key.toLowerCase();
+            if (key === ' ' || key === 'enter') {
+                e.preventDefault();
+                if (!showResult && selectedOption) {
+                    checkAnswer();
+                } else if (showResult) {
+                    next();
+                }
+            } else if (key === 'l') {
+                if (list[index]) speak(list[index].text, playbackRate);
+            } else if (key === 's') {
+                togglePlaybackRate();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [selectedOption, showResult, index, list, playbackRate]);
 
     const restart = () => {
         setIndex(0);
@@ -173,7 +276,7 @@ function ListeningPractice() {
                     <span>Score: {score}/{list.length}</span>
                 </div>
 
-                <div className="practice-card">
+                <div className="practice-card practice-card-animated" key={index}>
                     <div className="practice-header-nav">
                         <button className="back-btn" onClick={() => navigate(`/practice?lang=${lang}`)}>
                             <ArrowLeft size={16} /> Back to Practice
@@ -200,15 +303,38 @@ function ListeningPractice() {
                                 <p style={{ color: '#64748b', marginBottom: '1.5rem', textAlign: 'center' }}>
                                     Listen carefully and select what you hear
                                 </p>
-                                <div className="minimalist-btn-group">
-                                    <button
-                                        onClick={() => speak(current.text)}
-                                        className="listen-btn"
-                                        style={{ width: '100px', height: '100px' }}
-                                    >
-                                        <Volume2 size={40} strokeWidth={2.5} />
-                                    </button>
-                                    <span className="minimalist-btn-label">Listen</span>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                                    <div className="minimalist-btn-group">
+                                        <button
+                                            onClick={() => speak(current.text)}
+                                            className="listen-btn"
+                                            style={{ width: '100px', height: '100px' }}
+                                        >
+                                            <Volume2 size={40} strokeWidth={2.5} />
+                                        </button>
+                                        <span className="minimalist-btn-label">Listen</span>
+                                    </div>
+
+                                    <div className="minimalist-btn-group">
+                                        <button
+                                            onClick={togglePlaybackRate}
+                                            className="mini-speak-btn"
+                                            style={{
+                                                width: '60px',
+                                                height: '60px',
+                                                backgroundColor: playbackRate < 1 ? 'var(--color-primary)' : 'var(--color-white)',
+                                                color: playbackRate < 1 ? 'white' : 'var(--color-primary)',
+                                                borderColor: playbackRate < 1 ? 'var(--color-primary)' : 'var(--color-border)'
+                                            }}
+                                        >
+                                            <span style={{ fontSize: '1rem', fontWeight: 'bold' }}>
+                                                {playbackRate === 1 ? '0.6x' : '1.0x'}
+                                            </span>
+                                        </button>
+                                        <span className="minimalist-btn-label">
+                                            {playbackRate === 1 ? 'Slow' : 'Normal'}
+                                        </span>
+                                    </div>
                                 </div>
                                 {!hasPlayed && (
                                     <p style={{ marginTop: '1rem', color: '#94a3b8', fontSize: '0.875rem' }}>

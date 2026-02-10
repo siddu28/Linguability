@@ -40,6 +40,23 @@ function VocabularyPractice() {
         setShowAnswer(false);
     };
 
+    // Keyboard shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
+            const key = e.key.toLowerCase();
+            if (key === 'n') {
+                nextWord();
+            } else if (key === 's') {
+                setShowAnswer(true);
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [words]);
+
     if (!words.length) return (
         <div className="practice-layout">
             <Navbar />
@@ -71,7 +88,7 @@ function VocabularyPractice() {
                     <span>{Math.round(((index + 1) / words.length) * 100)}% complete</span>
                 </div>
 
-                <div className="practice-card">
+                <div className="practice-card practice-card-animated" key={index}>
                     <div className="practice-header-nav">
                         <button className="back-btn" onClick={() => navigate(`/practice?lang=${lang}`)}>
                             <ArrowLeft size={16} /> Back to Practice

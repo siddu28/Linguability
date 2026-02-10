@@ -51,17 +51,83 @@ function PronunciationPractice() {
         }
     };
 
+    // Pre-warm speech synthesis to detect available voices
+    const [availableVoices, setAvailableVoices] = useState([]);
+    useEffect(() => {
+        const loadVoices = () => {
+            const voices = window.speechSynthesis.getVoices();
+            setAvailableVoices(voices);
+        };
+        loadVoices();
+        window.speechSynthesis.onvoiceschanged = loadVoices;
+        return () => { window.speechSynthesis.onvoiceschanged = null; };
+    }, []);
+
+    // Google Translate TTS language codes
+    const gttsLangMap = {
+        'english': 'en',
+        'hindi': 'hi',
+        'tamil': 'ta',
+        'telugu': 'te'
+    };
+
+    // Check if a system voice exists for the current language
+    const hasSystemVoice = (lCode) => {
+        const normalizedLCode = lCode.toLowerCase().replace('_', '-');
+        const root = normalizedLCode.split('-')[0];
+        return availableVoices.some(v => {
+            const vLang = v.lang.toLowerCase().replace('_', '-');
+            return vLang === normalizedLCode || vLang.startsWith(root);
+        }) || availableVoices.some(v => v.name.toLowerCase().includes(lang.toLowerCase()));
+    };
+
+    // Fallback: Use backend TTS proxy (bypasses CORS)
+    const speakWithGoogleTTS = (text) => {
+        const gttsLang = gttsLangMap[lang] || 'en';
+        const encodedText = encodeURIComponent(text);
+        const url = `http://localhost:3001/api/practice/tts?text=${encodedText}&lang=${gttsLang}`;
+        const audio = new Audio(url);
+        audio.play().catch(err => {
+            console.error('TTS proxy fallback failed:', err);
+        });
+    };
+
     const speak = (text) => {
-        const utterance = new SpeechSynthesisUtterance(text);
         const langMap = {
             'english': 'en-US',
             'hindi': 'hi-IN',
             'tamil': 'ta-IN',
             'telugu': 'te-IN'
         };
-        utterance.lang = langMap[lang] || 'en-US';
-        speechSynthesis.cancel();
-        speechSynthesis.speak(utterance);
+        const lCode = langMap[lang] || 'en-US';
+
+        // If no system voice exists, use Google TTS fallback
+        if (!hasSystemVoice(lCode)) {
+            speakWithGoogleTTS(text);
+            return;
+        }
+
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = lCode;
+
+        const voices = window.speechSynthesis.getVoices();
+        const normalizedLCode = lCode.toLowerCase().replace('_', '-');
+        let selectedVoice = voices.find(v => v.lang.toLowerCase().replace('_', '-') === normalizedLCode);
+        if (!selectedVoice) {
+            const root = normalizedLCode.split('-')[0];
+            selectedVoice = voices.find(v => v.lang.toLowerCase().startsWith(root));
+        }
+        if (!selectedVoice) {
+            selectedVoice = voices.find(v => v.name.toLowerCase().includes(lang.toLowerCase()));
+        }
+        if (selectedVoice) {
+            utterance.voice = selectedVoice;
+        }
+
+        window.speechSynthesis.cancel();
+        setTimeout(() => {
+            window.speechSynthesis.speak(utterance);
+        }, 50);
     };
 
     const startRecognition = () => {
@@ -127,10 +193,34 @@ function PronunciationPractice() {
     };
 
     const next = () => {
+        if (!words.length) return;
         setIndex((prev) => (prev + 1) % words.length);
         setSpoken("");
         setResult(null);
     };
+
+    const current = words[index];
+
+    // Keyboard shortcuts
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (!current) return;
+
+            const key = e.key.toLowerCase();
+            if (key === ' ' || key === 'spacebar') {
+                e.preventDefault();
+                if (!isRecording) startRecognition();
+            } else if (key === 'l') {
+                speak(current.text);
+            } else if (key === 'n') {
+                next();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isRecording, current, words]);
 
     if (!words.length) return (
         <div className="practice-layout">
@@ -140,8 +230,6 @@ function PronunciationPractice() {
             </div>
         </div>
     );
-
-    const current = words[index];
 
     const getScoreColor = (score) => {
         if (score >= 80) return "var(--color-success)";
@@ -188,7 +276,7 @@ function PronunciationPractice() {
                     <span>{Math.round(((index + 1) / words.length) * 100)}% complete</span>
                 </div>
 
-                <div className="practice-card">
+                <div className="practice-card practice-card-animated" key={index}>
                     <div className="practice-header-nav">
                         <button className="back-btn" onClick={() => navigate(`/practice?lang=${lang}`)}>
                             <ArrowLeft size={16} /> Back to Practice

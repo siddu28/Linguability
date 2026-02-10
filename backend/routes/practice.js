@@ -124,4 +124,36 @@ router.get('/:languageId/:type', (req, res) => {
     res.json(lang[type])
 })
 
+
+// ================== TTS PROXY (for languages without system voices) ==================
+router.get('/tts', async (req, res) => {
+    const { text, lang } = req.query;
+    if (!text || !lang) {
+        return res.status(400).json({ error: "text and lang query params are required" });
+    }
+
+    const encodedText = encodeURIComponent(text);
+    const url = `https://translate.google.com/translate_tts?ie=UTF-8&tl=${lang}&client=tw-ob&q=${encodedText}`;
+
+    try {
+        const fetch = (await import('node-fetch')).default;
+        const response = await fetch(url, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            }
+        });
+
+        if (!response.ok) {
+            return res.status(response.status).json({ error: "TTS service error" });
+        }
+
+        res.set('Content-Type', 'audio/mpeg');
+        res.set('Cache-Control', 'public, max-age=86400'); // Cache for 24h
+        response.body.pipe(res);
+    } catch (error) {
+        console.error("TTS proxy error:", error);
+        res.status(500).json({ error: "TTS proxy failed" });
+    }
+});
+
 module.exports = router;
