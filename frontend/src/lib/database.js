@@ -17,21 +17,43 @@ export async function getProfile(userId) {
 }
 
 export async function updateProfile(userId, updates) {
-    const { data, error } = await supabase
-        .from('profiles')
-        .update({ ...updates, updated_at: new Date().toISOString() })
-        .eq('id', userId)
-        .select()
-        .single()
+    let payload = { ...updates, updated_at: new Date().toISOString() }
 
-    if (error) {
+    // Remove columns already known to be missing
+    for (const col of _missingProfileCols) delete payload[col]
+
+    // Try up to 5 times, removing any column the DB doesn't recognize
+    for (let attempt = 0; attempt < 5; attempt++) {
+        const { data, error } = await supabase
+            .from('profiles')
+            .update(payload)
+            .eq('id', userId)
+            .select()
+            .single()
+
+        if (!error) return data
+
+        if (error.code === '42703' || error.message?.includes('column')) {
+            const match = error.message.match(/Could not find the '(\w+)' column/)
+            if (match) {
+                _missingProfileCols.add(match[1])
+                delete payload[match[1]]
+                continue
+            }
+        }
+
         console.error('Error updating profile:', error)
         throw error
     }
-    return data
+
+    return null
 }
 
 // ============ USER SETTINGS ============
+
+// Cache columns that are known to be missing from the DB to avoid repeated warnings
+const _missingSettingsCols = new Set()
+const _missingProfileCols = new Set()
 
 export async function getUserSettings(userId) {
     const { data, error } = await supabase
@@ -47,21 +69,53 @@ export async function getUserSettings(userId) {
 }
 
 export async function upsertUserSettings(userId, settings) {
-    const { data, error } = await supabase
-        .from('user_settings')
-        .upsert({
-            user_id: userId,
-            ...settings,
-            updated_at: new Date().toISOString()
-        })
-        .select()
-        .single()
+    // Build payload, progressively removing columns that don't exist in the DB
+    const allColumns = {
+        user_id: userId,
+        focus_mode: settings.focus_mode ?? false,
+        font_size: settings.font_size ?? 'medium',
+        font_family: settings.font_family ?? 'system',
+        line_spacing: settings.line_spacing ?? 'normal',
+        letter_spacing: settings.letter_spacing ?? 'normal',
+        high_contrast: settings.high_contrast ?? false,
+        text_to_speech: settings.text_to_speech ?? false,
+        reading_speed: settings.reading_speed ?? 'normal',
+        screen_reader_friendly: settings.screen_reader_friendly ?? false,
+        updated_at: new Date().toISOString()
+    }
 
-    if (error) {
+    let payload = { ...allColumns }
+
+    // Remove columns already known to be missing
+    for (const col of _missingSettingsCols) delete payload[col]
+
+    // Try up to 5 times, each time removing the offending column
+    for (let attempt = 0; attempt < 5; attempt++) {
+        const { data, error } = await supabase
+            .from('user_settings')
+            .upsert(payload)
+            .select()
+            .single()
+
+        if (!error) return data
+
+        // If a column doesn't exist, remove it and retry
+        if (error.code === '42703' || error.message?.includes('column')) {
+            const match = error.message.match(/Could not find the '(\w+)' column/)
+            if (match) {
+                _missingSettingsCols.add(match[1])
+                delete payload[match[1]]
+                continue
+            }
+        }
+
+        // Non-column error, throw immediately
         console.error('Error saving settings:', error)
         throw error
     }
-    return data
+
+    console.error('Failed to save settings after removing missing columns')
+    return null
 }
 
 // ============ LESSON PROGRESS ============

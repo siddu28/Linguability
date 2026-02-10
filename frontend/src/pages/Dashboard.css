@@ -172,27 +172,26 @@
 .recommendation-list {
     display: flex;
     flex-direction: column;
+    gap: var(--spacing-sm);
 }
 
 .recommendation-item {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--spacing-md) 0;
-    border-bottom: 1px solid var(--color-border);
+    padding: var(--spacing-md) var(--spacing-lg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
     text-align: left;
     transition: all var(--transition-fast);
 }
 
 .recommendation-item:last-child {
-    border-bottom: none;
+    border-bottom: 1px solid var(--color-border);
 }
 
 .recommendation-item:hover {
     background-color: var(--color-background);
-    margin: 0 calc(-1 * var(--spacing-lg));
-    padding-left: var(--spacing-lg);
-    padding-right: var(--spacing-lg);
 }
 
 .recommendation-info {
@@ -274,4 +273,46 @@
     .progress-ring-card {
         grid-column: span 1;
     }
+}
+
+/* Dark Mode Styles */
+[data-theme="dark"] .dashboard-page {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .dashboard-title,
+[data-theme="dark"] .section-title,
+[data-theme="dark"] .stat-value,
+[data-theme="dark"] .lesson-title,
+[data-theme="dark"] .recommendation-title {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .stat-card .card,
+[data-theme="dark"] .lesson-card {
+    background-color: #1E1E1E;
+    border: 2px solid #e91e63;
+}
+
+[data-theme="dark"] .lesson-card {
+    background-color: #2a2a2a;
+    border: 1px solid #e91e63;
+}
+
+[data-theme="dark"] .view-all-btn {
+    color: #ffffff;
+    border: 1px solid #e91e63;
+}
+
+[data-theme="dark"] .view-all-btn:hover {
+    background-color: #2a2a2a;
+}
+
+[data-theme="dark"] .recommendation-item {
+    border: 2px solid #e91e63;
+    border-radius: var(--radius-md);
+}
+
+[data-theme="dark"] .recommendation-item:hover {
+    background-color: #2a2a2a;
 }

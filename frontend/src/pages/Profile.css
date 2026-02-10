@@ -246,3 +246,27 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Dark Mode Styles */
+[data-theme="dark"] .profile-page {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .profile-title,
+[data-theme="dark"] .profile-name,
+[data-theme="dark"] .stat-value,
+[data-theme="dark"] .language-name {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .profile-header-card,
+[data-theme="dark"] .profile-stat-card,
+[data-theme="dark"] .profile-card {
+    background-color: #1E1E1E;
+    border: 2px solid #e91e63;
+}
+
+[data-theme="dark"] .language-item {
+    background-color: #2a2a2a;
+    border: 1px solid #e91e63;
+}

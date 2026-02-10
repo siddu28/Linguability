@@ -444,3 +444,34 @@
         margin-top: var(--spacing-sm);
     }
 }
+
+/* Dark Mode Styles */
+[data-theme="dark"] .lessons-page {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .lessons-title,
+[data-theme="dark"] .section-title,
+[data-theme="dark"] .lesson-title,
+[data-theme="dark"] .language-name {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .language-card,
+[data-theme="dark"] .lesson-section {
+    background-color: #1E1E1E;
+    border: 2px solid #e91e63;
+}
+
+[data-theme="dark"] .lesson-item {
+    background-color: #2a2a2a;
+    border: 1px solid #e91e63;
+}
+
+[data-theme="dark"] .back-btn {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .section-header {
+    border-bottom-color: #e91e63;
+}

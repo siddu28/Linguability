@@ -476,3 +476,33 @@
         font-size: 1.5rem;
     }
 }
+
+/* Dark Mode Styles */
+[data-theme="dark"] .login-page {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .login-form-panel {
+    background-color: #1E1E1E;
+    border: 2px solid #e91e63;
+}
+
+[data-theme="dark"] .form-title,
+[data-theme="dark"] .brand-title {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .feature-card {
+    background-color: rgba(233, 30, 99, 0.1);
+    border: 1px solid #e91e63;
+}
+
+[data-theme="dark"] .auth-btn {
+    background-color: #2a2a2a;
+    border: 1px solid #e91e63;
+    color: #ffffff;
+}
+
+[data-theme="dark"] .auth-btn:hover {
+    background-color: #3a3a3a;
+}

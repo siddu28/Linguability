@@ -10,7 +10,12 @@
 }
 
 .settings-header {
-    margin-bottom: var(--spacing-lg);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-xl);
 }
 
 .settings-title {
@@ -21,6 +26,7 @@
 
 .settings-subtitle {
     color: var(--color-text-secondary);
+    margin: 0;
 }
 
 /* Tabs */
@@ -119,6 +125,56 @@
 
 .settings-toggles>*:last-child {
     border-bottom: none;
+}
+
+/* Setting Group (for button selectors) */
+.setting-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.setting-label {
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-primary);
+}
+
+/* Option Buttons */
+.option-buttons {
+    display: flex;
+    gap: var(--spacing-sm);
+    flex-wrap: wrap;
+}
+
+.option-btn {
+    flex: 1;
+    min-width: 70px;
+    max-width: 120px;
+    padding: 0.625rem var(--spacing-md);
+    background: var(--color-white);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.option-btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: rgba(233, 30, 99, 0.03);
+}
+
+.option-btn.active {
+    background: linear-gradient(135deg, rgba(233, 30, 99, 0.1) 0%, rgba(233, 30, 140, 0.15) 100%);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    font-weight: var(--font-weight-semibold);
 }
 
 /* Audio Card */
@@ -291,4 +347,25 @@
         flex-direction: column;
         gap: var(--spacing-md);
     }
+}
+
+/* Dark Mode Styles */
+[data-theme="dark"] .settings-page {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .settings-title,
+[data-theme="dark"] .settings-section-title,
+[data-theme="dark"] .setting-label,
+[data-theme="dark"] .info-value {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .settings-card {
+    background-color: #1E1E1E;
+    border: 2px solid #e91e63;
+}
+
+[data-theme="dark"] .info-row {
+    border-bottom-color: #e91e63;
 }

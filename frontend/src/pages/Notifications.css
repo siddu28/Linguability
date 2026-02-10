@@ -149,3 +149,22 @@
         height: 36px;
     }
 }
+
+/* Dark Mode Styles */
+[data-theme="dark"] .notifications-page {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .notifications-title,
+[data-theme="dark"] .notification-title {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .notification-item {
+    background-color: #1E1E1E;
+    border: 2px solid #e91e63;
+}
+
+[data-theme="dark"] .notification-header {
+    border-bottom-color: #e91e63;
+}
