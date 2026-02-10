@@ -284,7 +284,7 @@ function ListeningPractice() {
                                 <Button variant="primary" onClick={restart}>
                                     Practice Again
                                 </Button>
-                                <Button variant="secondary" onClick={() => navigate(`/practice`)}>
+                                <Button variant="secondary" onClick={() => navigate(`/practice?lang=${lang}`)}>
                                     Back to Practice
                                 </Button>
                             </div>

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Card from "../components/Card";
 import Button from "../components/Button";
@@ -7,6 +7,7 @@ import { ChevronRight, Mic, Headphones, BookOpen, Play } from "lucide-react";
 import "./Practice.css";
 
 export default function Practice() {
+    const [searchParams, setSearchParams] = useSearchParams();
     const [selectedLanguage, setSelectedLanguage] = useState(null);
 
     const languages = [
@@ -15,6 +16,27 @@ export default function Practice() {
         { id: 'tamil', name: 'Tamil', flag: 'த', flagColor: '#E91E8C', desc: 'பயிற்சி' },
         { id: 'telugu', name: 'Telugu', flag: 'తె', flagColor: '#10B981', desc: 'సాధన' }
     ];
+
+    // Initialize state from URL params
+    useEffect(() => {
+        const langId = searchParams.get("lang");
+        if (langId) {
+            const lang = languages.find(l => l.id === langId);
+            if (lang) {
+                setSelectedLanguage(lang);
+            }
+        } else {
+            setSelectedLanguage(null);
+        }
+    }, [searchParams]);
+
+    const handleLanguageSelect = (lang) => {
+        setSearchParams({ lang: lang.id });
+    };
+
+    const handleBackToLanguages = () => {
+        setSearchParams({});
+    };
 
     const practiceTypes = [
         {
@@ -57,7 +79,7 @@ export default function Practice() {
                                 <Card
                                     key={lang.id}
                                     className="language-card"
-                                    onClick={() => setSelectedLanguage(lang)}
+                                    onClick={() => handleLanguageSelect(lang)}
                                 >
                                     <div
                                         className="language-flag-badge"
@@ -79,7 +101,7 @@ export default function Practice() {
                         <div className="practice-header">
                             <button
                                 className="back-btn"
-                                onClick={() => setSelectedLanguage(null)}
+                                onClick={handleBackToLanguages}
                             >
                                 ← Back to Languages
                             </button>

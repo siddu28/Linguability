@@ -314,6 +314,68 @@
     margin-top: 2.5rem;
 }
 
+/* Difficulty Buttons */
+.difficulty-btn {
+    padding: 0.6rem 1.25rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    cursor: pointer;
+    background-color: var(--color-white);
+    color: var(--color-text-secondary);
+    font-weight: var(--font-weight-medium);
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-fast);
+    min-width: 100px;
+}
+
+.difficulty-btn:hover {
+    border-color: var(--color-primary);
+    background-color: var(--color-background);
+}
+
+.difficulty-btn.active {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: white;
+    font-weight: var(--font-weight-bold);
+    box-shadow: 0 4px 12px rgba(233, 30, 140, 0.2);
+}
+
+/* Pronunciation Results */
+.spoken-text-display {
+    margin-bottom: 1.5rem;
+    color: var(--color-text-secondary);
+    font-size: 1.1rem;
+}
+
+.spoken-value {
+    color: var(--color-text-primary);
+    font-weight: var(--font-weight-bold);
+}
+
+/* Vocabulary Specific Enhancements */
+.answer-section-inner {
+    padding: 2.5rem;
+    border-radius: var(--radius-xl);
+    background-color: var(--color-background);
+    border: 1px solid var(--color-border);
+    margin-top: 1rem;
+}
+
+.meaning-text {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: 0.5rem;
+}
+
+.example-text {
+    font-size: 1.25rem;
+    font-style: italic;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+}
+
 /* Responsive */
 @media (max-width: 640px) {
     .word-display h2 {
