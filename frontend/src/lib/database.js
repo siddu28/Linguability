@@ -168,3 +168,185 @@ export async function createNotification(userId, notification) {
     }
     return data
 }
+
+// ============ ASSESSMENT RESULTS ============
+
+export async function saveAssessmentResult(userId, result) {
+    const { data, error } = await supabase
+        .from('assessment_results')
+        .insert({
+            user_id: userId,
+            quiz_id: result.quizId,
+            quiz_title: result.quizTitle,
+            score: result.score,
+            total_questions: result.totalQuestions,
+            score_percentage: result.scorePercentage,
+            time_taken_seconds: result.timeTakenSeconds,
+            answers: result.answers || []
+        })
+        .select()
+        .single()
+
+    if (error) {
+        console.error('Error saving assessment result:', error)
+        throw error
+    }
+    return data
+}
+
+export async function getAssessmentResults(userId) {
+    const { data, error } = await supabase
+        .from('assessment_results')
+        .select('*')
+        .eq('user_id', userId)
+        .order('completed_at', { ascending: false })
+
+    if (error) {
+        console.error('Error fetching assessment results:', error)
+        return []
+    }
+    return data
+}
+
+export async function getAssessmentStats(userId) {
+    const { data, error } = await supabase
+        .from('assessment_results')
+        .select('score_percentage, quiz_id')
+        .eq('user_id', userId)
+
+    if (error) {
+        console.error('Error fetching assessment stats:', error)
+        return { completed: 0, averageScore: 0, completedQuizIds: [] }
+    }
+
+    const completed = data.length
+    const averageScore = completed > 0
+        ? Math.round(data.reduce((sum, r) => sum + parseFloat(r.score_percentage), 0) / completed)
+        : 0
+    const completedQuizIds = [...new Set(data.map(r => r.quiz_id))]
+
+    return { completed, averageScore, completedQuizIds }
+}
+
+export async function hasCompletedQuiz(userId, quizId) {
+    const { data, error } = await supabase
+        .from('assessment_results')
+        .select('id')
+        .eq('user_id', userId)
+        .eq('quiz_id', quizId)
+        .limit(1)
+
+    if (error) {
+        console.error('Error checking quiz completion:', error)
+        return false
+    }
+    return data && data.length > 0
+}
+
+// ============ PRONUNCIATION RESULTS ============
+
+export async function savePronunciationResult(userId, result) {
+    // Save to assessment_results table with type 'pronunciation'
+    const { data, error } = await supabase
+        .from('assessment_results')
+        .insert({
+            user_id: userId,
+            quiz_id: result.testId,
+            quiz_title: result.testTitle,
+            score: result.passedWords,
+            total_questions: result.totalWords,
+            score_percentage: result.score,
+            time_taken_seconds: null,
+            answers: result.results,
+            completed_at: result.completedAt
+        })
+        .select()
+        .single()
+
+    if (error) {
+        console.error('Error saving pronunciation result:', error)
+        throw error
+    }
+    return data
+}
+
+export async function getPronunciationResults(userId) {
+    const { data, error } = await supabase
+        .from('assessment_results')
+        .select('*')
+        .eq('user_id', userId)
+        .like('quiz_id', '%pronunciation%')
+        .order('completed_at', { ascending: false })
+
+    if (error) {
+        console.error('Error fetching pronunciation results:', error)
+        return []
+    }
+    return data
+}
+
+// ============ QUIZ PROGRESS (SAVE/RESUME) ============
+
+export async function saveQuizProgress(userId, progressData) {
+    const { data, error } = await supabase
+        .from('quiz_progress')
+        .upsert({
+            user_id: userId,
+            quiz_id: progressData.quizId,
+            quiz_type: progressData.quizType,
+            current_index: progressData.currentIndex,
+            answers: progressData.answers,
+            questions: progressData.questions,
+            start_time: progressData.startTime,
+            updated_at: new Date().toISOString()
+        }, {
+            onConflict: 'user_id,quiz_id'
+        })
+        .select()
+        .single()
+
+    if (error) {
+        console.error('Error saving quiz progress:', error)
+        throw error
+    }
+    return data
+}
+
+export async function getQuizProgress(userId, quizId) {
+    const { data, error } = await supabase
+        .from('quiz_progress')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('quiz_id', quizId)
+        .single()
+
+    if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
+        console.error('Error fetching quiz progress:', error)
+    }
+    return data
+}
+
+export async function deleteQuizProgress(userId, quizId) {
+    const { error } = await supabase
+        .from('quiz_progress')
+        .delete()
+        .eq('user_id', userId)
+        .eq('quiz_id', quizId)
+
+    if (error) {
+        console.error('Error deleting quiz progress:', error)
+    }
+}
+
+export async function getAllQuizProgress(userId) {
+    const { data, error } = await supabase
+        .from('quiz_progress')
+        .select('quiz_id, quiz_type, current_index, updated_at')
+        .eq('user_id', userId)
+
+    if (error) {
+        console.error('Error fetching all quiz progress:', error)
+        return []
+    }
+    return data
+}

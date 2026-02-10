@@ -1,94 +1,169 @@
+/* ===================================
+   Login Page - Split Screen Design
+   =================================== */
+
 .login-page {
     display: flex;
     min-height: 100vh;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* Left Panel - Branding */
+/* ===================================
+   Left Panel - Branding
+   =================================== */
 .login-brand {
     flex: 1;
-    background-color: var(--color-primary);
-    color: var(--color-white);
-    padding: var(--spacing-2xl);
+    background: linear-gradient(135deg, #c2185b 0%, #880e4f 50%, #6a1b4d 100%);
+    color: white;
+    padding: 2rem 2.5rem;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Subtle pattern overlay */
+.login-brand::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    z-index: 0;
+}
+
+.login-brand>* {
+    position: relative;
+    z-index: 1;
+}
+
+/* Brand Header */
+.brand-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.brand-logo {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+}
+
+.brand-logo svg {
+    width: 100%;
+    height: 100%;
+}
+
+.brand-text {
     display: flex;
     flex-direction: column;
 }
 
-.brand-header {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-}
-
-.brand-logo {
-    width: 44px;
-    height: 44px;
-    background-color: var(--color-white);
-    border-radius: var(--radius-full);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.brand-logo span {
-    color: var(--color-primary);
-    font-weight: var(--font-weight-bold);
-    font-size: var(--font-size-lg);
-}
-
 .brand-name {
-    font-weight: var(--font-weight-semibold);
-    font-size: var(--font-size-xl);
+    font-weight: 700;
+    font-size: 1.25rem;
+    letter-spacing: -0.01em;
 }
 
+.brand-tagline {
+    font-size: 0.85rem;
+    opacity: 0.85;
+}
+
+/* Brand Content */
 .brand-content {
     flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    max-width: 400px;
+    max-width: 440px;
 }
 
 .brand-title {
-    font-size: var(--font-size-3xl);
-    font-weight: var(--font-weight-bold);
+    font-size: 2.25rem;
+    font-weight: 700;
     line-height: 1.2;
-    margin-bottom: var(--spacing-lg);
+    margin-bottom: 1rem;
 }
 
 .brand-description {
-    font-size: var(--font-size-base);
+    font-size: 1.05rem;
     opacity: 0.9;
-    margin-bottom: var(--spacing-2xl);
+    margin-bottom: 2rem;
     line-height: 1.6;
 }
 
-.brand-features {
+/* Feature Grid */
+.feature-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: var(--spacing-md);
+    gap: 0.875rem;
 }
 
-.feature-item {
+.feature-card {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(8px);
+    border-radius: 16px;
+    padding: 1.25rem;
+    transition: all 0.25s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.feature-card:hover {
+    background: rgba(255, 255, 255, 0.18);
+    transform: translateY(-2px);
+}
+
+.feature-icon {
+    display: block;
+    width: 36px;
+    height: 36px;
+    color: white;
+    margin-bottom: 0.75rem;
+}
+
+.feature-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+.feature-text {
     display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    font-size: var(--font-size-sm);
-    opacity: 0.9;
+    flex-direction: column;
+    gap: 0.25rem;
 }
 
+.feature-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.feature-desc {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    line-height: 1.4;
+}
+
+/* Brand Footer */
 .brand-footer {
-    font-size: var(--font-size-sm);
-    opacity: 0.7;
+    font-size: 0.85rem;
+    opacity: 0.6;
+    margin-top: 2rem;
 }
 
-/* Right Panel - Form */
-.login-form-container {
+/* ===================================
+   Right Panel - Login Form
+   =================================== */
+.login-form-panel {
     flex: 1;
-    background-color: var(--color-white);
+    background: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: var(--spacing-2xl);
+    padding: 2rem;
 }
 
 .login-form-wrapper {
@@ -97,64 +172,200 @@
 }
 
 .form-title {
-    font-size: var(--font-size-2xl);
-    font-weight: var(--font-weight-semibold);
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #1a1a2e;
     text-align: center;
-    margin-bottom: var(--spacing-sm);
+    margin-bottom: 0.5rem;
 }
 
 .form-subtitle {
-    color: var(--color-text-secondary);
+    color: #666;
     text-align: center;
-    margin-bottom: var(--spacing-xl);
+    font-size: 0.95rem;
+    margin-bottom: 2rem;
 }
 
-.form-tabs {
-    display: flex;
-    background-color: var(--color-background);
-    border-radius: var(--radius-md);
-    padding: var(--spacing-xs);
-    margin-bottom: var(--spacing-xl);
-}
-
-.form-tab {
-    flex: 1;
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-radius: var(--radius-sm);
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text-secondary);
-    transition: all var(--transition-fast);
-}
-
-.form-tab.active {
-    background-color: var(--color-white);
-    color: var(--color-text-primary);
-    box-shadow: var(--shadow-sm);
-}
-
+/* Form Fields */
 .login-form {
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-lg);
+    gap: 1.25rem;
 }
 
-.submit-btn {
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.field-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.field-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.forgot-link {
+    font-size: 0.85rem;
+    color: #c2185b;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.forgot-link:hover {
+    color: #880e4f;
+    text-decoration: underline;
+}
+
+/* Input Wrapper */
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.input-icon {
+    position: absolute;
+    left: 1rem;
+    width: 20px;
+    height: 20px;
+    color: #888;
+    pointer-events: none;
+}
+
+.input-icon svg {
     width: 100%;
-    margin-top: var(--spacing-sm);
+    height: 100%;
 }
 
-.form-footer {
+.input-wrapper input {
+    width: 100%;
+    padding: 0.875rem 1rem 0.875rem 3rem;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    color: #333;
+    background: #fff;
+    transition: all 0.2s;
+}
+
+.input-wrapper input::placeholder {
+    color: #999;
+}
+
+.input-wrapper input:hover {
+    border-color: #ccc;
+}
+
+.input-wrapper input:focus {
+    outline: none;
+    border-color: #c2185b;
+    box-shadow: 0 0 0 3px rgba(194, 24, 91, 0.1);
+}
+
+.toggle-password {
+    position: absolute;
+    right: 1rem;
+    width: 22px;
+    height: 22px;
+    color: #888;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+}
+
+.toggle-password:hover {
+    color: #c2185b;
+}
+
+.toggle-password svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Error Message */
+.form-error {
+    font-size: 0.9rem;
+    color: #d32f2f;
+    background: #ffebee;
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
     text-align: center;
-    font-size: var(--font-size-sm);
-    color: var(--color-text-muted);
-    margin-top: var(--spacing-lg);
 }
 
-.form-footer a {
-    color: var(--color-primary);
+/* Submit Button */
+.submit-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 1rem;
+    background: linear-gradient(135deg, #c2185b 0%, #ad1457 100%);
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 4px 16px rgba(194, 24, 91, 0.25);
+    margin-top: 0.5rem;
 }
 
-.form-footer a:hover {
+.submit-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(194, 24, 91, 0.35);
+}
+
+.submit-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.submit-btn .btn-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.submit-btn .btn-icon svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Toggle Sign In / Sign Up */
+.toggle-mode {
+    text-align: center;
+    margin-top: 1.25rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.toggle-mode button {
+    background: none;
+    border: none;
+    color: #c2185b;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: color 0.2s;
+}
+
+.toggle-mode button:hover {
+    color: #880e4f;
     text-decoration: underline;
 }
 
@@ -162,7 +373,7 @@
 .auth-divider {
     display: flex;
     align-items: center;
-    margin: var(--spacing-lg) 0;
+    margin: 1.5rem 0;
 }
 
 .auth-divider::before,
@@ -170,189 +381,98 @@
     content: '';
     flex: 1;
     height: 1px;
-    background-color: var(--color-border);
+    background: #e0e0e0;
 }
 
 .auth-divider span {
-    padding: 0 var(--spacing-md);
-    color: var(--color-text-muted);
-    font-size: var(--font-size-sm);
-    text-transform: lowercase;
+    padding: 0 1rem;
+    color: #888;
+    font-size: 0.85rem;
 }
 
-/* Google Sign In Button */
-.google-signin-btn {
-    width: 100%;
+/* Google Button */
+.google-btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-md) var(--spacing-lg);
-    background-color: var(--color-white);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-md);
-    font-size: var(--font-size-base);
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text-primary);
+    gap: 0.75rem;
+    width: 100%;
+    padding: 0.875rem;
+    background: #fff;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: #333;
     cursor: pointer;
-    transition: all var(--transition-fast);
+    transition: all 0.2s;
 }
 
-.google-signin-btn:hover {
-    background-color: var(--color-background);
-    border-color: var(--color-text-muted);
-    box-shadow: var(--shadow-sm);
+.google-btn:hover:not(:disabled) {
+    background: #f8f8f8;
+    border-color: #ccc;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
-.google-signin-btn:focus-visible {
-    outline: 2px solid var(--color-primary);
-    outline-offset: 2px;
+.google-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
 }
 
-.google-icon {
-    flex-shrink: 0;
-}
-
-/* Learning Challenges Step */
-.challenges-step {
-    animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateX(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-.back-btn {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
-    color: var(--color-text-secondary);
-    font-size: var(--font-size-sm);
-    margin-bottom: var(--spacing-lg);
-    transition: color var(--transition-fast);
-}
-
-.back-btn:hover {
-    color: var(--color-primary);
-}
-
-.challenges-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-    margin: var(--spacing-lg) 0;
-    max-height: 350px;
-    overflow-y: auto;
-    padding-right: var(--spacing-xs);
-}
-
-.challenge-item {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--spacing-md);
-    padding: var(--spacing-md);
-    border: 2px solid var(--color-border);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition: all var(--transition-fast);
-}
-
-.challenge-item:hover {
-    border-color: var(--color-primary-light);
-    background-color: rgba(233, 30, 140, 0.02);
-}
-
-.challenge-item.selected {
-    border-color: var(--color-primary);
-    background-color: rgba(233, 30, 140, 0.05);
-}
-
-.challenge-checkbox {
-    width: 20px;
-    height: 20px;
-    margin-top: 2px;
-    accent-color: var(--color-primary);
-    cursor: pointer;
-    flex-shrink: 0;
-}
-
-.challenge-content {
-    flex: 1;
-}
-
-.challenge-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.challenge-label {
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text-primary);
-}
-
-.challenge-check {
-    color: var(--color-primary);
-}
-
-.challenge-description {
-    font-size: var(--font-size-sm);
-    color: var(--color-text-muted);
-    margin-top: var(--spacing-xs);
-}
-
-.challenges-actions {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-sm);
-    margin-top: var(--spacing-lg);
-}
-
-.skip-btn {
-    padding: var(--spacing-sm);
-    color: var(--color-text-muted);
-    font-size: var(--font-size-sm);
-    transition: color var(--transition-fast);
-}
-
-.skip-btn:hover {
-    color: var(--color-text-primary);
-}
-
-.challenges-note {
-    text-align: center;
-    font-size: var(--font-size-sm);
-    color: var(--color-text-muted);
-    margin-top: var(--spacing-lg);
-}
-
-/* Responsive */
+/* ===================================
+   Responsive Design
+   =================================== */
 @media (max-width: 900px) {
     .login-page {
         flex-direction: column;
     }
 
     .login-brand {
-        padding: var(--spacing-xl);
+        padding: 1.5rem;
     }
 
     .brand-content {
-        padding: var(--spacing-xl) 0;
+        padding: 1.5rem 0;
+        max-width: 100%;
     }
 
     .brand-title {
-        font-size: var(--font-size-2xl);
+        font-size: 1.75rem;
     }
 
-    .challenges-list {
-        max-height: 250px;
+    .brand-description {
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .feature-grid {
+        gap: 0.75rem;
+    }
+
+    .feature-card {
+        padding: 1rem;
+    }
+
+    .feature-icon {
+        width: 28px;
+        height: 28px;
+    }
+
+    .login-form-panel {
+        padding: 2rem 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .feature-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .brand-title {
+        font-size: 1.5rem;
+    }
+
+    .form-title {
+        font-size: 1.5rem;
     }
 }
