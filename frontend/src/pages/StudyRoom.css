@@ -92,24 +92,32 @@
     background-color: #dc2626;
 }
 
-/* Main Content Layout */
-.study-room-main {
-    display: grid;
-    grid-template-columns: 1fr 350px;
+/* Top Row: Video + Chat side by side */
+.study-room-top {
+    display: flex;
     gap: var(--spacing-lg);
     margin-bottom: var(--spacing-lg);
 }
 
 /* Video Section */
 .video-section {
+    flex: 1;
     display: flex;
     flex-direction: column;
     gap: var(--spacing-lg);
+    min-width: 0;
+}
+
+/* Chat Section (right side) */
+.chat-section {
+    width: 380px;
+    min-width: 320px;
+    flex-shrink: 0;
 }
 
 .video-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: var(--spacing-md);
 }
 
@@ -119,7 +127,7 @@
     border-radius: var(--radius-lg);
     overflow: hidden;
     aspect-ratio: 16 / 9;
-    min-height: 250px;
+    min-height: 220px;
 }
 
 .video-element {
@@ -176,6 +184,9 @@
     font-size: var(--font-size-xs) !important;
     color: var(--color-text-muted);
     opacity: 0.7;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
 }
 
 .share-hint {
@@ -199,12 +210,6 @@
     50% {
         opacity: 0.7;
     }
-}
-
-.remote-user-status {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-xs);
 }
 
 .connected {
@@ -293,7 +298,7 @@
     color: var(--color-text-primary);
     cursor: pointer;
     transition: all var(--transition-fast);
-    min-width: 140px;
+    min-width: 130px;
     justify-content: center;
 }
 
@@ -321,9 +326,17 @@
     background-color: #dc2626;
 }
 
+/* Bottom Row: Tasks + Participants */
+.study-room-bottom {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+
 /* Task Section */
 .task-section {
-    min-height: 400px;
+    min-height: 300px;
 }
 
 /* Participants Panel */
@@ -332,6 +345,7 @@
     border-radius: var(--radius-lg);
     border: 1px solid var(--color-border);
     padding: var(--spacing-lg);
+    height: fit-content;
 }
 
 .participants-title {
@@ -418,12 +432,17 @@
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-    .study-room-main {
-        grid-template-columns: 1fr;
+    .study-room-top {
+        flex-direction: column;
     }
 
-    .task-section {
-        order: 2;
+    .chat-section {
+        width: 100%;
+        min-width: unset;
+    }
+
+    .study-room-bottom {
+        grid-template-columns: 1fr;
     }
 }
 

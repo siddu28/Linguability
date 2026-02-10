@@ -15,6 +15,7 @@ import {
 } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import TaskList from '../components/TaskList'
+import ChatPanel from '../components/ChatPanel'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
 import useWebRTC from '../hooks/useWebRTC'
@@ -543,8 +544,8 @@ function StudyRoom() {
                     </div>
                 </div>
 
-                {/* Main Content Area */}
-                <div className="study-room-main">
+                {/* Top Row: Video + Chat side by side */}
+                <div className="study-room-top">
                     {/* Video Section */}
                     <div className="video-section">
                         {/* Video Grid */}
@@ -691,6 +692,18 @@ function StudyRoom() {
                         </div>
                     </div>
 
+                    {/* Chat Section */}
+                    <div className="chat-section">
+                        <ChatPanel
+                            roomId={roomId}
+                            userId={user?.id}
+                            userName={user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Anonymous'}
+                        />
+                    </div>
+                </div>
+
+                {/* Bottom Row: Tasks + Participants */}
+                <div className="study-room-bottom">
                     {/* Task List Section */}
                     <div className="task-section">
                         <TaskList
@@ -699,45 +712,45 @@ function StudyRoom() {
                             onToggleTask={handleToggleTask}
                         />
                     </div>
-                </div>
 
-                {/* Participants Panel */}
-                <div className="participants-panel">
-                    <h3 className="participants-title">
-                        <Users size={18} />
-                        <span>Participants</span>
-                    </h3>
-                    <ul className="participants-list">
-                        {participants.map((participant) => {
-                            const status = connectionStatus[participant.user_id]
-                            const isConnected = status === 'connected'
-                            const isMe = participant.user_id === user?.id
+                    {/* Participants Panel */}
+                    <div className="participants-panel">
+                        <h3 className="participants-title">
+                            <Users size={18} />
+                            <span>Participants</span>
+                        </h3>
+                        <ul className="participants-list">
+                            {participants.map((participant) => {
+                                const status = connectionStatus[participant.user_id]
+                                const isConnected = status === 'connected'
+                                const isMe = participant.user_id === user?.id
 
-                            return (
-                                <li key={participant.id} className="participant-item">
-                                    <div className="participant-avatar">
-                                        <User size={16} />
-                                    </div>
-                                    <span className="participant-name">
-                                        {participant.user_name}
-                                        {isMe && ' (You)'}
-                                        {participant.user_id === roomData?.created_by && ' · Host'}
-                                    </span>
-                                    <div className="participant-status">
-                                        {!participant.is_audio_enabled && (
-                                            <MicOff size={14} className="status-icon muted" />
-                                        )}
-                                        {!participant.is_video_enabled && (
-                                            <VideoOff size={14} className="status-icon" />
-                                        )}
-                                        {!isMe && isConnected && (
-                                            <Wifi size={14} className="status-icon connected" />
-                                        )}
-                                    </div>
-                                </li>
-                            )
-                        })}
-                    </ul>
+                                return (
+                                    <li key={participant.id} className="participant-item">
+                                        <div className="participant-avatar">
+                                            <User size={16} />
+                                        </div>
+                                        <span className="participant-name">
+                                            {participant.user_name}
+                                            {isMe && ' (You)'}
+                                            {participant.user_id === roomData?.created_by && ' · Host'}
+                                        </span>
+                                        <div className="participant-status">
+                                            {!participant.is_audio_enabled && (
+                                                <MicOff size={14} className="status-icon muted" />
+                                            )}
+                                            {!participant.is_video_enabled && (
+                                                <VideoOff size={14} className="status-icon" />
+                                            )}
+                                            {!isMe && isConnected && (
+                                                <Wifi size={14} className="status-icon connected" />
+                                            )}
+                                        </div>
+                                    </li>
+                                )
+                            })}
+                        </ul>
+                    </div>
                 </div>
             </main>
         </div>
