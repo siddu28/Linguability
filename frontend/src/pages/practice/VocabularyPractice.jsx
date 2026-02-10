@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { savePracticeProgress, getPracticeProgress } from "../../lib/database";
 import Navbar from "../../components/Navbar";
 import Button from "../../components/Button";
 import { ArrowLeft, ChevronRight, Eye } from "lucide-react";
@@ -9,9 +11,13 @@ function VocabularyPractice() {
     const [words, setWords] = useState([]);
     const [index, setIndex] = useState(0);
     const [showAnswer, setShowAnswer] = useState(false);
+    const [completedCount, setCompletedCount] = useState(0);
+    const [progressLoaded, setProgressLoaded] = useState(false);
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
     const lang = searchParams.get("lang") || "english";
+    const saveTimeoutRef = useRef(null);
 
     // Language display names
     const langNames = {
@@ -21,23 +27,81 @@ function VocabularyPractice() {
         'telugu': 'Telugu'
     };
 
+    // Fetch vocabulary data and restore saved progress
     useEffect(() => {
-        fetch(`http://localhost:3001/api/practice/${lang}/vocabulary`)
-            .then(res => res.json())
-            .then(data => {
+        let cancelled = false;
+
+        async function loadData() {
+            try {
+                const res = await fetch(`http://localhost:3001/api/practice/${lang}/vocabulary`);
+                const data = await res.json();
+
+                if (cancelled) return;
+
                 if (Array.isArray(data)) {
                     setWords(data);
+
+                    // Restore saved progress if user is logged in
+                    if (user?.id) {
+                        const saved = await getPracticeProgress(user.id, lang, 'vocabulary');
+                        if (!cancelled && saved) {
+                            const restoredIndex = Math.min(saved.current_index, data.length - 1);
+                            setIndex(restoredIndex);
+                            setCompletedCount(saved.completed_count || 0);
+                        }
+                    }
                 } else {
                     console.error("Invalid data format received");
                     setWords([]);
                 }
-            })
-            .catch(err => console.error("Error fetching practice data:", err));
-    }, [lang]);
+            } catch (err) {
+                console.error("Error fetching practice data:", err);
+            } finally {
+                if (!cancelled) setProgressLoaded(true);
+            }
+        }
+
+        loadData();
+        return () => { cancelled = true; };
+    }, [lang, user?.id]);
+
+    // Save progress (debounced)
+    const saveProgress = (newIndex, newCompletedCount) => {
+        if (!user?.id) return;
+
+        if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+        saveTimeoutRef.current = setTimeout(() => {
+            savePracticeProgress(user.id, {
+                language: lang,
+                practice_type: 'vocabulary',
+                current_index: newIndex,
+                completed_count: newCompletedCount
+            });
+        }, 500);
+    };
+
+    // Save on unmount
+    useEffect(() => {
+        return () => {
+            if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+            if (user?.id && words.length > 0) {
+                savePracticeProgress(user.id, {
+                    language: lang,
+                    practice_type: 'vocabulary',
+                    current_index: index,
+                    completed_count: completedCount
+                });
+            }
+        };
+    }, [user?.id, lang, index, completedCount, words.length]);
 
     const nextWord = () => {
-        setIndex((prev) => (prev + 1) % words.length);
+        const newIndex = (index + 1) % words.length;
+        const newCompleted = completedCount + 1;
+        setIndex(newIndex);
         setShowAnswer(false);
+        setCompletedCount(newCompleted);
+        saveProgress(newIndex, newCompleted);
     };
 
     // Keyboard shortcuts
@@ -55,9 +119,9 @@ function VocabularyPractice() {
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [words]);
+    }, [words, index, completedCount]);
 
-    if (!words.length) return (
+    if (!words.length || !progressLoaded) return (
         <div className="practice-layout">
             <Navbar />
             <div className="practice-page">
@@ -93,6 +157,11 @@ function VocabularyPractice() {
                         <button className="back-btn" onClick={() => navigate(`/practice?lang=${lang}`)}>
                             <ArrowLeft size={16} /> Back to Practice
                         </button>
+                        {completedCount > 0 && (
+                            <span style={{ marginLeft: 'auto', fontSize: '0.85rem', color: 'var(--color-text-secondary)' }}>
+                                {completedCount} words practiced
+                            </span>
+                        )}
                     </div>
 
                     <div className="word-display">

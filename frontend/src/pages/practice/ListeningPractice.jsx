@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { savePracticeProgress, getPracticeProgress } from "../../lib/database";
 import Navbar from "../../components/Navbar";
 import Button from "../../components/Button";
 import { Volume2, ChevronRight, CheckCircle, XCircle, ArrowLeft } from "lucide-react";
@@ -18,7 +20,10 @@ function ListeningPractice() {
     const [hasPlayed, setHasPlayed] = useState(false);
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
     const lang = searchParams.get("lang") || "english";
+    const saveTimeoutRef = useRef(null);
+    const [progressLoaded, setProgressLoaded] = useState(false);
 
     const langNames = {
         'english': 'English',
@@ -35,13 +40,19 @@ function ListeningPractice() {
     };
 
     useEffect(() => {
-        fetch(`http://localhost:3001/api/practice/${lang}/listening`)
-            .then(res => res.json())
-            .then(data => {
-                // Normalize into separate word and sentence sources so UI can toggle between them
+        let cancelled = false;
+
+        async function loadData() {
+            try {
+                const res = await fetch(`http://localhost:3001/api/practice/${lang}/listening`);
+                const data = await res.json();
+                if (cancelled) return;
+
+                let ws = [];
+                let ss = [];
+
                 if (Array.isArray(data)) {
-                    // Legacy: treat everything as words
-                    const ws = data.map(item => ({
+                    ws = data.map(item => ({
                         ...item,
                         shuffledOptions: shuffleArray(Array.isArray(item.options) ? [...item.options] : [])
                     }));
@@ -49,17 +60,16 @@ function ListeningPractice() {
                     setSentencesSource([]);
                     setList(ws);
                 } else if (data && (Array.isArray(data.words) || Array.isArray(data.sentences))) {
-                    const ws = (data.words || []).map(item => ({
+                    ws = (data.words || []).map(item => ({
                         ...item,
                         shuffledOptions: shuffleArray(Array.isArray(item.options) ? [...item.options] : [])
                     }));
-                    const ss = (data.sentences || []).map(item => ({
+                    ss = (data.sentences || []).map(item => ({
                         ...item,
                         shuffledOptions: shuffleArray(Array.isArray(item.options) ? [...item.options] : [])
                     }));
                     setWordsSource(ws);
                     setSentencesSource(ss);
-                    // default to words if available, else sentences
                     setList(ws.length ? ws : ss);
                     setCategory(ws.length ? 'words' : 'sentences');
                 } else {
@@ -68,9 +78,63 @@ function ListeningPractice() {
                     setSentencesSource([]);
                     setList([]);
                 }
-            })
-            .catch(err => console.error("Error fetching practice data:", err));
-    }, [lang]);
+
+                // Restore saved progress
+                if (user?.id) {
+                    const saved = await getPracticeProgress(user.id, lang, 'listening');
+                    if (!cancelled && saved) {
+                        const activeList = saved.category === 'sentences' ? ss : ws;
+                        if (activeList.length > 0) {
+                            setCategory(saved.category || 'words');
+                            setIndex(Math.min(saved.current_index, activeList.length - 1));
+                            setScore(saved.score || 0);
+                            setList(activeList);
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error("Error fetching practice data:", err);
+            } finally {
+                if (!cancelled) setProgressLoaded(true);
+            }
+        }
+
+        loadData();
+        return () => { cancelled = true; };
+    }, [lang, user?.id]);
+
+    // Save progress (debounced)
+    const saveListeningProgress = (newIndex, newScore, cat) => {
+        if (!user?.id) return;
+        if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+        saveTimeoutRef.current = setTimeout(() => {
+            savePracticeProgress(user.id, {
+                language: lang,
+                practice_type: 'listening',
+                current_index: newIndex,
+                score: newScore,
+                category: cat || category,
+                completed_count: newIndex + 1
+            });
+        }, 500);
+    };
+
+    // Save on unmount
+    useEffect(() => {
+        return () => {
+            if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+            if (user?.id && list.length > 0) {
+                savePracticeProgress(user.id, {
+                    language: lang,
+                    practice_type: 'listening',
+                    current_index: index,
+                    score: score,
+                    category: category,
+                    completed_count: index + 1
+                });
+            }
+        };
+    }, [user?.id, lang, index, score, category, list.length]);
 
     const shuffleArray = (array) => {
         for (let i = array.length - 1; i > 0; i--) {
@@ -170,8 +234,13 @@ function ListeningPractice() {
     const checkAnswer = () => {
         if (!selectedOption) return;
         setShowResult(true);
-        if (selectedOption === list[index].text) {
-            setScore(prev => prev + 1);
+        const isCorrect = selectedOption === list[index].text;
+        if (isCorrect) {
+            const newScore = score + 1;
+            setScore(newScore);
+            saveListeningProgress(index, newScore, category);
+        } else {
+            saveListeningProgress(index, score, category);
         }
     };
 
@@ -243,7 +312,7 @@ function ListeningPractice() {
         setList(prepared);
     }
 
-    if (!list.length) return (
+    if (!list.length || !progressLoaded) return (
         <div className="practice-layout">
             <Navbar />
             <div className="practice-page">

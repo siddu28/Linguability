@@ -404,3 +404,61 @@ export async function getAllQuizProgress(userId) {
     }
     return data
 }
+
+// ============ PRACTICE PROGRESS ============
+
+export async function savePracticeProgress(userId, progress) {
+    const { data, error } = await supabase
+        .from('practice_progress')
+        .upsert({
+            user_id: userId,
+            language: progress.language,
+            practice_type: progress.practice_type,
+            current_index: progress.current_index ?? 0,
+            score: progress.score ?? 0,
+            difficulty: progress.difficulty ?? 'simple',
+            category: progress.category ?? 'words',
+            completed_count: progress.completed_count ?? 0,
+            updated_at: new Date().toISOString()
+        }, {
+            onConflict: 'user_id,language,practice_type'
+        })
+        .select()
+        .single()
+
+    if (error) {
+        console.error('Error saving practice progress:', error)
+        // Don't throw — progress saving is non-critical
+        return null
+    }
+    return data
+}
+
+export async function getPracticeProgress(userId, language, practiceType) {
+    const { data, error } = await supabase
+        .from('practice_progress')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('language', language)
+        .eq('practice_type', practiceType)
+        .single()
+
+    if (error && error.code !== 'PGRST116') { // PGRST116 = no rows
+        console.error('Error fetching practice progress:', error)
+    }
+    return data
+}
+
+export async function getAllPracticeProgress(userId) {
+    const { data, error } = await supabase
+        .from('practice_progress')
+        .select('*')
+        .eq('user_id', userId)
+        .order('updated_at', { ascending: false })
+
+    if (error) {
+        console.error('Error fetching all practice progress:', error)
+        return []
+    }
+    return data
+}
