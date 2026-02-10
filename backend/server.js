@@ -1,7 +1,6 @@
 const express = require('express')
 const cors = require('cors')
 const dotenv = require('dotenv')
-
 // Load environment variables
 dotenv.config()
 
@@ -14,8 +13,10 @@ app.use(express.json())
 
 // Import routes
 const lessonsRouter = require('./routes/lessons')
+const practiceRouter = require('./routes/practice');
 
 // Routes
+app.use('/api/practice', practiceRouter);
 app.use('/api/lessons', lessonsRouter)
 
 // Health check
