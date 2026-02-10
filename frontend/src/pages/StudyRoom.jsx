@@ -609,14 +609,31 @@ function StudyRoom() {
                                                 <span className="remote-user-name">{participant.user_name}</span>
                                                 <span className="remote-user-status">
                                                     {status === 'connecting' || status === 'new' ? (
-                                                        <>Connecting...</>
-                                                    ) : status === 'failed' || status === 'disconnected' ? (
+                                                        <>
+                                                            <Wifi size={14} className="pulse" />
+                                                            Connecting...
+                                                        </>
+                                                    ) : status === 'failed' ? (
                                                         <>
                                                             <WifiOff size={14} />
                                                             Connection failed
+                                                            <button
+                                                                className="retry-btn"
+                                                                onClick={() => {
+                                                                    closeConnection(participant.user_id)
+                                                                    setTimeout(() => callParticipant(participant.user_id, participant.user_name), 500)
+                                                                }}
+                                                            >
+                                                                Retry
+                                                            </button>
+                                                        </>
+                                                    ) : status === 'disconnected' ? (
+                                                        <>
+                                                            <WifiOff size={14} />
+                                                            Disconnected — reconnecting...
                                                         </>
                                                     ) : (
-                                                        <>Establishing connection...</>
+                                                        <>Waiting to connect...</>
                                                     )}
                                                 </span>
                                             </div>
