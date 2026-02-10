@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
-import { updateProfile, upsertUserSettings } from '../lib/database'
+import { useSettings } from '../context/SettingsContext'
+import { updateProfile } from '../lib/database'
 import './Onboarding.css'
 
 // Custom SVG Icons - Unique designs, not generic
@@ -214,6 +215,7 @@ const preferenceOptions = [
 function Onboarding() {
     const navigate = useNavigate()
     const { user, loading: authLoading } = useAuth()
+    const { updateSettings: applySettings } = useSettings()
     const [currentStep, setCurrentStep] = useState(STEPS.WELCOME)
     const [submitting, setSubmitting] = useState(false)
     const [showOnboarding, setShowOnboarding] = useState(false)
@@ -299,39 +301,49 @@ function Onboarding() {
     const handleComplete = async () => {
         setSubmitting(true)
         try {
+            if (user?.id) {
+                // Save profile (non-blocking — don't let this prevent settings save)
+                try {
+                    const learningChallenges = []
+                    if (selections.preferences.includes('dyslexia')) learningChallenges.push('dyslexia')
+                    if (selections.preferences.includes('audio')) learningChallenges.push('auditory')
+
+                    await updateProfile(user.id, {
+                        learning_challenges: learningChallenges,
+                        learning_goal: selections.goal,
+                        experience_level: selections.level,
+                        daily_goal_minutes: selections.dailyTime
+                    })
+                } catch (profileErr) {
+                    // Profile columns may not all exist yet — non-blocking
+                }
+
+                // Save settings to DB BEFORE updating user metadata
+                try {
+                    await applySettings({
+                        focusMode: settings.focusMode,
+                        textSize: settings.textSize,
+                        fontFamily: settings.fontFamily,
+                        lineSpacing: settings.lineSpacing,
+                        letterSpacing: settings.letterSpacing,
+                        highContrast: settings.highContrast,
+                        readingSpeed: settings.readingSpeed,
+                        screenReaderFriendly: settings.screenReaderFriendly,
+                        textToSpeech: selections.preferences.includes('tts')
+                    })
+                } catch (settingsErr) {
+                    console.warn('Settings save failed:', settingsErr)
+                }
+            }
+
+            // Update user metadata AFTER settings are saved
             await supabase.auth.updateUser({
                 data: { onboarding_completed: true }
             })
 
-            if (user?.id) {
-                // Determine learning challenges based on preferences
-                const learningChallenges = []
-                if (selections.preferences.includes('dyslexia')) learningChallenges.push('dyslexia')
-                if (selections.preferences.includes('audio')) learningChallenges.push('auditory')
-
-                await updateProfile(user.id, {
-                    learning_challenges: learningChallenges,
-                    learning_goal: selections.goal,
-                    experience_level: selections.level,
-                    daily_goal_minutes: selections.dailyTime
-                })
-
-                await upsertUserSettings(user.id, {
-                    focus_mode: settings.focusMode,
-                    font_size: settings.textSize,
-                    font_family: settings.fontFamily,
-                    line_spacing: settings.lineSpacing,
-                    letter_spacing: settings.letterSpacing,
-                    high_contrast: settings.highContrast,
-                    reading_speed: settings.readingSpeed,
-                    screen_reader_friendly: settings.screenReaderFriendly,
-                    text_to_speech: selections.preferences.includes('tts')
-                })
-            }
-
             navigate('/dashboard')
         } catch (err) {
-            console.error('Failed to save preferences:', err)
+            console.error('Failed to complete onboarding:', err)
             navigate('/dashboard')
         } finally {
             setSubmitting(false)

@@ -71,6 +71,12 @@
   --transition-fast: 150ms ease;
   --transition-base: 250ms ease;
   --transition-slow: 350ms ease;
+
+  /* User Accessibility Settings (defaults, overridden by SettingsContext) */
+  --user-font-size: 1rem;
+  --user-font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+  --user-line-spacing: 1.6;
+  --user-letter-spacing: 0;
 }
 
 /* Dark Theme */
@@ -162,6 +168,48 @@ body {
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Apply user accessibility settings to lesson/practice/quiz content */
+.lesson-content,
+.practice-content,
+.quiz-content,
+.word-card,
+.question-text,
+.quiz-option,
+.lesson-text,
+.word-main,
+.word-translation,
+.phonetic-badge {
+  font-size: var(--user-font-size) !important;
+  font-family: var(--user-font-family) !important;
+  line-height: var(--user-line-spacing) !important;
+  letter-spacing: var(--user-letter-spacing) !important;
+}
+
+/* High Contrast Mode */
+body.high-contrast {
+  --color-text-primary: #000000;
+  --color-background: #FFFFFF;
+  --color-border: #000000;
+}
+
+body.high-contrast .word-card,
+body.high-contrast .quiz-card,
+body.high-contrast .lesson-card {
+  border: 3px solid #000000;
+  background: #FFFFFF;
+}
+
+/* Focus Mode - reduce visual noise */
+body.focus-mode .navbar,
+body.focus-mode .sidebar {
+  opacity: 0.7;
+}
+
+body.focus-mode .word-card,
+body.focus-mode .quiz-card {
+  box-shadow: 0 0 0 4px rgba(233, 30, 99, 0.2);
 }
 
 a {

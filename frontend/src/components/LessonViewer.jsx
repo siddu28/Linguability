@@ -13,6 +13,7 @@ import {
 import { getWordsForLesson } from '../data/wordsData'
 import { getNumbersForLesson } from '../data/numbersData'
 import { getSentencesForLesson } from '../data/sentencesData'
+import { useSettings } from '../context/SettingsContext'
 import Button from './Button'
 import './LessonViewer.css'
 
@@ -23,6 +24,8 @@ function LessonViewer({
     onClose,
     onProgress // Callback: (progressPercent, isComplete) => void
 }) {
+    // Get user accessibility settings
+    const { getStyleValues, getSpeechRate, settings } = useSettings()
     const [words, setWords] = useState([])
     const [currentIndex, setCurrentIndex] = useState(0)
     const [visitedWords, setVisitedWords] = useState([0]) // Track visited words for progress
@@ -198,7 +201,7 @@ function LessonViewer({
         }
 
         const utterance = new SpeechSynthesisUtterance(textToSpeak)
-        utterance.rate = 0.7 // Slower for learning
+        utterance.rate = getSpeechRate() // Use user's preferred reading speed
 
         if (voiceToUse) {
             utterance.voice = voiceToUse
@@ -400,7 +403,7 @@ function LessonViewer({
 
             {/* Word Card */}
             <div className={`word-card ${matchResult ? matchResult : ''}`}>
-                <div className="word-main">
+                <div className="word-main" style={getStyleValues()}>
                     {currentWord.word}
                 </div>
 

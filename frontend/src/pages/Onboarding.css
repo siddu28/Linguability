@@ -390,19 +390,19 @@
     gap: 1.5rem;
     margin-top: 1rem;
     align-items: start;
-    max-height: 420px;
+    max-height: 380px;
 }
 
-/* Lesson Preview - Fixed/Sticky */
+/* Lesson Preview - Fixed height */
 .ob-lesson-preview {
     background: white;
     border-radius: 20px;
     padding: 1.25rem;
     border: 2px solid #f0e4e8;
     transition: all 0.3s ease;
-    position: sticky;
-    top: 0;
     height: fit-content;
+    max-height: 380px;
+    overflow: hidden;
 }
 
 .ob-lesson-preview.focus-mode {
@@ -552,7 +552,7 @@
     border-radius: 20px;
     padding: 1.25rem;
     border: 2px solid #f0e4e8;
-    max-height: 420px;
+    max-height: 380px;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: #e91e63 #f5f0f2;
