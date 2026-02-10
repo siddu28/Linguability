@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+import { savePracticeProgress, getPracticeProgress } from "../../lib/database";
 import Navbar from "../../components/Navbar";
 import Button from "../../components/Button";
 import { ArrowLeft, Mic, Volume2, ChevronRight, RefreshCw } from "lucide-react";
@@ -13,9 +15,13 @@ function PronunciationPractice() {
     const [isRecording, setIsRecording] = useState(false);
     const [difficulty, setDifficulty] = useState("simple"); // simple, medium, hard
     const [allData, setAllData] = useState(null);
+    const [completedCount, setCompletedCount] = useState(0);
+    const [progressLoaded, setProgressLoaded] = useState(false);
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
     const lang = searchParams.get("lang") || "english";
+    const saveTimeoutRef = useRef(null);
 
     // Language display names
     const langNames = {
@@ -26,20 +32,79 @@ function PronunciationPractice() {
     };
 
     useEffect(() => {
-        fetch(`http://localhost:3001/api/practice/${lang}/pronunciation`)
-            .then(res => res.json())
-            .then(data => {
+        let cancelled = false;
+
+        async function loadData() {
+            try {
+                const res = await fetch(`http://localhost:3001/api/practice/${lang}/pronunciation`);
+                const data = await res.json();
+                if (cancelled) return;
+
                 setAllData(data);
-                // Load initial difficulty level
+                let initialWords = [];
+                let initialDifficulty = 'simple';
+
                 if (data && data.simple) {
-                    setWords(data.simple);
+                    initialWords = data.simple;
                 } else if (Array.isArray(data)) {
-                    // Fallback for old format
-                    setWords(data);
+                    initialWords = data;
                 }
-            })
-            .catch(err => console.error("Error fetching practice data:", err));
-    }, [lang]);
+
+                // Restore saved progress
+                if (user?.id) {
+                    const saved = await getPracticeProgress(user.id, lang, 'pronunciation');
+                    if (!cancelled && saved) {
+                        initialDifficulty = saved.difficulty || 'simple';
+                        const diffWords = data?.[initialDifficulty] || initialWords;
+                        initialWords = diffWords;
+                        setDifficulty(initialDifficulty);
+                        setIndex(Math.min(saved.current_index, diffWords.length - 1));
+                        setCompletedCount(saved.completed_count || 0);
+                    }
+                }
+
+                setWords(initialWords);
+            } catch (err) {
+                console.error("Error fetching practice data:", err);
+            } finally {
+                if (!cancelled) setProgressLoaded(true);
+            }
+        }
+
+        loadData();
+        return () => { cancelled = true; };
+    }, [lang, user?.id]);
+
+    // Save progress (debounced)
+    const savePronunciationProgress = (newIndex, diff, newCompleted) => {
+        if (!user?.id) return;
+        if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+        saveTimeoutRef.current = setTimeout(() => {
+            savePracticeProgress(user.id, {
+                language: lang,
+                practice_type: 'pronunciation',
+                current_index: newIndex,
+                difficulty: diff || difficulty,
+                completed_count: newCompleted
+            });
+        }, 500);
+    };
+
+    // Save on unmount
+    useEffect(() => {
+        return () => {
+            if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+            if (user?.id && words.length > 0) {
+                savePracticeProgress(user.id, {
+                    language: lang,
+                    practice_type: 'pronunciation',
+                    current_index: index,
+                    difficulty: difficulty,
+                    completed_count: completedCount
+                });
+            }
+        };
+    }, [user?.id, lang, index, difficulty, completedCount, words.length]);
 
     const handleDifficultyChange = (newDifficulty) => {
         setDifficulty(newDifficulty);
@@ -48,6 +113,16 @@ function PronunciationPractice() {
         setResult(null);
         if (allData && allData[newDifficulty]) {
             setWords(allData[newDifficulty]);
+        }
+        // Save the new difficulty selection
+        if (user?.id) {
+            savePracticeProgress(user.id, {
+                language: lang,
+                practice_type: 'pronunciation',
+                current_index: 0,
+                difficulty: newDifficulty,
+                completed_count: completedCount
+            });
         }
     };
 
@@ -194,9 +269,13 @@ function PronunciationPractice() {
 
     const next = () => {
         if (!words.length) return;
-        setIndex((prev) => (prev + 1) % words.length);
+        const newIndex = (index + 1) % words.length;
+        const newCompleted = completedCount + 1;
+        setIndex(newIndex);
         setSpoken("");
         setResult(null);
+        setCompletedCount(newCompleted);
+        savePronunciationProgress(newIndex, difficulty, newCompleted);
     };
 
     const current = words[index];
@@ -222,7 +301,7 @@ function PronunciationPractice() {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isRecording, current, words]);
 
-    if (!words.length) return (
+    if (!words.length || !progressLoaded) return (
         <div className="practice-layout">
             <Navbar />
             <div className="practice-page">

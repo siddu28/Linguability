@@ -17,21 +17,43 @@ export async function getProfile(userId) {
 }
 
 export async function updateProfile(userId, updates) {
-    const { data, error } = await supabase
-        .from('profiles')
-        .update({ ...updates, updated_at: new Date().toISOString() })
-        .eq('id', userId)
-        .select()
-        .single()
+    let payload = { ...updates, updated_at: new Date().toISOString() }
 
-    if (error) {
+    // Remove columns already known to be missing
+    for (const col of _missingProfileCols) delete payload[col]
+
+    // Try up to 5 times, removing any column the DB doesn't recognize
+    for (let attempt = 0; attempt < 5; attempt++) {
+        const { data, error } = await supabase
+            .from('profiles')
+            .update(payload)
+            .eq('id', userId)
+            .select()
+            .single()
+
+        if (!error) return data
+
+        if (error.code === '42703' || error.message?.includes('column')) {
+            const match = error.message.match(/Could not find the '(\w+)' column/)
+            if (match) {
+                _missingProfileCols.add(match[1])
+                delete payload[match[1]]
+                continue
+            }
+        }
+
         console.error('Error updating profile:', error)
         throw error
     }
-    return data
+
+    return null
 }
 
 // ============ USER SETTINGS ============
+
+// Cache columns that are known to be missing from the DB to avoid repeated warnings
+const _missingSettingsCols = new Set()
+const _missingProfileCols = new Set()
 
 export async function getUserSettings(userId) {
     const { data, error } = await supabase
@@ -47,21 +69,53 @@ export async function getUserSettings(userId) {
 }
 
 export async function upsertUserSettings(userId, settings) {
-    const { data, error } = await supabase
-        .from('user_settings')
-        .upsert({
-            user_id: userId,
-            ...settings,
-            updated_at: new Date().toISOString()
-        })
-        .select()
-        .single()
+    // Build payload, progressively removing columns that don't exist in the DB
+    const allColumns = {
+        user_id: userId,
+        focus_mode: settings.focus_mode ?? false,
+        font_size: settings.font_size ?? 'medium',
+        font_family: settings.font_family ?? 'system',
+        line_spacing: settings.line_spacing ?? 'normal',
+        letter_spacing: settings.letter_spacing ?? 'normal',
+        high_contrast: settings.high_contrast ?? false,
+        text_to_speech: settings.text_to_speech ?? false,
+        reading_speed: settings.reading_speed ?? 'normal',
+        screen_reader_friendly: settings.screen_reader_friendly ?? false,
+        updated_at: new Date().toISOString()
+    }
 
-    if (error) {
+    let payload = { ...allColumns }
+
+    // Remove columns already known to be missing
+    for (const col of _missingSettingsCols) delete payload[col]
+
+    // Try up to 5 times, each time removing the offending column
+    for (let attempt = 0; attempt < 5; attempt++) {
+        const { data, error } = await supabase
+            .from('user_settings')
+            .upsert(payload)
+            .select()
+            .single()
+
+        if (!error) return data
+
+        // If a column doesn't exist, remove it and retry
+        if (error.code === '42703' || error.message?.includes('column')) {
+            const match = error.message.match(/Could not find the '(\w+)' column/)
+            if (match) {
+                _missingSettingsCols.add(match[1])
+                delete payload[match[1]]
+                continue
+            }
+        }
+
+        // Non-column error, throw immediately
         console.error('Error saving settings:', error)
         throw error
     }
-    return data
+
+    console.error('Failed to save settings after removing missing columns')
+    return null
 }
 
 // ============ LESSON PROGRESS ============
@@ -346,6 +400,64 @@ export async function getAllQuizProgress(userId) {
 
     if (error) {
         console.error('Error fetching all quiz progress:', error)
+        return []
+    }
+    return data
+}
+
+// ============ PRACTICE PROGRESS ============
+
+export async function savePracticeProgress(userId, progress) {
+    const { data, error } = await supabase
+        .from('practice_progress')
+        .upsert({
+            user_id: userId,
+            language: progress.language,
+            practice_type: progress.practice_type,
+            current_index: progress.current_index ?? 0,
+            score: progress.score ?? 0,
+            difficulty: progress.difficulty ?? 'simple',
+            category: progress.category ?? 'words',
+            completed_count: progress.completed_count ?? 0,
+            updated_at: new Date().toISOString()
+        }, {
+            onConflict: 'user_id,language,practice_type'
+        })
+        .select()
+        .single()
+
+    if (error) {
+        console.error('Error saving practice progress:', error)
+        // Don't throw — progress saving is non-critical
+        return null
+    }
+    return data
+}
+
+export async function getPracticeProgress(userId, language, practiceType) {
+    const { data, error } = await supabase
+        .from('practice_progress')
+        .select('*')
+        .eq('user_id', userId)
+        .eq('language', language)
+        .eq('practice_type', practiceType)
+        .single()
+
+    if (error && error.code !== 'PGRST116') { // PGRST116 = no rows
+        console.error('Error fetching practice progress:', error)
+    }
+    return data
+}
+
+export async function getAllPracticeProgress(userId) {
+    const { data, error } = await supabase
+        .from('practice_progress')
+        .select('*')
+        .eq('user_id', userId)
+        .order('updated_at', { ascending: false })
+
+    if (error) {
+        console.error('Error fetching all practice progress:', error)
         return []
     }
     return data

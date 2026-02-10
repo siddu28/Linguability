@@ -10,7 +10,7 @@
     background-color: var(--color-background);
 }
 
-.practice-page {
+.practice-layout .practice-page {
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -260,7 +260,7 @@
     margin-top: 2rem;
 }
 
-.option-btn {
+.practice-layout .option-btn {
     padding: 1.5rem;
     font-size: 1.125rem;
     font-weight: 600;
@@ -277,13 +277,13 @@
     position: relative;
 }
 
-.option-btn:hover:not(:disabled) {
+.practice-layout .option-btn:hover:not(:disabled) {
     border-color: var(--color-text-muted);
     background-color: var(--color-background);
     transform: translateY(-2px);
 }
 
-.option-btn.selected {
+.practice-layout .option-btn.selected {
     border-color: var(--color-primary);
     background-color: rgba(233, 30, 140, 0.05);
     color: var(--color-primary);
@@ -291,14 +291,14 @@
     box-shadow: 0 4px 12px rgba(233, 30, 140, 0.15);
 }
 
-.option-btn.correct {
+.practice-layout .option-btn.correct {
     border-color: var(--color-success);
     background-color: rgba(34, 197, 94, 0.05);
     color: #065f46;
     border-width: 3px;
 }
 
-.option-btn.incorrect {
+.practice-layout .option-btn.incorrect {
     border-color: var(--color-error);
     background-color: rgba(239, 68, 68, 0.05);
     color: #991b1b;

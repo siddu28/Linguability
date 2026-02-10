@@ -315,3 +315,42 @@
         width: 100%;
     }
 }
+
+/* Dark Mode Styles */
+[data-theme="dark"] .study-rooms-page {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .study-rooms-title,
+[data-theme="dark"] .room-name {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .room-card {
+    background-color: #1E1E1E;
+    border: 2px solid #e91e63;
+}
+
+[data-theme="dark"] .empty-state {
+    background-color: #1E1E1E;
+    border: 2px solid #e91e63;
+    color: #ffffff;
+}
+
+[data-theme="dark"] .modal-content {
+    background-color: #1E1E1E;
+    border: 2px solid #e91e63;
+    color: #ffffff;
+}
+
+[data-theme="dark"] .form-input {
+    background-color: #2a2a2a;
+    border: 1px solid #e91e63;
+    color: #ffffff;
+}
+
+[data-theme="dark"] .search-input {
+    background-color: #2a2a2a;
+    border: 1px solid #e91e63;
+    color: #ffffff;
+}

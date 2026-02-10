@@ -610,3 +610,35 @@
         flex-direction: column;
     }
 }
+
+/* Dark Mode Styles */
+[data-theme="dark"] .quiz-page {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .quiz-title,
+[data-theme="dark"] .question-text,
+[data-theme="dark"] .results-title {
+    color: #ffffff;
+}
+
+[data-theme="dark"] .quiz-card,
+[data-theme="dark"] .results-card,
+[data-theme="dark"] .intro-card {
+    background-color: #1E1E1E;
+    border: 2px solid #e91e63;
+}
+
+[data-theme="dark"] .option-btn {
+    background-color: #2a2a2a;
+    border: 2px solid #e91e63;
+    color: #ffffff;
+}
+
+[data-theme="dark"] .option-btn:hover {
+    background-color: #3a3a3a;
+}
+
+[data-theme="dark"] .progress-bar {
+    background-color: #2a2a2a;
+}
