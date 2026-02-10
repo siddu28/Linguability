@@ -64,7 +64,7 @@ function VocabularyPractice() {
                             className="top-progress-fill"
                             style={{
                                 width: `${((index + 1) / words.length) * 100}%`,
-                                backgroundColor: '#10b981'
+                                backgroundColor: 'var(--color-success)'
                             }}
                         />
                     </div>
@@ -85,14 +85,14 @@ function VocabularyPractice() {
                     <div className="vocabulary-content" style={{ minHeight: '200px', width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                         {showAnswer ? (
                             <div className="answer-section" style={{ width: '100%', textAlign: 'center', animation: 'premiumFadeIn 0.5s ease' }}>
-                                <div style={{ padding: '2rem', borderRadius: '16px', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+                                <div className="answer-section-inner">
                                     <div style={{ marginBottom: '1.5rem' }}>
                                         <h4 style={{ color: 'var(--color-primary)', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Meaning</h4>
-                                        <p style={{ fontSize: '1.5rem', fontWeight: '600', color: '#1e293b' }}>{current.meaning}</p>
+                                        <p className="meaning-text">{current.meaning}</p>
                                     </div>
                                     <div>
-                                        <h4 style={{ color: '#64748b', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Example</h4>
-                                        <p style={{ fontSize: '1.125rem', fontStyle: 'italic', color: '#475569' }}>"{current.example}"</p>
+                                        <h4 style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Example</h4>
+                                        <p className="example-text">"{current.example}"</p>
                                     </div>
                                 </div>
                             </div>

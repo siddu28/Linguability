@@ -166,7 +166,7 @@ function ListeningPractice() {
                             className="top-progress-fill"
                             style={{
                                 width: `${((index + (showResult ? 1 : 0)) / list.length) * 100}%`,
-                                backgroundColor: '#10b981'
+                                backgroundColor: 'var(--color-success)'
                             }}
                         />
                     </div>
@@ -223,12 +223,12 @@ function ListeningPractice() {
                                         <button
                                             key={i}
                                             className={`option-btn ${selectedOption === option ? 'selected' : ''} ${showResult
-                                                    ? option === current.text
-                                                        ? 'correct'
-                                                        : selectedOption === option
-                                                            ? 'incorrect'
-                                                            : ''
-                                                    : ''
+                                                ? option === current.text
+                                                    ? 'correct'
+                                                    : selectedOption === option
+                                                        ? 'incorrect'
+                                                        : ''
+                                                : ''
                                                 }`}
                                             onClick={() => handleOptionSelect(option)}
                                             disabled={showResult}

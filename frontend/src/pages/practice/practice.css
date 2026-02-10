@@ -7,7 +7,7 @@
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background-color: #f8fafc;
+    background-color: var(--color-background);
 }
 
 .practice-page {
@@ -16,7 +16,7 @@
     flex-direction: column;
     align-items: center;
     padding: var(--spacing-xl);
-    background-color: #f8fafc;
+    background-color: var(--color-background);
 }
 
 /* Slim Top Progress Bar */
@@ -28,29 +28,29 @@
     gap: 1.5rem;
     margin-bottom: 2rem;
     padding: 0 1rem;
-    color: #64748b;
+    color: var(--color-text-secondary);
     font-size: 0.875rem;
 }
 
 .top-progress-bar {
     flex: 1;
     height: 8px;
-    background-color: #e2e8f0;
+    background-color: var(--color-border);
     border-radius: var(--radius-full);
     overflow: hidden;
 }
 
 .top-progress-fill {
     height: 100%;
-    background-color: #10b981;
+    background-color: var(--color-success);
     border-radius: var(--radius-full);
     transition: width 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Minimalist Card Design */
 .practice-card {
-    background: white;
-    border: 1px solid #e2e8f0;
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
     border-radius: var(--radius-xl);
     padding: var(--spacing-3xl);
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
@@ -74,7 +74,7 @@
 .back-btn {
     padding: 0.5rem 1rem;
     border-radius: var(--radius-md);
-    color: #64748b;
+    color: var(--color-text-secondary);
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
@@ -87,7 +87,7 @@
 
 .back-btn:hover {
     color: var(--color-primary);
-    background-color: #f1f5f9;
+    background-color: var(--color-background);
 }
 
 /* Word Display - Minimalist */
@@ -99,7 +99,7 @@
 
 .word-display h2 {
     font-size: 4.5rem;
-    color: #1e293b;
+    color: var(--color-text-primary);
     margin-bottom: 1.5rem;
     font-weight: 700;
 }
@@ -110,8 +110,8 @@
     width: 70px;
     height: 70px;
     border-radius: 50%;
-    background: white;
-    border: 1px solid #e2e8f0;
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
     color: var(--color-primary);
     display: flex;
     align-items: center;
@@ -124,7 +124,7 @@
 
 .listen-btn:hover,
 .mini-speak-btn:hover {
-    background-color: #fff1f2;
+    background-color: rgba(233, 30, 140, 0.05);
     border-color: var(--color-primary);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(233, 30, 140, 0.1);
@@ -148,7 +148,7 @@
 .minimalist-btn-label {
     font-size: 0.875rem;
     font-weight: 500;
-    color: #64748b;
+    color: var(--color-text-secondary);
 }
 
 /* Category selector (Words / Sentences) */
@@ -165,22 +165,22 @@
 }
 
 .category-toggle:hover {
-    background-color: #f8fafc;
-    color: #334155;
+    background-color: var(--color-background);
+    color: var(--color-text-secondary);
 }
 
 .category-toggle.active {
-    background: linear-gradient(90deg,#ec4899,#db2777);
+    background: linear-gradient(90deg, var(--color-primary), var(--color-primary-dark));
     color: white;
     border-color: transparent;
-    box-shadow: 0 6px 18px rgba(219,39,119,0.12);
+    box-shadow: 0 6px 18px rgba(219, 39, 119, 0.12);
 }
 
 /* Record Button - Minimalist */
 .record-btn-container {
     margin-top: 2rem;
     padding-top: 2rem;
-    border-top: 1px solid #f1f5f9;
+    border-top: 1px solid var(--color-border);
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -191,24 +191,24 @@
     width: 80px;
     height: 80px;
     border-radius: 50%;
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: var(--color-background);
+    border: 1px solid var(--color-border);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s;
-    color: #64748b;
+    color: var(--color-text-secondary);
 }
 
 .record-btn-circular:hover:not(:disabled) {
     background-color: white;
-    border-color: #cbd5e1;
+    border-color: var(--color-text-muted);
     color: #334155;
 }
 
 .record-btn-circular.recording {
-    background-color: #fff1f2;
+    background-color: rgba(239, 68, 68, 0.05);
     border-color: var(--color-error);
     color: var(--color-error);
     box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1);
@@ -228,14 +228,14 @@
     gap: 1rem;
     padding: 1.5rem;
     border-radius: var(--radius-lg);
-    background-color: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background-color: var(--color-background);
+    border: 1px solid var(--color-border);
 }
 
 .score-value-text {
     font-size: 2.5rem;
     font-weight: 700;
-    color: #1e293b;
+    color: var(--color-text-primary);
 }
 
 /* Listening Practice Specifics */
@@ -265,9 +265,9 @@
     font-size: 1.125rem;
     font-weight: 600;
     border-radius: 16px;
-    border: 2px solid #e2e8f0;
-    background: white;
-    color: #1e293b;
+    border: 2px solid var(--color-border);
+    background: var(--color-white);
+    color: var(--color-text-primary);
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
@@ -278,29 +278,29 @@
 }
 
 .option-btn:hover:not(:disabled) {
-    border-color: #cbd5e1;
-    background-color: #f8fafc;
+    border-color: var(--color-text-muted);
+    background-color: var(--color-background);
     transform: translateY(-2px);
 }
 
 .option-btn.selected {
     border-color: var(--color-primary);
-    background-color: #fff1f2;
+    background-color: rgba(233, 30, 140, 0.05);
     color: var(--color-primary);
     border-width: 3px;
     box-shadow: 0 4px 12px rgba(233, 30, 140, 0.15);
 }
 
 .option-btn.correct {
-    border-color: #10b981;
-    background-color: #ecfdf5;
+    border-color: var(--color-success);
+    background-color: rgba(34, 197, 94, 0.05);
     color: #065f46;
     border-width: 3px;
 }
 
 .option-btn.incorrect {
-    border-color: #ef4444;
-    background-color: #fef2f2;
+    border-color: var(--color-error);
+    background-color: rgba(239, 68, 68, 0.05);
     color: #991b1b;
     border-width: 3px;
 }

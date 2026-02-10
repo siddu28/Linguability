@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 import Card from "../components/Card";
 import Button from "../components/Button";
 import { ChevronRight, Mic, Headphones, BookOpen, Play } from "lucide-react";
-import "./Lessons.css";  // Using Lessons CSS for consistent styling
+import "./Practice.css";
 
 export default function Practice() {
     const [selectedLanguage, setSelectedLanguage] = useState(null);
@@ -41,15 +41,15 @@ export default function Practice() {
     ];
 
     return (
-        <div className="lessons-page">
+        <div className="practice-page">
             <Navbar />
 
-            <main className="lessons-content">
+            <main className="practice-content">
                 {!selectedLanguage ? (
                     <>
-                        <div className="lessons-header">
-                            <h1 className="lessons-title">Choose a Language</h1>
-                            <p className="lessons-subtitle">Select a language to start practicing</p>
+                        <div className="practice-header">
+                            <h1 className="practice-title">Choose a Language</h1>
+                            <p className="practice-subtitle">Select a language to start practicing</p>
                         </div>
 
                         <div className="languages-grid">
@@ -60,20 +60,8 @@ export default function Practice() {
                                     onClick={() => setSelectedLanguage(lang)}
                                 >
                                     <div
-                                        className="language-flag"
-                                        style={{
-                                            backgroundColor: lang.flagColor,
-                                            width: '64px',
-                                            height: '64px',
-                                            borderRadius: '12px',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            fontSize: '1.5rem',
-                                            fontWeight: 'bold',
-                                            color: 'white',
-                                            margin: '0 auto 12px auto'
-                                        }}
+                                        className="language-flag-badge"
+                                        style={{ backgroundColor: lang.flagColor }}
                                     >
                                         {lang.flag}
                                     </div>
@@ -88,7 +76,7 @@ export default function Practice() {
                     </>
                 ) : (
                     <>
-                        <div className="lessons-header">
+                        <div className="practice-header">
                             <button
                                 className="back-btn"
                                 onClick={() => setSelectedLanguage(null)}
@@ -97,34 +85,23 @@ export default function Practice() {
                             </button>
                             <div className="header-content">
                                 <div
-                                    className="selected-flag"
-                                    style={{
-                                        backgroundColor: selectedLanguage.flagColor,
-                                        width: '60px',
-                                        height: '60px',
-                                        borderRadius: '12px',
-                                        display: 'flex',
-                                        alignItems: 'center',
-                                        justifyContent: 'center',
-                                        fontSize: '1.5rem',
-                                        fontWeight: 'bold',
-                                        color: 'white'
-                                    }}
+                                    className="selected-flag-badge"
+                                    style={{ backgroundColor: selectedLanguage.flagColor }}
                                 >
                                     {selectedLanguage.flag}
                                 </div>
                                 <div>
-                                    <h1 className="lessons-title">{selectedLanguage.name} Practice</h1>
-                                    <p className="lessons-subtitle">Master your skills with focused exercises</p>
+                                    <h1 className="practice-title">{selectedLanguage.name} Practice</h1>
+                                    <p className="practice-subtitle">Master your skills with focused exercises</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="sections-container">
+                        <div className="practice-grid">
                             {practiceTypes.map((practice) => {
                                 const Icon = practice.icon;
                                 return (
-                                    <div key={practice.id} className="lesson-section">
+                                    <Card key={practice.id} className="practice-section">
                                         <div className="section-header">
                                             <div
                                                 className="section-icon"
@@ -138,17 +115,17 @@ export default function Practice() {
                                             </div>
                                         </div>
 
-                                        <div style={{ marginTop: '16px' }}>
+                                        <div className="practice-action">
                                             <Link
                                                 to={`/practice/${practice.id}?lang=${selectedLanguage.id}`}
-                                                style={{ textDecoration: 'none' }}
+                                                className="start-practice-link"
                                             >
-                                                <Button variant="primary" icon={Play}>
+                                                <Button variant="primary" icon={Play} className="start-practice-btn">
                                                     Start Practice
                                                 </Button>
                                             </Link>
                                         </div>
-                                    </div>
+                                    </Card>
                                 );
                             })}
                         </div>

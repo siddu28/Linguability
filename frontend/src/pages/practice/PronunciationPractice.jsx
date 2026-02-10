@@ -155,49 +155,22 @@ function PronunciationPractice() {
 
             <div className="practice-page">
                 {/* Difficulty Selection */}
-                <div style={{ padding: '1rem', backgroundColor: '#f1f5f9', borderRadius: '0.5rem', marginBottom: '1rem', display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+                <div style={{ padding: '1rem', backgroundColor: 'var(--color-background)', borderRadius: '0.5rem', marginBottom: '1rem', display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
                     <button
                         onClick={() => handleDifficultyChange("simple")}
-                        style={{
-                            padding: '0.5rem 1rem',
-                            borderRadius: '0.375rem',
-                            border: 'none',
-                            cursor: 'pointer',
-                            backgroundColor: difficulty === "simple" ? '#3b82f6' : '#cbd5e1',
-                            color: difficulty === "simple" ? 'white' : '#475569',
-                            fontWeight: difficulty === "simple" ? '600' : '500',
-                            fontSize: '0.875rem'
-                        }}
+                        className={`difficulty-btn ${difficulty === "simple" ? 'active' : ''}`}
                     >
                         Simple
                     </button>
                     <button
                         onClick={() => handleDifficultyChange("medium")}
-                        style={{
-                            padding: '0.5rem 1rem',
-                            borderRadius: '0.375rem',
-                            border: 'none',
-                            cursor: 'pointer',
-                            backgroundColor: difficulty === "medium" ? '#3b82f6' : '#cbd5e1',
-                            color: difficulty === "medium" ? 'white' : '#475569',
-                            fontWeight: difficulty === "medium" ? '600' : '500',
-                            fontSize: '0.875rem'
-                        }}
+                        className={`difficulty-btn ${difficulty === "medium" ? 'active' : ''}`}
                     >
                         Medium
                     </button>
                     <button
                         onClick={() => handleDifficultyChange("hard")}
-                        style={{
-                            padding: '0.5rem 1rem',
-                            borderRadius: '0.375rem',
-                            border: 'none',
-                            cursor: 'pointer',
-                            backgroundColor: difficulty === "hard" ? '#3b82f6' : '#cbd5e1',
-                            color: difficulty === "hard" ? 'white' : '#475569',
-                            fontWeight: difficulty === "hard" ? '600' : '500',
-                            fontSize: '0.875rem'
-                        }}
+                        className={`difficulty-btn ${difficulty === "hard" ? 'active' : ''}`}
                     >
                         Hard
                     </button>
@@ -209,7 +182,7 @@ function PronunciationPractice() {
                     <div className="top-progress-bar">
                         <div
                             className="top-progress-fill"
-                            style={{ width: `${((index + 1) / words.length) * 100}%` }}
+                            style={{ width: `${((index + 1) / words.length) * 100}%`, backgroundColor: 'var(--color-success)' }}
                         />
                     </div>
                     <span>{Math.round(((index + 1) / words.length) * 100)}% complete</span>
@@ -255,8 +228,8 @@ function PronunciationPractice() {
 
                     {spoken && (
                         <div className="result-section">
-                            <p className="spoken-text" style={{ marginBottom: '1rem', color: '#64748b' }}>
-                                You said: <span style={{ color: '#0f172a', fontWeight: '600' }}>"{spoken}"</span>
+                            <p className="spoken-text-display">
+                                You said: <span className="spoken-value">"{spoken}"</span>
                             </p>
 
                             {result && (
