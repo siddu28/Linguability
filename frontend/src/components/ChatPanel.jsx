@@ -54,6 +54,8 @@ function ChatPanel({ roomId, userId, userName }) {
     useEffect(() => {
         if (!roomId || !userId) return
 
+        console.log(`[Chat] Initializing socket connection for room: ${roomId}, user: ${userId}`)
+
         const socket = io(SOCKET_URL, {
             transports: ['websocket', 'polling']
         })
@@ -61,32 +63,43 @@ function ChatPanel({ roomId, userId, userName }) {
         socketRef.current = socket
 
         socket.on('connect', () => {
-            console.log('[Chat] Connected to server')
+            console.log('[Chat] ✅ Connected to server, socket ID:', socket.id)
             setIsConnected(true)
+            console.log(`[Chat] 📤 Joining room: ${roomId}`)
             socket.emit('join-room', roomId, userId)
         })
 
         socket.on('disconnect', () => {
-            console.log('[Chat] Disconnected from server')
+            console.log('[Chat] ❌ Disconnected from server')
             setIsConnected(false)
         })
 
         socket.on('receive-message', (message) => {
-            console.log('[Chat] Message received:', message.user_name, message.content)
+            console.log('[Chat] 📩 Message received:', {
+                from: message.user_name,
+                content: message.content,
+                messageId: message.id,
+                roomId: message.room_id
+            })
             setMessages(prev => {
                 // Avoid duplicates (in case both socket and Supabase deliver)
                 const exists = prev.some(m => m.id === message.id)
-                if (exists) return prev
+                if (exists) {
+                    console.log('[Chat] ⚠️ Duplicate message detected, skipping')
+                    return prev
+                }
+                console.log('[Chat] ✅ Adding message to state')
                 return [...prev, message]
             })
         })
 
         socket.on('connect_error', (err) => {
-            console.error('[Chat] Connection error:', err.message)
+            console.error('[Chat] ❌ Connection error:', err.message)
             setIsConnected(false)
         })
 
         return () => {
+            console.log('[Chat] 🧹 Cleaning up socket connection')
             socket.disconnect()
         }
     }, [roomId, userId])
@@ -101,14 +114,23 @@ function ChatPanel({ roomId, userId, userName }) {
         e.preventDefault()
 
         const trimmed = newMessage.trim()
-        if (!trimmed || !socketRef.current || !isConnected) return
+        if (!trimmed || !socketRef.current || !isConnected) {
+            console.log('[Chat] ⚠️ Cannot send message:', {
+                hasContent: !!trimmed,
+                hasSocket: !!socketRef.current,
+                isConnected
+            })
+            return
+        }
 
+        console.log('[Chat] 📤 Sending message:', trimmed)
         socketRef.current.emit('send-message', {
             roomId,
             userId,
             userName,
             content: trimmed
         })
+        console.log('[Chat] ✅ Message emitted to server')
 
         setNewMessage('')
     }

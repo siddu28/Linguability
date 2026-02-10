@@ -47,7 +47,7 @@ io.on('connection', (socket) => {
     // Join Room
     socket.on('join-room', (roomId, userId) => {
         socket.join(roomId)
-        console.log(`User ${userId} (${socket.id}) joined room ${roomId}`)
+        console.log(`[ROOM] User ${userId} (socket: ${socket.id}) joined room "${roomId}"`)
         socket.to(roomId).emit('user-connected', userId)
     })
 
@@ -80,7 +80,14 @@ io.on('connection', (socket) => {
     // Chat Messaging
     socket.on('send-message', async (data) => {
         const { roomId, userId, userName, content } = data
-        console.log(`Message in ${roomId} from ${userName}: ${content}`)
+        console.log(`[CHAT] Message in room "${roomId}" from ${userName} (${userId}): ${content}`)
+
+        // Get all sockets in the room for debugging
+        const socketsInRoom = await io.in(roomId).fetchSockets()
+        console.log(`[CHAT] Broadcasting to ${socketsInRoom.length} socket(s) in room "${roomId}"`)
+        socketsInRoom.forEach((s, i) => {
+            console.log(`  └─ Socket ${i + 1}: ${s.id}`)
+        })
 
         // Broadcast to everyone in the room including sender (for simplicity, or filter sender)
         io.in(roomId).emit('receive-message', {
@@ -91,6 +98,8 @@ io.on('connection', (socket) => {
             content: content,
             created_at: new Date().toISOString()
         })
+
+        console.log(`[CHAT] Message broadcast complete`)
 
         // Persist to Supabase if configured
         if (supabase) {
