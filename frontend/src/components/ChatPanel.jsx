@@ -3,7 +3,7 @@ import { Send } from 'lucide-react'
 import { supabase } from '../lib/supabaseClient'
 import './ChatPanel.css'
 
-function ChatPanel({ roomId, user, isOpen }) {
+function ChatPanel({ roomId, user, isOpen, socket }) {
     const [messages, setMessages] = useState([])
     const [newMessage, setNewMessage] = useState('')
     const [sending, setSending] = useState(false)
@@ -18,7 +18,7 @@ function ChatPanel({ roomId, user, isOpen }) {
         scrollToBottom()
     }, [messages, scrollToBottom])
 
-    // Fetch existing messages
+    // Fetch existing messages from Supabase (History)
     const fetchMessages = useCallback(async () => {
         try {
             const { data, error } = await supabase
@@ -34,62 +34,57 @@ function ChatPanel({ roomId, user, isOpen }) {
         }
     }, [roomId])
 
-    // Initial fetch and real-time subscription
+    // Initial fetch and Socket listeners
     useEffect(() => {
         if (!roomId) return
 
         fetchMessages()
 
-        // Subscribe to new messages
-        const subscription = supabase
-            .channel(`room_${roomId}_messages`)
-            .on(
-                'postgres_changes',
-                {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'room_messages',
-                    filter: `room_id=eq.${roomId}`
-                },
-                (payload) => {
-                    setMessages(prev => [...prev, payload.new])
-                }
-            )
-            .subscribe()
+        if (socket) {
+            socket.on('receive-message', (message) => {
+                setMessages(prev => {
+                    // Avoid duplicates if we are also fetching or if same message comes twice
+                    // (Using ID check is good practice)
+                    if (prev.some(m => m.id === message.id)) return prev
+                    return [...prev, message]
+                })
+            })
+        }
 
         return () => {
-            supabase.removeChannel(subscription)
+            if (socket) {
+                socket.off('receive-message')
+            }
         }
-    }, [roomId, fetchMessages])
+    }, [roomId, fetchMessages, socket])
 
-    // Send message
+    // Send message via Socket
     const handleSendMessage = async (e) => {
         e.preventDefault()
-        if (!newMessage.trim() || !user || sending) return
+        if (!newMessage.trim() || !user || !socket) return
 
-        setSending(true)
+        // setSending(true) // Optional: disable while sending if we want to confirm receipt? 
+        // With sockets, it's fire and forget mostly, or wait for ack.
+        // For optimisitc UI, we typically just send.
+
         const messageText = newMessage.trim()
         setNewMessage('')
 
-        try {
-            const userName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Anonymous'
+        // Emit to server
+        const userName = user.user_metadata?.full_name || user.email?.split('@')[0] || 'Anonymous'
 
-            const { error } = await supabase
-                .from('room_messages')
-                .insert({
-                    room_id: roomId,
-                    user_id: user.id,
-                    user_name: userName,
-                    content: messageText
-                })
+        socket.emit('send-message', {
+            roomId,
+            userId: user.id,
+            userName: userName,
+            content: messageText
+        })
 
-            if (error) throw error
-        } catch (err) {
-            console.error('Error sending message:', err)
-            setNewMessage(messageText) // Restore message on error
-        } finally {
-            setSending(false)
-        }
+        // We don't strictly need to add it manually if the server broadcasts back to us too.
+        // But for faster UI, we might want to append pending message.
+        // The server implementation above uses `io.in(roomId).emit` so it WILL come back to sender.
+        // So we can just wait for 'receive-message' or append optimistically.
+        // Let's rely on the broadcast for simplicity and consistency of IDs.
     }
 
     // Format timestamp
@@ -119,7 +114,7 @@ function ChatPanel({ roomId, user, isOpen }) {
                         const isOwn = message.user_id === user?.id
                         return (
                             <div
-                                key={message.id}
+                                key={message.id || Math.random()} // Fallback key if temp ID collision
                                 className={`chat-message ${isOwn ? 'own' : 'other'}`}
                             >
                                 {!isOwn && (
@@ -145,12 +140,12 @@ function ChatPanel({ roomId, user, isOpen }) {
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Type a message..."
                     className="chat-input"
-                    disabled={sending}
+                    disabled={!socket} // Disable if no connection
                 />
                 <button
                     type="submit"
                     className="chat-send-btn"
-                    disabled={!newMessage.trim() || sending}
+                    disabled={!newMessage.trim() || !socket}
                     aria-label="Send message"
                 >
                     <Send size={18} />

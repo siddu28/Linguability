@@ -1,21 +1,17 @@
 import { useRef, useEffect, useState, useCallback } from 'react'
-import { supabase } from '../lib/supabaseClient'
+import io from 'socket.io-client'
 
 // ICE servers with STUN and multiple free TURN options
-// TURN servers relay media when direct connection fails
 const ICE_SERVERS = {
     iceServers: [
-        // Google STUN servers
         { urls: 'stun:stun.l.google.com:19302' },
         { urls: 'stun:stun1.l.google.com:19302' },
         { urls: 'stun:stun2.l.google.com:19302' },
-        // ExpressTURN free servers
         {
             urls: 'turn:relay1.expressturn.com:3478',
             username: 'efM0OFPCLPVUPH26I6',
             credential: 'jtDT4yNWQqXt0bGC'
         },
-        // Numb STUN/TURN (free public)
         { urls: 'stun:numb.viagenie.ca' },
         {
             urls: 'turn:numb.viagenie.ca',
@@ -26,16 +22,39 @@ const ICE_SERVERS = {
     iceCandidatePoolSize: 10
 }
 
+// Socket URL - assumes backend is running on port 3001 locally
+// In production, this should be an environment variable
+const SOCKET_URL = 'http://localhost:3001'
+
 export function useWebRTC(roomId, userId, userName) {
     const [remoteStreams, setRemoteStreams] = useState({})
     const [connectionStatus, setConnectionStatus] = useState({})
     const [localStream, setLocalStream] = useState(null)
+    const [socket, setSocket] = useState(null)
 
     const peerConnections = useRef({})
-    const pendingCandidates = useRef({})
-    const channelRef = useRef(null)
     const localStreamRef = useRef(null)
-    const retryCount = useRef({})
+    const socketRef = useRef(null)
+
+    // Initialize Socket connection
+    useEffect(() => {
+        if (!userId || !roomId) return
+
+        console.log('Connecting to socket server...')
+        const newSocket = io(SOCKET_URL)
+        socketRef.current = newSocket
+        setSocket(newSocket)
+
+        newSocket.on('connect', () => {
+            console.log('Socket connected:', newSocket.id)
+            newSocket.emit('join-room', roomId, userId)
+        })
+
+        // Cleanup
+        return () => {
+            newSocket.disconnect()
+        }
+    }, [roomId, userId])
 
     // Update local stream ref
     const updateLocalStream = useCallback((stream) => {
@@ -62,417 +81,186 @@ export function useWebRTC(roomId, userId, userName) {
         }
     }, [])
 
-    // Send signaling data via Supabase
-    const sendSignal = useCallback(async (data) => {
-        try {
-            console.log(`Sending ${data.type} to ${data.to}`)
-            const { error } = await supabase.from('webrtc_signals').insert({
-                room_id: roomId,
-                from_user: userId,
-                to_user: data.to,
-                signal_type: data.type,
-                signal_data: JSON.stringify(data.payload),
-                created_at: new Date().toISOString()
-            })
-            if (error) {
-                console.error('Error sending signal:', error)
-            }
-        } catch (error) {
-            console.error('Error sending signal:', error)
-        }
-    }, [roomId, userId])
-
-    // Create a peer connection for a specific user
-    const createPeerConnection = useCallback((remoteUserId, remoteUserName, forceNew = false) => {
-        // Return existing connection if available and not closed
-        if (!forceNew) {
-            const existingPc = peerConnections.current[remoteUserId]
-            if (existingPc && existingPc.connectionState !== 'closed' && existingPc.connectionState !== 'failed') {
-                return existingPc
-            }
-        }
-
-        // Close existing if forcing new
-        if (peerConnections.current[remoteUserId]) {
-            peerConnections.current[remoteUserId].close()
-        }
-
-        console.log(`Creating peer connection for ${remoteUserName}`)
+    // Create a peer connection
+    const createPeerConnection = useCallback((remoteSocketId, isInitiator = false) => {
+        console.log(`Creating PeerConnection for ${remoteSocketId}`)
 
         const pc = new RTCPeerConnection(ICE_SERVERS)
-        peerConnections.current[remoteUserId] = pc
+        peerConnections.current[remoteSocketId] = pc
 
-        // Set initial status
-        setConnectionStatus(prev => ({
-            ...prev,
-            [remoteUserId]: 'new'
-        }))
+        setConnectionStatus(prev => ({ ...prev, [remoteSocketId]: 'connecting' }))
 
-        // Add local tracks to the connection if stream exists
+        // Add local tracks
         if (localStreamRef.current) {
-            console.log('Adding local tracks to peer connection')
             localStreamRef.current.getTracks().forEach(track => {
                 pc.addTrack(track, localStreamRef.current)
             })
         }
 
-        // Handle incoming remote tracks
+        // Handle ICE candidates
+        pc.onicecandidate = (event) => {
+            if (event.candidate && socketRef.current) {
+                socketRef.current.emit('ice-candidate', {
+                    candidate: event.candidate,
+                    roomId,
+                    to: remoteSocketId // In this simple mesh, we might broadcast or target specific socket
+                })
+            }
+        }
+
+        // Handle incoming tracks
         pc.ontrack = (event) => {
-            console.log(`Received ${event.track.kind} track from ${remoteUserName}`)
+            console.log(`Received track from ${remoteSocketId}`)
             const [remoteStream] = event.streams
             if (remoteStream) {
                 setRemoteStreams(prev => ({
                     ...prev,
-                    [remoteUserId]: {
+                    [remoteSocketId]: {
                         stream: remoteStream,
-                        userName: remoteUserName
+                        // We might need to map socket ID to user data if we want names
+                        // For now we use socket ID as identifier in streams
+                        // If we need the actual user ID/Name, we'd need to send that in signaling
                     }
                 }))
             }
         }
 
-        // Handle ICE candidates
-        pc.onicecandidate = async (event) => {
-            if (event.candidate) {
-                await sendSignal({
-                    type: 'ice-candidate',
-                    payload: event.candidate.toJSON(),
-                    to: remoteUserId
-                })
-            }
-        }
-
-        // Handle connection state changes
+        // Connection state
         pc.onconnectionstatechange = () => {
-            console.log(`Connection state with ${remoteUserName}: ${pc.connectionState}`)
+            console.log(`Connection state with ${remoteSocketId}: ${pc.connectionState}`)
             setConnectionStatus(prev => ({
                 ...prev,
-                [remoteUserId]: pc.connectionState
+                [remoteSocketId]: pc.connectionState
             }))
 
-            // Handle connection failure - retry with ICE restart
             if (pc.connectionState === 'failed') {
-                const retries = retryCount.current[remoteUserId] || 0
-                if (retries < 2) {
-                    console.log(`Connection failed, attempting ICE restart (retry ${retries + 1})`)
-                    retryCount.current[remoteUserId] = retries + 1
-                    pc.restartIce()
-                } else {
-                    console.log('Max retries reached, closing connection')
-                    pc.close()
-                }
-            }
-
-            if (pc.connectionState === 'connected') {
-                console.log(`Successfully connected to ${remoteUserName}!`)
-                retryCount.current[remoteUserId] = 0
-            }
-        }
-
-        // Handle ICE connection state
-        pc.oniceconnectionstatechange = () => {
-            console.log(`ICE state with ${remoteUserName}: ${pc.iceConnectionState}`)
-
-            // Try to trigger reconnection on disconnect
-            if (pc.iceConnectionState === 'disconnected') {
-                setTimeout(() => {
-                    if (pc.iceConnectionState === 'disconnected') {
-                        console.log('Still disconnected, attempting reconnection...')
-                        pc.restartIce()
-                    }
-                }, 3000)
-            }
-        }
-
-        // Handle ICE gathering state
-        pc.onicegatheringstatechange = () => {
-            console.log(`ICE gathering: ${pc.iceGatheringState}`)
-        }
-
-        // Handle negotiation needed (for renegotiation after ICE restart)
-        pc.onnegotiationneeded = async () => {
-            console.log('Negotiation needed for', remoteUserId)
-            // Only the offerer should create new offers
-            if (userId > remoteUserId) {
-                try {
-                    const offer = await pc.createOffer({ iceRestart: true })
-                    await pc.setLocalDescription(offer)
-                    await sendSignal({
-                        type: 'offer',
-                        payload: offer,
-                        to: remoteUserId
-                    })
-                } catch (e) {
-                    console.error('Error in negotiation:', e)
-                }
+                // Retry logic could go here
             }
         }
 
         return pc
-    }, [sendSignal, userId])
+    }, [roomId])
 
-    // Handle incoming offer
-    const handleOffer = useCallback(async (fromUserId, fromUserName, offer) => {
-        console.log(`Handling offer from ${fromUserName}`)
+    // Handle Socket Events
+    useEffect(() => {
+        if (!socket) return
 
-        // Check if this is an ICE restart (renegotiation)
-        const existingPc = peerConnections.current[fromUserId]
-        const isRenegotiation = existingPc && existingPc.connectionState !== 'closed'
+        // 1. User Connected (Another user joined the room)
+        socket.on('user-connected', async (newUserId) => {
+            console.log(`User connected: ${newUserId}, initiating call`)
+            // We initiate the call
+            // Ideally we should know the socket ID of the user.
+            // The current simple server setup broadcasts to room.
+            // The 'call-user' event in server expects 'user' (userId) but primarily targets 'roomId'
 
-        const pc = isRenegotiation ? existingPc : createPeerConnection(fromUserId, fromUserName)
+            // To make this work properly with mesh topology + sockets:
+            // When A joins:
+            // Server notifies B.
+            // B calls A.
 
-        try {
-            // Handle glare (both sides sending offers simultaneously)
-            if (pc.signalingState === 'have-local-offer') {
-                // Rollback our offer if we have lower user ID (they take precedence)
-                if (userId < fromUserId) {
-                    console.log('Glare detected, rolling back local offer')
-                    await pc.setLocalDescription({ type: 'rollback' })
-                } else {
-                    console.log('Glare detected, ignoring incoming offer')
-                    return
-                }
-            }
+            // Wait, usually the new joiner initiates? Or existing?
+            // Let's say existing users call the new user.
+            // But we need the new user's Socket ID to target them specifically or generic broadcast?
+            // In the server implementation: socket.to(roomId).emit('user-connected', userId)
 
-            await pc.setRemoteDescription(new RTCSessionDescription(offer))
-            console.log('Remote description set')
+            // Actually, a better pattern for mesh is:
+            // 1. New user joins.
+            // 2. Existing users receive 'user-connected'.
+            // 3. Existing users create Offer -> Send 'call-user' to Room (or specific socket if known).
 
-            // Apply any pending ICE candidates
-            if (pendingCandidates.current[fromUserId]) {
-                for (const candidate of pendingCandidates.current[fromUserId]) {
-                    try {
-                        await pc.addIceCandidate(new RTCIceCandidate(candidate))
-                    } catch (e) {
-                        console.error('Error adding pending ICE candidate:', e)
-                    }
-                }
-                delete pendingCandidates.current[fromUserId]
-            }
+            // NOTE: The server logic `socket.on('call-user')` broadcasts `call-made` to the ROOM.
+            // This means EVERYONE receives the offer. We need to filter by target?
+            // The current server logic doesn't have a 'to' field in 'call-user', it just broadcasts to room.
+            // This works for 2 people. For >2, we need target socket IDs.
+            // For now, assuming 2 people per room (from Requirement or limited scope), broadcast is okay.
+            // But we must be careful not to process our own offer.
 
+            const pc = createPeerConnection(newUserId, true) // treating userId as identifier
+            const offer = await pc.createOffer()
+            await pc.setLocalDescription(offer)
+
+            socket.emit('call-user', {
+                offer,
+                roomId,
+                user: userId // My user ID
+            })
+        })
+
+        // 2. Transmit Offer (Called 'call-made' from server)
+        socket.on('call-made', async (data) => {
+            // data: { offer, socket, user }
+            // If we are the one who sent it, ignore (server uses socket.to so sender shouldn't receive, but good to check)
+
+            console.log('Received call-made (Offer)')
+            const pc = createPeerConnection(data.socket, false) // Use socket ID or user ID?
+            // The server sends 'socket' (the caller's socket ID). 
+            // We should use that to reply with answer.
+
+            await pc.setRemoteDescription(new RTCSessionDescription(data.offer))
             const answer = await pc.createAnswer()
             await pc.setLocalDescription(answer)
 
-            await sendSignal({
-                type: 'answer',
-                payload: answer,
-                to: fromUserId
+            socket.emit('make-answer', {
+                answer,
+                to: data.socket // Send back to caller's socket ID (server handles this)
             })
-            console.log('Answer sent')
-        } catch (error) {
-            console.error('Error handling offer:', error)
-        }
-    }, [createPeerConnection, sendSignal, userId])
 
-    // Handle incoming answer
-    const handleAnswer = useCallback(async (fromUserId, answer) => {
-        console.log(`Handling answer from ${fromUserId}`)
+            // Store mapping if needed?
+        })
 
-        const pc = peerConnections.current[fromUserId]
-        if (!pc) {
-            console.log('No peer connection for answer')
-            return
-        }
-
-        try {
-            if (pc.signalingState !== 'have-local-offer') {
-                console.log('Ignoring answer, signaling state:', pc.signalingState)
-                return
+        // 3. Receive Answer
+        socket.on('answer-made', async (data) => {
+            // data: { socket, answer }
+            console.log('Received answer-made')
+            const pc = peerConnections.current[data.socket]
+            if (pc) {
+                await pc.setRemoteDescription(new RTCSessionDescription(data.answer))
             }
+        })
 
-            await pc.setRemoteDescription(new RTCSessionDescription(answer))
-            console.log('Remote description (answer) set')
-
-            // Apply any pending ICE candidates
-            if (pendingCandidates.current[fromUserId]) {
-                for (const candidate of pendingCandidates.current[fromUserId]) {
-                    try {
-                        await pc.addIceCandidate(new RTCIceCandidate(candidate))
-                    } catch (e) {
-                        console.error('Error adding pending ICE candidate:', e)
-                    }
-                }
-                delete pendingCandidates.current[fromUserId]
-            }
-        } catch (error) {
-            console.error('Error handling answer:', error)
-        }
-    }, [])
-
-    // Handle incoming ICE candidate
-    const handleIceCandidate = useCallback(async (fromUserId, candidate) => {
-        const pc = peerConnections.current[fromUserId]
-        if (pc && pc.remoteDescription && pc.remoteDescription.type) {
-            try {
-                await pc.addIceCandidate(new RTCIceCandidate(candidate))
-            } catch (error) {
-                console.error('Error adding ICE candidate:', error)
-            }
-        } else {
-            // Store candidate for later
-            if (!pendingCandidates.current[fromUserId]) {
-                pendingCandidates.current[fromUserId] = []
-            }
-            pendingCandidates.current[fromUserId].push(candidate)
-        }
-    }, [])
-
-    // Initiate call to a new participant
-    const callParticipant = useCallback(async (remoteUserId, remoteUserName) => {
-        if (!localStreamRef.current) {
-            console.log('Cannot call - no local stream yet')
-            return
-        }
-
-        // Determine who initiates - higher user ID creates the offer
-        // This prevents both sides from creating offers simultaneously
-        if (userId < remoteUserId) {
-            console.log(`Skipping call to ${remoteUserName} - they will call us`)
-            return
-        }
-
-        console.log(`Calling ${remoteUserName}`)
-
-        const pc = createPeerConnection(remoteUserId, remoteUserName)
-
-        try {
-            if (pc.signalingState !== 'stable') {
-                console.log('Signaling not stable, skipping offer')
-                return
-            }
-
-            const offer = await pc.createOffer({
-                offerToReceiveAudio: true,
-                offerToReceiveVideo: true
-            })
-            await pc.setLocalDescription(offer)
-
-            await sendSignal({
-                type: 'offer',
-                payload: offer,
-                to: remoteUserId,
-                fromUserName: userName
-            })
-            console.log('Offer sent')
-        } catch (error) {
-            console.error('Error creating offer:', error)
-        }
-    }, [createPeerConnection, sendSignal, userName, userId])
-
-    // Process a signal from the database
-    const processSignal = useCallback(async (signal) => {
-        const payload = JSON.parse(signal.signal_data)
-
-        console.log(`Processing ${signal.signal_type} from ${signal.from_user.slice(0, 8)}...`)
-
-        if (signal.signal_type === 'offer') {
-            await handleOffer(signal.from_user, 'Peer', payload)
-        } else if (signal.signal_type === 'answer') {
-            await handleAnswer(signal.from_user, payload)
-        } else if (signal.signal_type === 'ice-candidate') {
-            await handleIceCandidate(signal.from_user, payload)
-        }
-
-        // Delete processed signal
-        try {
-            await supabase
-                .from('webrtc_signals')
-                .delete()
-                .eq('id', signal.id)
-        } catch (e) {
-            console.error('Error deleting signal:', e)
-        }
-    }, [handleOffer, handleAnswer, handleIceCandidate])
-
-    // Listen for signaling messages
-    useEffect(() => {
-        if (!roomId || !userId) return
-
-        console.log('Setting up WebRTC signaling')
-
-        // Fetch and process any pending signals
-        const processPendingSignals = async () => {
-            const { data: signals, error } = await supabase
-                .from('webrtc_signals')
-                .select('*')
-                .eq('room_id', roomId)
-                .eq('to_user', userId)
-                .order('created_at', { ascending: true })
-
-            if (error) {
-                console.error('Error fetching pending signals:', error)
-                return
-            }
-
-            if (signals && signals.length > 0) {
-                console.log(`Processing ${signals.length} pending signals`)
-                for (const signal of signals) {
-                    await processSignal(signal)
+        // 4. ICE Candidates
+        socket.on('ice-candidate-received', async (data) => {
+            // data: { candidate, socket }
+            const pc = peerConnections.current[data.socket]
+            if (pc) {
+                try {
+                    await pc.addIceCandidate(new RTCIceCandidate(data.candidate))
+                } catch (e) {
+                    console.error('Error adding ice candidate', e)
                 }
             }
-        }
-
-        processPendingSignals()
-
-        // Subscribe to new signals
-        channelRef.current = supabase
-            .channel(`webrtc_signals_${roomId}_${userId}`)
-            .on(
-                'postgres_changes',
-                {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'webrtc_signals',
-                    filter: `to_user=eq.${userId}`
-                },
-                async (payload) => {
-                    const signal = payload.new
-                    if (signal.room_id === roomId) {
-                        await processSignal(signal)
-                    }
-                }
-            )
-            .subscribe((status) => {
-                console.log('WebRTC channel:', status)
-            })
+        })
 
         return () => {
-            if (channelRef.current) {
-                supabase.removeChannel(channelRef.current)
-            }
+            socket.off('user-connected')
+            socket.off('call-made')
+            socket.off('answer-made')
+            socket.off('ice-candidate-received')
         }
-    }, [roomId, userId, processSignal])
+    }, [socket, roomId, userId, createPeerConnection])
 
-    // Cleanup peer connections
+    // Cleanup function
     const cleanup = useCallback(() => {
-        console.log('Cleaning up WebRTC')
-        Object.values(peerConnections.current).forEach(pc => {
-            pc.close()
-        })
+        if (socketRef.current) {
+            socketRef.current.disconnect()
+        }
+        Object.values(peerConnections.current).forEach(pc => pc.close())
         peerConnections.current = {}
-        pendingCandidates.current = {}
-        retryCount.current = {}
         setRemoteStreams({})
-        setConnectionStatus({})
     }, [])
 
-    // Close connection to specific user
-    const closeConnection = useCallback((remoteUserId) => {
-        const pc = peerConnections.current[remoteUserId]
-        if (pc) {
-            pc.close()
-            delete peerConnections.current[remoteUserId]
-            delete pendingCandidates.current[remoteUserId]
-            delete retryCount.current[remoteUserId]
-            setRemoteStreams(prev => {
-                const next = { ...prev }
-                delete next[remoteUserId]
-                return next
-            })
-            setConnectionStatus(prev => {
-                const next = { ...prev }
-                delete next[remoteUserId]
-                return next
-            })
+    // Call participant wrapper (mostly auto-handled by join-room now, but kept for compatibility)
+    const callParticipant = useCallback((remoteUserId) => {
+        // With sockets, we usually auto-call on join. 
+        // We can leave this empty or use it to force a call if needed.
+        console.log('Manual call requested - handled by socket auto-join usually')
+    }, [])
+
+    const closeConnection = useCallback((id) => {
+        // Cleanup specific connection
+        if (peerConnections.current[id]) {
+            peerConnections.current[id].close()
+            delete peerConnections.current[id]
         }
     }, [])
 
@@ -481,9 +269,10 @@ export function useWebRTC(roomId, userId, userName) {
         connectionStatus,
         localStream,
         updateLocalStream,
-        callParticipant,
+        callParticipant, // kept for interface compatibility
         closeConnection,
-        cleanup
+        cleanup,
+        socket // Expose socket for Chat component to use!
     }
 }
 

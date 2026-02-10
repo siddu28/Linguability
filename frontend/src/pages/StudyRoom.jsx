@@ -58,7 +58,8 @@ function StudyRoom() {
         updateLocalStream,
         callParticipant,
         closeConnection,
-        cleanup: cleanupWebRTC
+        cleanup: cleanupWebRTC,
+        socket
     } = useWebRTC(
         roomId,
         user?.id,
@@ -715,6 +716,7 @@ function StudyRoom() {
                                     roomId={roomId}
                                     user={user}
                                     isOpen={isChatOpen}
+                                    socket={socket}
                                 />
                             </div>
                         )}
