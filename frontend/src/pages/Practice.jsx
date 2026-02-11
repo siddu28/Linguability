@@ -2,9 +2,12 @@ import { Mic, Volume2, RefreshCw } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import Card from '../components/Card'
 import Button from '../components/Button'
+import FocusModeToggle from '../components/FocusModeToggle'
+import { useSettings } from '../context/SettingsContext'
 import './Practice.css'
 
 function Practice() {
+    const { settings } = useSettings()
     const practiceTypes = [
         { id: 'pronunciation', icon: Mic, title: 'Pronunciation Practice', description: 'Practice speaking', color: '#E91E8C' },
         { id: 'listening', icon: Volume2, title: 'Listening Practice', description: 'Improve listening', color: '#3B82F6' },
@@ -12,8 +15,9 @@ function Practice() {
     ]
 
     return (
-        <div className="practice-page">
+        <div className={`practice-page ${settings.focusMode ? 'focus-mode-active' : ''}`}>
             <Navbar />
+            <FocusModeToggle />
             <main className="practice-content">
                 <h1 className="practice-title">Practice</h1>
                 <p className="practice-subtitle">Choose a practice type</p>

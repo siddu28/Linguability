@@ -1,0 +1,174 @@
+/* ============ Focus Mode Toggle Button ============ */
+.focus-mode-toggle {
+    position: fixed;
+    top: 80px;
+    right: 24px;
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border: 2px solid #e5e7eb;
+    border-radius: 50px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6b7280;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    font-family: inherit;
+}
+
+.focus-mode-toggle:hover {
+    border-color: #E91E8C;
+    color: #E91E8C;
+    box-shadow: 0 4px 16px rgba(233, 30, 140, 0.15);
+    transform: translateY(-1px);
+}
+
+.focus-mode-toggle.active {
+    background: linear-gradient(135deg, #E91E8C, #c4167a);
+    border-color: #E91E8C;
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(233, 30, 140, 0.35);
+}
+
+.focus-mode-toggle.active:hover {
+    background: linear-gradient(135deg, #c4167a, #a5126a);
+    color: #fff;
+}
+
+.focus-mode-label {
+    white-space: nowrap;
+}
+
+/* Inline mini-switch */
+.focus-mode-switch {
+    position: relative;
+    width: 34px;
+    height: 18px;
+    border-radius: 9px;
+    background: #d1d5db;
+    transition: background 0.3s ease;
+    flex-shrink: 0;
+}
+
+.focus-mode-switch.on {
+    background: rgba(255, 255, 255, 0.4);
+}
+
+.focus-mode-knob {
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.focus-mode-switch.on .focus-mode-knob {
+    transform: translateX(16px);
+}
+
+/* ============ Focus Mode Active — Hide Elements ============ */
+
+/* Navbar hidden on all focus-mode pages */
+.focus-mode-active .navbar {
+    display: none !important;
+}
+
+/* Page content adjustments when navbar is hidden */
+.focus-mode-active.lessons-page .lessons-content,
+.focus-mode-active.practice-page .practice-content,
+.focus-mode-active.assessments-page .assessments-content,
+.focus-mode-active.quiz-page .quiz-page-content,
+.focus-mode-active.pronunciation-page .pronunciation-page-content {
+    padding-top: 24px;
+}
+
+/* ---------- Lessons Page ---------- */
+.focus-mode-active.lessons-page .accessibility-banner,
+.focus-mode-active.lessons-page .lessons-header,
+.focus-mode-active.lessons-page .section-header {
+    display: none !important;
+}
+
+/* ---------- Practice Page ---------- */
+.focus-mode-active.practice-page .practice-title,
+.focus-mode-active.practice-page .practice-subtitle {
+    display: none !important;
+}
+
+/* ---------- Assessments Page ---------- */
+.focus-mode-active.assessments-page .assessments-header,
+.focus-mode-active.assessments-page .stats-row,
+.focus-mode-active.assessments-page .filter-tabs,
+.focus-mode-active.assessments-page .locked-section,
+.focus-mode-active.assessments-page .recent-results-section,
+.focus-mode-active.assessments-page .accessibility-box {
+    display: none !important;
+}
+
+/* ---------- QuizPage ---------- */
+.focus-mode-active.quiz-page .back-btn,
+.focus-mode-active.quiz-page .score-indicator {
+    display: none !important;
+}
+
+/* ---------- PronunciationPage ---------- */
+.focus-mode-active.pronunciation-page .back-button {
+    display: none !important;
+}
+
+/* ---------- LessonViewer (overlay modal) ---------- */
+.focus-mode-active .viewer-header,
+.focus-mode-active .viewer-progress,
+.focus-mode-active .dots-indicator {
+    display: none !important;
+}
+
+/* Center content nicely when extra chrome is hidden */
+.focus-mode-active .lesson-viewer {
+    padding-top: 72px;
+}
+
+/* ---------- Dark theme support ---------- */
+[data-theme="dark"] .focus-mode-toggle {
+    background: rgba(30, 30, 30, 0.95);
+    border-color: #374151;
+    color: #9ca3af;
+}
+
+[data-theme="dark"] .focus-mode-toggle:hover {
+    border-color: #E91E8C;
+    color: #E91E8C;
+}
+
+[data-theme="dark"] .focus-mode-toggle.active {
+    background: linear-gradient(135deg, #E91E8C, #c4167a);
+    border-color: #E91E8C;
+    color: #fff;
+}
+
+[data-theme="dark"] .focus-mode-switch {
+    background: #4b5563;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+    .focus-mode-toggle {
+        top: 70px;
+        right: 12px;
+        padding: 6px 10px;
+        font-size: 0.75rem;
+    }
+
+    .focus-mode-label {
+        display: none;
+    }
+}

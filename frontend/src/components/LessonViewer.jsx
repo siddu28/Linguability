@@ -15,6 +15,7 @@ import { getNumbersForLesson } from '../data/numbersData'
 import { getSentencesForLesson } from '../data/sentencesData'
 import { useSettings } from '../context/SettingsContext'
 import Button from './Button'
+import FocusModeToggle from './FocusModeToggle'
 import './LessonViewer.css'
 
 function LessonViewer({
@@ -378,7 +379,8 @@ function LessonViewer({
     }
 
     return (
-        <div className="lesson-viewer">
+        <div className={`lesson-viewer ${settings.focusMode ? 'focus-mode-active' : ''}`}>
+            <FocusModeToggle />
             {/* Header */}
             <div className="viewer-header">
                 <button className="back-home-btn" onClick={handleClose}>

@@ -10,12 +10,15 @@ import { savePronunciationResult, saveQuizProgress, getQuizProgress, deleteQuizP
 import Navbar from '../components/Navbar'
 import PronunciationTest from '../components/PronunciationTest'
 import Button from '../components/Button'
+import FocusModeToggle from '../components/FocusModeToggle'
+import { useSettings } from '../context/SettingsContext'
 import './PronunciationPage.css'
 
 function PronunciationPage() {
     const { testId } = useParams()
     const navigate = useNavigate()
     const { user } = useAuth()
+    const { settings } = useSettings()
 
     const [testConfig, setTestConfig] = useState(null)
     const [words, setWords] = useState([])
@@ -172,8 +175,9 @@ function PronunciationPage() {
     }
 
     return (
-        <div className="pronunciation-page">
+        <div className={`pronunciation-page ${settings.focusMode ? 'focus-mode-active' : ''}`}>
             <Navbar />
+            <FocusModeToggle />
 
             <div className="pronunciation-page-content">
                 {/* Back Button */}

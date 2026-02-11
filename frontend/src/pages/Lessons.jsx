@@ -17,10 +17,13 @@ import Navbar from '../components/Navbar'
 import Card from '../components/Card'
 import Button from '../components/Button'
 import LessonViewer from '../components/LessonViewer'
+import FocusModeToggle from '../components/FocusModeToggle'
+import { useSettings } from '../context/SettingsContext'
 import './Lessons.css'
 
 function Lessons() {
     const { user } = useAuth()
+    const { settings: globalSettings } = useSettings()
     const [selectedLanguage, setSelectedLanguage] = useState(null)
     const [activeLesson, setActiveLesson] = useState(null)
     const [lessonProgress, setLessonProgress] = useState({}) // { lessonId: { status, progress_percent } }
@@ -44,9 +47,9 @@ function Lessons() {
                 // Load learning challenges from profile
                 const profile = await getProfile(user.id)
                 if (profile?.learning_challenges) {
-                    setAccessibilitySettings(prev => ({ 
-                        ...prev, 
-                        challenges: profile.learning_challenges 
+                    setAccessibilitySettings(prev => ({
+                        ...prev,
+                        challenges: profile.learning_challenges
                     }))
                 }
 
@@ -291,8 +294,9 @@ function Lessons() {
     const activeAdaptations = getActiveAdaptations()
 
     return (
-        <div className={`lessons-page ${getAccessibilityClasses()}`}>
+        <div className={`lessons-page ${getAccessibilityClasses()} ${globalSettings.focusMode ? 'focus-mode-active' : ''}`}>
             <Navbar />
+            <FocusModeToggle />
 
             <main className="lessons-content">
                 {/* Accessibility Banner */}
