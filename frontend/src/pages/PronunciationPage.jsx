@@ -18,7 +18,7 @@ function PronunciationPage() {
     const { testId } = useParams()
     const navigate = useNavigate()
     const { user } = useAuth()
-    const { settings } = useSettings()
+    const { settings, getSpeechRate } = useSettings()
 
     const [testConfig, setTestConfig] = useState(null)
     const [words, setWords] = useState([])
@@ -290,6 +290,7 @@ function PronunciationPage() {
                     <PronunciationTest
                         words={words}
                         testConfig={testConfig}
+                        speechRate={getSpeechRate()}
                         onComplete={handleTestComplete}
                         initialState={initialTestState}
                         onProgressUpdate={handleProgressUpdate}

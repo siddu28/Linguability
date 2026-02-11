@@ -239,7 +239,7 @@ function LessonViewer({
         setHighlightedCharIndex(-1)
         window.speechSynthesis.cancel() // Cancel any ongoing speech
         window.speechSynthesis.speak(utterance)
-    }, [currentWord, language.id, language.name, isSpeaking, availableVoices])
+    }, [currentWord, language.id, language.name, isSpeaking, availableVoices, getSpeechRate])
 
     // Speech Recognition: Start listening
     const handleSpeak = () => {

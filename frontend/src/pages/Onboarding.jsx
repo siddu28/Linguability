@@ -386,7 +386,7 @@ function Onboarding() {
         window.speechSynthesis.cancel()
 
         const utterance = new SpeechSynthesisUtterance(text)
-        utterance.rate = 0.85
+        utterance.rate = settings.readingSpeed === 'very-slow' ? 0.5 : settings.readingSpeed === 'slow' ? 0.75 : settings.readingSpeed === 'fast' ? 1.25 : settings.readingSpeed === 'very-fast' ? 1.5 : 1
         utterance.pitch = 1
 
         // Get voices and find English voice
@@ -692,6 +692,7 @@ function Onboarding() {
                                 </div>
                                 <div className="ob-option-buttons">
                                     {[
+                                        { id: 'very-slow', label: '0.5x' },
                                         { id: 'slow', label: '0.75x' },
                                         { id: 'normal', label: '1x' },
                                         { id: 'fast', label: '1.25x' },

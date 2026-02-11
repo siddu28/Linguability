@@ -15,7 +15,7 @@ function QuizPage() {
     const { quizId } = useParams()
     const navigate = useNavigate()
     const { user } = useAuth()
-    const { settings } = useSettings()
+    const { settings, getSpeechRate } = useSettings()
 
     const [loading, setLoading] = useState(true)
     const [quiz, setQuiz] = useState(null)
@@ -335,7 +335,7 @@ function QuizPage() {
                         quizConfig={quiz}
                         hideTimer={shouldHideTimer()}
                         textToSpeech={userSettings?.text_to_speech ?? true}
-                        speechRate={userSettings?.speech_rate ?? 1}
+                        speechRate={getSpeechRate()}
                         onComplete={handleQuizComplete}
                         initialState={initialQuizState}
                         onProgressUpdate={handleProgressUpdate}

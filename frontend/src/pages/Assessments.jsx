@@ -29,7 +29,7 @@ import './Assessments.css'
 function Assessments() {
     const navigate = useNavigate()
     const { user } = useAuth()
-    const { settings } = useSettings()
+    const { settings, getSpeechRate } = useSettings()
     const [activeTab, setActiveTab] = useState('available')
     const [loading, setLoading] = useState(true)
     const [stats, setStats] = useState({
@@ -171,7 +171,7 @@ function Assessments() {
         window.speechSynthesis.cancel()
         const text = `${assessment.title}. ${assessment.description}. ${assessment.questions} questions, ${assessment.duration}`
         const utterance = new SpeechSynthesisUtterance(text)
-        utterance.rate = 0.9
+        utterance.rate = getSpeechRate()
         window.speechSynthesis.speak(utterance)
     }
 
