@@ -6,6 +6,7 @@ import {
     Mic,
     ClipboardCheck,
     Users,
+    BarChart3,
     Volume2,
     Moon,
     Sun,
@@ -32,6 +33,7 @@ function Navbar() {
         { to: '/lessons', icon: BookOpen, label: 'Lessons' },
         { to: '/practice', icon: Mic, label: 'Practice' },
         { to: '/assessments', icon: ClipboardCheck, label: 'Assessments' },
+        { to: '/analytics', icon: BarChart3, label: 'Analytics' },
         { to: '/study-rooms', icon: Users, label: 'Study Rooms' },
     ]
 
