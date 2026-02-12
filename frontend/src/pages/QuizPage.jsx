@@ -7,12 +7,15 @@ import { getQuizById, generateQuizQuestions } from '../data/quizData'
 import Navbar from '../components/Navbar'
 import Quiz from '../components/Quiz'
 import Button from '../components/Button'
+import FocusModeToggle from '../components/FocusModeToggle'
+import { useSettings } from '../context/SettingsContext'
 import './QuizPage.css'
 
 function QuizPage() {
     const { quizId } = useParams()
     const navigate = useNavigate()
     const { user } = useAuth()
+    const { settings, getSpeechRate } = useSettings()
 
     const [loading, setLoading] = useState(true)
     const [quiz, setQuiz] = useState(null)
@@ -229,8 +232,9 @@ function QuizPage() {
     }
 
     return (
-        <div className="quiz-page">
+        <div className={`quiz-page ${settings.focusMode ? 'focus-mode-active' : ''}`}>
             <Navbar />
+            <FocusModeToggle />
 
             <main className="quiz-page-content">
                 {/* Back Button */}
@@ -331,7 +335,7 @@ function QuizPage() {
                         quizConfig={quiz}
                         hideTimer={shouldHideTimer()}
                         textToSpeech={userSettings?.text_to_speech ?? true}
-                        speechRate={userSettings?.speech_rate ?? 1}
+                        speechRate={getSpeechRate()}
                         onComplete={handleQuizComplete}
                         initialState={initialQuizState}
                         onProgressUpdate={handleProgressUpdate}

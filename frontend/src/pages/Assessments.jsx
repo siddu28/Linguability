@@ -22,11 +22,14 @@ import {
 import Navbar from '../components/Navbar'
 import Card from '../components/Card'
 import Button from '../components/Button'
+import FocusModeToggle from '../components/FocusModeToggle'
+import { useSettings } from '../context/SettingsContext'
 import './Assessments.css'
 
 function Assessments() {
     const navigate = useNavigate()
     const { user } = useAuth()
+    const { settings, getSpeechRate } = useSettings()
     const [activeTab, setActiveTab] = useState('available')
     const [loading, setLoading] = useState(true)
     const [stats, setStats] = useState({
@@ -195,7 +198,7 @@ function Assessments() {
         window.speechSynthesis.cancel()
         const text = `${assessment.title}. ${assessment.description}. ${assessment.questions} questions, ${assessment.duration}`
         const utterance = new SpeechSynthesisUtterance(text)
-        utterance.rate = 0.9
+        utterance.rate = getSpeechRate()
         window.speechSynthesis.speak(utterance)
     }
 
@@ -211,8 +214,9 @@ function Assessments() {
     }
 
     return (
-        <div className="assessments-page">
+        <div className={`assessments-page ${settings.focusMode ? 'focus-mode-active' : ''}`}>
             <Navbar />
+            <FocusModeToggle />
 
             <main className="assessments-content">
                 <div className="assessments-header">

@@ -21,6 +21,7 @@ import QuizPage from './pages/QuizPage'
 import PronunciationPage from './pages/PronunciationPage'
 import StudyRooms from './pages/StudyRooms'
 import StudyRoom from './pages/StudyRoom'
+import Analytics from './pages/Analytics'
 import { AuthProvider } from './context/AuthContext'
 import { SettingsProvider } from './context/SettingsContext'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -152,6 +153,14 @@ function App() {
                                 element={
                                     <ProtectedRoute>
                                         <StudyRoom />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/analytics"
+                                element={
+                                    <ProtectedRoute>
+                                        <Analytics />
                                     </ProtectedRoute>
                                 }
                             />

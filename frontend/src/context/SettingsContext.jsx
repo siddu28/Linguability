@@ -26,7 +26,7 @@ const fontFamilyMap = {
     'opendyslexic': '"OpenDyslexic", "Comic Sans MS", sans-serif',
     'serif': 'Georgia, "Times New Roman", serif'
 }
-const readingSpeedMap = { 'slow': 0.75, 'normal': 1, 'fast': 1.25, 'very-fast': 1.5 }
+const readingSpeedMap = { 'very-slow': 0.5, 'slow': 0.75, 'normal': 1, 'fast': 1.25, 'very-fast': 1.5 }
 
 // Map database fields to state fields
 function mapDbToState(dbSettings) {

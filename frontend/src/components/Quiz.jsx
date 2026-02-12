@@ -25,6 +25,8 @@ function Quiz({
     const [answers, setAnswers] = useState(initialState?.answers ?? [])
     const [timeRemaining, setTimeRemaining] = useState(quizConfig?.duration || 600)
     const [startTime] = useState(Date.now())
+    const [highlightedCharIndex, setHighlightedCharIndex] = useState(-1)
+    const [isTTSSpeaking, setIsTTSSpeaking] = useState(false)
 
     const currentQuestion = questions[currentQuestionIndex]
     const progress = ((currentQuestionIndex) / questions.length) * 100
@@ -61,6 +63,26 @@ function Quiz({
         const utterance = new SpeechSynthesisUtterance(text)
         utterance.rate = speechRate
         utterance.lang = 'en-US'
+
+        setHighlightedCharIndex(-1)
+        setIsTTSSpeaking(true)
+
+        utterance.onboundary = (event) => {
+            if (event.name === 'word') {
+                setHighlightedCharIndex(event.charIndex)
+            }
+        }
+
+        utterance.onend = () => {
+            setHighlightedCharIndex(-1)
+            setIsTTSSpeaking(false)
+        }
+
+        utterance.onerror = () => {
+            setHighlightedCharIndex(-1)
+            setIsTTSSpeaking(false)
+        }
+
         window.speechSynthesis.speak(utterance)
     }, [textToSpeech, speechRate])
 
@@ -175,7 +197,34 @@ function Quiz({
                     )}
                 </div>
 
-                <h2 className="question-text">{currentQuestion.question}</h2>
+                <h2 className="question-text">
+                    {(() => {
+                        const text = currentQuestion.questionAudio || currentQuestion.question
+                        const questionWords = text.split(/\s+/)
+                        if (!isTTSSpeaking || highlightedCharIndex < 0) {
+                            return currentQuestion.question
+                        }
+                        // Map charIndex to word index
+                        let charPos = 0
+                        let activeIdx = 0
+                        for (let i = 0; i < questionWords.length; i++) {
+                            if (charPos + questionWords[i].length > highlightedCharIndex) {
+                                activeIdx = i
+                                break
+                            }
+                            charPos += questionWords[i].length + 1
+                        }
+                        // If questionAudio differs from question, map ratio
+                        const displayWords = currentQuestion.question.split(/\s+/)
+                        const ratio = displayWords.length / Math.max(questionWords.length, 1)
+                        const displayIdx = Math.min(Math.floor(activeIdx * ratio), displayWords.length - 1)
+                        return displayWords.map((w, i) => (
+                            <span key={i} className={i === displayIdx ? 'tts-highlight' : ''}>
+                                {w}{i < displayWords.length - 1 ? ' ' : ''}
+                            </span>
+                        ))
+                    })()}
+                </h2>
 
                 {/* Options Grid */}
                 <div className="options-grid">

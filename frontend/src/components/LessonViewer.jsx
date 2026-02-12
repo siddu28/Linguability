@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import {
     Volume2,
     Mic,
@@ -15,6 +15,7 @@ import { getNumbersForLesson } from '../data/numbersData'
 import { getSentencesForLesson } from '../data/sentencesData'
 import { useSettings } from '../context/SettingsContext'
 import Button from './Button'
+import FocusModeToggle from './FocusModeToggle'
 import './LessonViewer.css'
 
 function LessonViewer({
@@ -37,6 +38,8 @@ function LessonViewer({
     const [recognition, setRecognition] = useState(null)
     const [availableVoices, setAvailableVoices] = useState([])
     const [voiceError, setVoiceError] = useState(null)
+    const [highlightedCharIndex, setHighlightedCharIndex] = useState(-1)
+    const textToSpeakRef = useRef('')
 
     // Load available voices
     useEffect(() => {
@@ -200,6 +203,7 @@ function LessonViewer({
             usingFallback = true
         }
 
+        textToSpeakRef.current = textToSpeak
         const utterance = new SpeechSynthesisUtterance(textToSpeak)
         utterance.rate = getSpeechRate() // Use user's preferred reading speed
 
@@ -210,8 +214,16 @@ function LessonViewer({
             utterance.lang = langCode
         }
 
+        // Word-level highlighting via onboundary
+        utterance.onboundary = (event) => {
+            if (event.name === 'word') {
+                setHighlightedCharIndex(event.charIndex)
+            }
+        }
+
         utterance.onend = () => {
             setIsSpeaking(false)
+            setHighlightedCharIndex(-1)
             if (usingFallback) {
                 setVoiceError(`Playing phonetic pronunciation. Native ${language.name} voice not available.`)
             }
@@ -220,12 +232,14 @@ function LessonViewer({
         utterance.onerror = (event) => {
             console.error('TTS error:', event)
             setIsSpeaking(false)
+            setHighlightedCharIndex(-1)
             setVoiceError(`Unable to play audio. Check browser TTS support.`)
         }
 
+        setHighlightedCharIndex(-1)
         window.speechSynthesis.cancel() // Cancel any ongoing speech
         window.speechSynthesis.speak(utterance)
-    }, [currentWord, language.id, language.name, isSpeaking, availableVoices])
+    }, [currentWord, language.id, language.name, isSpeaking, availableVoices, getSpeechRate])
 
     // Speech Recognition: Start listening
     const handleSpeak = () => {
@@ -378,7 +392,8 @@ function LessonViewer({
     }
 
     return (
-        <div className="lesson-viewer">
+        <div className={`lesson-viewer ${settings.focusMode ? 'focus-mode-active' : ''}`}>
+            <FocusModeToggle />
             {/* Header */}
             <div className="viewer-header">
                 <button className="back-home-btn" onClick={handleClose}>
@@ -404,7 +419,35 @@ function LessonViewer({
             {/* Word Card */}
             <div className={`word-card ${matchResult ? matchResult : ''}`}>
                 <div className="word-main" style={getStyleValues()}>
-                    {currentWord.word}
+                    {(() => {
+                        // Split word/sentence into individual words for TTS highlighting
+                        const text = currentWord.word
+                        const spokenText_ = textToSpeakRef.current
+                        const wordsArr = text.split(/\s+/)
+                        if (wordsArr.length <= 1 || highlightedCharIndex < 0 || !isSpeaking) {
+                            // Single word or no highlighting — show with pulse if speaking
+                            return <span className={isSpeaking && highlightedCharIndex >= 0 ? 'tts-highlight' : ''}>{text}</span>
+                        }
+                        // Multi-word: map charIndex from spoken text to display words
+                        const spokenWords = spokenText_.split(/\s+/)
+                        let charPos = 0
+                        let activeSpokenIdx = 0
+                        for (let i = 0; i < spokenWords.length; i++) {
+                            if (charPos + spokenWords[i].length > highlightedCharIndex) {
+                                activeSpokenIdx = i
+                                break
+                            }
+                            charPos += spokenWords[i].length + 1
+                        }
+                        // Map spoken word index to display word index (they may differ for fallback)
+                        const ratio = wordsArr.length / Math.max(spokenWords.length, 1)
+                        const activeDisplayIdx = Math.min(Math.floor(activeSpokenIdx * ratio), wordsArr.length - 1)
+                        return wordsArr.map((w, i) => (
+                            <span key={i} className={i === activeDisplayIdx ? 'tts-highlight' : ''}>
+                                {w}{i < wordsArr.length - 1 ? ' ' : ''}
+                            </span>
+                        ))
+                    })()}
                 </div>
 
                 {/* Listen Button */}

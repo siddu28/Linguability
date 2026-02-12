@@ -3,12 +3,15 @@ import { Link, useSearchParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Card from "../components/Card";
 import Button from "../components/Button";
+import FocusModeToggle from '../components/FocusModeToggle';
+import { useSettings } from '../context/SettingsContext';
 import { ChevronRight, Mic, Headphones, BookOpen, Play } from "lucide-react";
 import "./Practice.css";
 
 export default function Practice() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [selectedLanguage, setSelectedLanguage] = useState(null);
+    const { settings } = useSettings();
 
     const languages = [
         { id: 'english', name: 'English', flag: 'EN', flagColor: '#3B82F6', desc: 'Standard Practice' },
@@ -63,9 +66,9 @@ export default function Practice() {
     ];
 
     return (
-        <div className="practice-page">
+        <div className={`practice-page ${settings.focusMode ? 'focus-mode-active' : ''}`}>
             <Navbar />
-
+            <FocusModeToggle />
             <main className="practice-content">
                 {!selectedLanguage ? (
                     <>

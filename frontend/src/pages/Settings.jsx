@@ -196,6 +196,7 @@ function Settings() {
                             <label className="setting-label">Reading Speed</label>
                             <div className="option-buttons">
                                 {[
+                                    { id: 'very-slow', label: '0.5x' },
                                     { id: 'slow', label: '0.75x' },
                                     { id: 'normal', label: '1x' },
                                     { id: 'fast', label: '1.25x' },

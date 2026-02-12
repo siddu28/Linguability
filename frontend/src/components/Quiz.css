@@ -352,6 +352,16 @@
     color: var(--color-primary);
 }
 
+/* TTS Word Highlighting */
+.question-text .tts-highlight {
+    background: linear-gradient(135deg, rgba(233, 30, 140, 0.2), rgba(233, 30, 140, 0.1));
+    color: #E91E8C;
+    border-radius: 4px;
+    padding: 1px 3px;
+    display: inline;
+    transition: all 0.15s ease;
+}
+
 /* Responsive */
 @media (min-width: 640px) {
     .options-grid {
