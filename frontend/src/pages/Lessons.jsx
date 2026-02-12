@@ -9,7 +9,11 @@ import {
     Lock,
     CheckCircle2,
     Eye,
-    Clock
+    Clock,
+    Flame,
+    TrendingUp,
+    Activity,
+    BookMarked
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { getUserSettings, getProfile, getLessonProgress, markLessonComplete, updateLessonProgress } from '../lib/database'
@@ -293,6 +297,92 @@ function Lessons() {
 
     const activeAdaptations = getActiveAdaptations()
 
+    // ============ COMPUTED STATS ============
+    const totalCompleted = Object.values(lessonProgress).filter(p => p.status === 'completed').length
+    const totalInProgress = Object.values(lessonProgress).filter(p => p.status === 'in_progress').length
+    const totalLessonsAll = languages.length * 15 // 15 lessons per language
+    // Estimate time: 8 min per completed, 4 min per in-progress
+    const totalMinutes = (totalCompleted * 8) + (totalInProgress * 4)
+    const totalHours = Math.floor(totalMinutes / 60)
+    const remainingMins = totalMinutes % 60
+
+    // Get section progress for selected language
+    const getSectionProgress = (sectionId) => {
+        if (!selectedLanguage) return 0
+        const section = baseLessonSections.find(s => s.id === sectionId)
+        if (!section) return 0
+        let completed = 0
+        section.lessons.forEach((_, i) => {
+            const lessonId = generateLessonId(selectedLanguage.id, sectionId, i)
+            if (lessonProgress[lessonId]?.status === 'completed') completed++
+        })
+        return Math.round((completed / section.lessons.length) * 100)
+    }
+
+    // Recent activity: find last 3 touched lessons
+    const recentActivity = Object.entries(lessonProgress)
+        .filter(([, p]) => p.status === 'completed' || p.status === 'in_progress')
+        .map(([id, p]) => {
+            // Parse lesson ID: e.g. "english_words_1"
+            const parts = id.split('_')
+            const langId = parts[0]
+            const sectionId = parts[1]
+            const lessonNum = parseInt(parts[2]) || 1
+            const langObj = languages.find(l => l.id === langId)
+            const sectionObj = baseLessonSections.find(s => s.id === sectionId)
+            const lessonObj = sectionObj?.lessons?.[lessonNum - 1]
+            return {
+                id,
+                language: langObj?.name || langId,
+                flag: langObj?.flag || '🌐',
+                section: sectionObj?.title || sectionId,
+                lesson: lessonObj?.title || `Lesson ${lessonNum}`,
+                status: p.status,
+                progress: p.progress_percent || 0
+            }
+        })
+        .slice(0, 3)
+
+    // Find recommended next lesson
+    const getNextLesson = () => {
+        for (const lang of languages) {
+            for (const section of baseLessonSections) {
+                for (let i = 0; i < section.lessons.length; i++) {
+                    const lessonId = generateLessonId(lang.id, section.id, i)
+                    const p = lessonProgress[lessonId]
+                    if (p?.status === 'in_progress') {
+                        return {
+                            language: lang,
+                            section,
+                            lesson: section.lessons[i],
+                            lessonIndex: i,
+                            progress: p.progress_percent || 0
+                        }
+                    }
+                }
+            }
+        }
+        // If no in-progress, find first not-started
+        for (const lang of languages) {
+            for (const section of baseLessonSections) {
+                for (let i = 0; i < section.lessons.length; i++) {
+                    const lessonId = generateLessonId(lang.id, section.id, i)
+                    if (!lessonProgress[lessonId]) {
+                        return {
+                            language: lang,
+                            section,
+                            lesson: section.lessons[i],
+                            lessonIndex: i,
+                            progress: 0
+                        }
+                    }
+                }
+            }
+        }
+        return null
+    }
+    const nextLesson = getNextLesson()
+
     return (
         <div className={`lessons-page ${getAccessibilityClasses()} ${globalSettings.focusMode ? 'focus-mode-active' : ''}`}>
             <Navbar />
@@ -315,6 +405,80 @@ function Lessons() {
 
                 {!selectedLanguage ? (
                     <>
+                        {/* Learning Stats Banner */}
+                        <div className="stats-banner">
+                            <div className="stat-card">
+                                <div className="stat-icon completed-icon">
+                                    <CheckCircle2 size={22} />
+                                </div>
+                                <div className="stat-info">
+                                    <span className="stat-value">{totalCompleted}</span>
+                                    <span className="stat-label">Lessons Done</span>
+                                </div>
+                            </div>
+                            <div className="stat-card">
+                                <div className="stat-icon progress-icon">
+                                    <TrendingUp size={22} />
+                                </div>
+                                <div className="stat-info">
+                                    <span className="stat-value">{totalInProgress}</span>
+                                    <span className="stat-label">In Progress</span>
+                                </div>
+                            </div>
+                            <div className="stat-card">
+                                <div className="stat-icon time-icon">
+                                    <Clock size={22} />
+                                </div>
+                                <div className="stat-info">
+                                    <span className="stat-value">
+                                        {totalHours > 0 ? `${totalHours}h ${remainingMins}m` : `${remainingMins}m`}
+                                    </span>
+                                    <span className="stat-label">Time Spent</span>
+                                </div>
+                            </div>
+                            <div className="stat-card">
+                                <div className="stat-icon streak-icon">
+                                    <Flame size={22} />
+                                </div>
+                                <div className="stat-info">
+                                    <span className="stat-value">
+                                        {Math.round((totalCompleted / totalLessonsAll) * 100)}%
+                                    </span>
+                                    <span className="stat-label">Overall</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Recommended Next Lesson */}
+                        {nextLesson && (
+                            <div className="next-lesson-banner" onClick={() => {
+                                setSelectedLanguage(nextLesson.language)
+                                setTimeout(() => {
+                                    setActiveLesson({
+                                        section: nextLesson.section.title,
+                                        lesson: nextLesson.lesson,
+                                        lessonIndex: nextLesson.lessonIndex
+                                    })
+                                }, 100)
+                            }}>
+                                <div className="next-lesson-left">
+                                    <BookMarked size={20} />
+                                    <div>
+                                        <span className="next-lesson-label">Continue where you left off</span>
+                                        <span className="next-lesson-title">
+                                            {nextLesson.language.flag} {nextLesson.language.name} — {nextLesson.lesson.title}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div className="next-lesson-right">
+                                    {nextLesson.progress > 0 && (
+                                        <span className="next-lesson-progress">{nextLesson.progress}%</span>
+                                    )}
+                                    <ChevronRight size={20} />
+                                </div>
+                            </div>
+                        )}
+
                         <div className="lessons-header">
                             <h1 className="lessons-title">Choose a Language</h1>
                             <p className="lessons-subtitle">Select a language to start learning</p>
@@ -349,6 +513,32 @@ function Lessons() {
                                 )
                             })}
                         </div>
+
+                        {/* Recent Activity Feed */}
+                        {recentActivity.length > 0 && (
+                            <div className="recent-activity-section">
+                                <div className="recent-activity-header">
+                                    <Activity size={20} />
+                                    <h3>Recent Activity</h3>
+                                </div>
+                                <div className="recent-activity-list">
+                                    {recentActivity.map((item) => (
+                                        <div key={item.id} className="activity-item">
+                                            <span className="activity-flag">{item.flag}</span>
+                                            <div className="activity-details">
+                                                <span className="activity-title">{item.lesson}</span>
+                                                <span className="activity-meta">
+                                                    {item.language} • {item.section}
+                                                </span>
+                                            </div>
+                                            <span className={`activity-badge ${item.status}`}>
+                                                {item.status === 'completed' ? '✅ Done' : `${item.progress}%`}
+                                            </span>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </>
                 ) : (
                     <>
@@ -371,15 +561,27 @@ function Lessons() {
                         <div className="sections-container">
                             {baseLessonSections.map((section) => {
                                 const Icon = section.icon
+                                const sectionProg = getSectionProgress(section.id)
                                 return (
                                     <div key={section.id} className="lesson-section">
                                         <div className="section-header">
                                             <div className="section-icon">
                                                 <Icon size={24} />
                                             </div>
-                                            <div>
-                                                <h2 className="section-title">{section.title}</h2>
+                                            <div style={{ flex: 1 }}>
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <h2 className="section-title">{section.title}</h2>
+                                                    <span className="section-progress-badge">
+                                                        {sectionProg}%
+                                                    </span>
+                                                </div>
                                                 <p className="section-description">{section.description}</p>
+                                                <div className="section-progress-bar">
+                                                    <div
+                                                        className="section-progress-fill"
+                                                        style={{ width: `${sectionProg}%` }}
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
 

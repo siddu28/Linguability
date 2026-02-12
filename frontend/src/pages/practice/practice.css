@@ -407,6 +407,65 @@
     animation: premiumSlideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* TTS Word Highlighting */
+.word-display h2 .tts-highlight {
+    background: linear-gradient(135deg, rgba(233, 30, 140, 0.2), rgba(233, 30, 140, 0.1));
+    color: #E91E8C;
+    border-radius: 4px;
+    padding: 2px 6px;
+    transform: scale(1.05);
+    display: inline-block;
+    transition: all 0.15s ease;
+}
+
+/* Audio Speed Control */
+.speed-control {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.speed-label {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+}
+
+.speed-buttons {
+    display: flex;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.speed-btn {
+    padding: 0.35rem 0.65rem;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    background: var(--color-background);
+    color: var(--color-text-secondary);
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.speed-btn:hover {
+    border-color: #E91E8C;
+    color: #E91E8C;
+    background: rgba(233, 30, 140, 0.08);
+}
+
+.speed-btn.active {
+    background: linear-gradient(135deg, #E91E8C, #E91E8Ccc);
+    color: white;
+    border-color: #E91E8C;
+    box-shadow: 0 2px 8px rgba(233, 30, 140, 0.3);
+}
+
 /* Responsive */
 @media (max-width: 640px) {
     .word-display h2 {

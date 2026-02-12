@@ -16,12 +16,16 @@ function PronunciationPractice() {
     const [difficulty, setDifficulty] = useState("simple"); // simple, medium, hard
     const [allData, setAllData] = useState(null);
     const [completedCount, setCompletedCount] = useState(0);
+    const [playbackRate, setPlaybackRate] = useState(1);
+    const [highlightedCharIndex, setHighlightedCharIndex] = useState(-1);
+    const [isSpeaking, setIsSpeaking] = useState(false);
     const [progressLoaded, setProgressLoaded] = useState(false);
     const [searchParams] = useSearchParams();
     const navigate = useNavigate();
     const { user } = useAuth();
     const lang = searchParams.get("lang") || "english";
     const saveTimeoutRef = useRef(null);
+    const highlightIntervalRef = useRef(null);
 
     // Language display names
     const langNames = {
@@ -162,8 +166,54 @@ function PronunciationPractice() {
         const encodedText = encodeURIComponent(text);
         const url = `http://localhost:3001/api/practice/tts?text=${encodedText}&lang=${gttsLang}`;
         const audio = new Audio(url);
+        audio.playbackRate = playbackRate;
+        setIsSpeaking(true);
+        setHighlightedCharIndex(-1);
+
+        // Clear any previous highlight interval
+        if (highlightIntervalRef.current) clearInterval(highlightIntervalRef.current);
+
+        audio.onended = () => {
+            setIsSpeaking(false);
+            setHighlightedCharIndex(-1);
+            if (highlightIntervalRef.current) clearInterval(highlightIntervalRef.current);
+        };
+
+        // Simulate word highlighting for Audio element
+        audio.onplaying = () => {
+            const wordsArr = text.split(/\s+/);
+            if (wordsArr.length <= 1) return;
+
+            // Estimate total duration: ~0.4s per word at 1x speed, adjusted for playback rate
+            const estimatedDuration = (audio.duration && isFinite(audio.duration))
+                ? audio.duration
+                : (wordsArr.length * 0.4) / playbackRate;
+            const msPerWord = (estimatedDuration / wordsArr.length) * 1000;
+
+            let wordIdx = 0;
+            // Set first word immediately
+            let charPos = 0;
+            setHighlightedCharIndex(0);
+
+            highlightIntervalRef.current = setInterval(() => {
+                wordIdx++;
+                if (wordIdx >= wordsArr.length) {
+                    clearInterval(highlightIntervalRef.current);
+                    return;
+                }
+                // Calculate charIndex for this word
+                charPos = 0;
+                for (let i = 0; i < wordIdx; i++) {
+                    charPos += wordsArr[i].length + 1;
+                }
+                setHighlightedCharIndex(charPos);
+            }, msPerWord);
+        };
+
         audio.play().catch(err => {
             console.error('TTS proxy fallback failed:', err);
+            setIsSpeaking(false);
+            if (highlightIntervalRef.current) clearInterval(highlightIntervalRef.current);
         });
     };
 
@@ -184,6 +234,7 @@ function PronunciationPractice() {
 
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.lang = lCode;
+        utterance.rate = playbackRate;
 
         const voices = window.speechSynthesis.getVoices();
         const normalizedLCode = lCode.toLowerCase().replace('_', '-');
@@ -199,9 +250,65 @@ function PronunciationPractice() {
             utterance.voice = selectedVoice;
         }
 
+        // Track whether onboundary fires (some voices don't support it)
+        let boundaryFired = false;
+
+        // Word-level highlighting via onboundary
+        utterance.onboundary = (event) => {
+            if (event.name === 'word') {
+                boundaryFired = true;
+                // Cancel fallback timer if native boundary works
+                if (highlightIntervalRef.current) {
+                    clearInterval(highlightIntervalRef.current);
+                    highlightIntervalRef.current = null;
+                }
+                setHighlightedCharIndex(event.charIndex);
+            }
+        };
+
+        utterance.onend = () => {
+            setIsSpeaking(false);
+            setHighlightedCharIndex(-1);
+            if (highlightIntervalRef.current) clearInterval(highlightIntervalRef.current);
+        };
+
+        utterance.onerror = () => {
+            setIsSpeaking(false);
+            setHighlightedCharIndex(-1);
+            if (highlightIntervalRef.current) clearInterval(highlightIntervalRef.current);
+        };
+
+        setHighlightedCharIndex(-1);
+        setIsSpeaking(true);
+        if (highlightIntervalRef.current) clearInterval(highlightIntervalRef.current);
+
         window.speechSynthesis.cancel();
         setTimeout(() => {
             window.speechSynthesis.speak(utterance);
+
+            // Fallback: if onboundary doesn't fire within 300ms, simulate word highlighting
+            setTimeout(() => {
+                if (!boundaryFired && text.split(/\s+/).length > 1) {
+                    const wordsArr = text.split(/\s+/);
+                    // Estimate ~0.5s per word at 1x speed
+                    const msPerWord = (500 / playbackRate);
+                    let wordIdx = 0;
+                    setHighlightedCharIndex(0);
+
+                    highlightIntervalRef.current = setInterval(() => {
+                        wordIdx++;
+                        if (wordIdx >= wordsArr.length) {
+                            clearInterval(highlightIntervalRef.current);
+                            return;
+                        }
+                        let charPos = 0;
+                        for (let i = 0; i < wordIdx; i++) {
+                            charPos += wordsArr[i].length + 1;
+                        }
+                        setHighlightedCharIndex(charPos);
+                    }, msPerWord);
+                }
+            }, 300);
         }, 50);
     };
 
@@ -363,7 +470,30 @@ function PronunciationPractice() {
                     </div>
 
                     <div className="word-display">
-                        <h2>{current.text}</h2>
+                        <h2>
+                            {(() => {
+                                const text = current.text;
+                                const wordsArr = text.split(/\s+/);
+                                if (wordsArr.length <= 1 || highlightedCharIndex < 0 || !isSpeaking) {
+                                    return <span className={isSpeaking && highlightedCharIndex >= 0 ? 'tts-highlight' : ''}>{text}</span>;
+                                }
+                                // Multi-word: map charIndex to active word
+                                let charPos = 0;
+                                let activeIdx = 0;
+                                for (let i = 0; i < wordsArr.length; i++) {
+                                    if (charPos + wordsArr[i].length > highlightedCharIndex) {
+                                        activeIdx = i;
+                                        break;
+                                    }
+                                    charPos += wordsArr[i].length + 1;
+                                }
+                                return wordsArr.map((w, i) => (
+                                    <span key={i} className={i === activeIdx ? 'tts-highlight' : ''}>
+                                        {w}{i < wordsArr.length - 1 ? ' ' : ''}
+                                    </span>
+                                ));
+                            })()}
+                        </h2>
 
                         <div className="minimalist-btn-group">
                             <button
@@ -374,6 +504,22 @@ function PronunciationPractice() {
                                 <Volume2 size={28} />
                             </button>
                             <span className="minimalist-btn-label">Listen</span>
+                        </div>
+
+                        {/* Audio Speed Control */}
+                        <div className="speed-control">
+                            <span className="speed-label">Speed:</span>
+                            <div className="speed-buttons">
+                                {[0.25, 0.5, 0.75, 1, 1.25, 1.5, 2].map((rate) => (
+                                    <button
+                                        key={rate}
+                                        className={`speed-btn ${playbackRate === rate ? 'active' : ''}`}
+                                        onClick={() => setPlaybackRate(rate)}
+                                    >
+                                        {rate}x
+                                    </button>
+                                ))}
+                            </div>
                         </div>
                     </div>
 
