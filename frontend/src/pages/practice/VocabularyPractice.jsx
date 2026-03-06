@@ -33,7 +33,7 @@ function VocabularyPractice() {
 
         async function loadData() {
             try {
-                const res = await fetch(`http://localhost:3001/api/practice/${lang}/vocabulary`);
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/practice/${lang}/vocabulary`);
                 const data = await res.json();
 
                 if (cancelled) return;

@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabaseClient'
 import { Send, MessageCircle } from 'lucide-react'
 import './ChatPanel.css'
 
-const SOCKET_URL = 'http://localhost:3001'
+const SOCKET_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
 
 function ChatPanel({ roomId, userId, userName }) {
     const [messages, setMessages] = useState([])

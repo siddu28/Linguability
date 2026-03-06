@@ -44,7 +44,7 @@ function ListeningPractice() {
 
         async function loadData() {
             try {
-                const res = await fetch(`http://localhost:3001/api/practice/${lang}/listening`);
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/practice/${lang}/listening`);
                 const data = await res.json();
                 if (cancelled) return;
 
@@ -178,7 +178,7 @@ function ListeningPractice() {
     const speakWithGoogleTTS = (text, rate = 1) => {
         const gttsLang = gttsLangMap[lang] || 'en';
         const encodedText = encodeURIComponent(text);
-        const url = `http://localhost:3001/api/practice/tts?text=${encodedText}&lang=${gttsLang}`;
+        const url = `${import.meta.env.VITE_BACKEND_URL}/api/practice/tts?text=${encodedText}&lang=${gttsLang}`;
         const audio = new Audio(url);
         audio.playbackRate = rate;
         audio.play().then(() => {

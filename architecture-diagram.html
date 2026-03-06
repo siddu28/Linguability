@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Linguability — System Architecture</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #fff;
+            font-family: 'Inter', sans-serif;
+            color: #1e293b;
+            width: 1536px;
+            height: 730px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .node {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            z-index: 2;
+        }
+
+        .node-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .07);
+            margin-bottom: 4px;
+        }
+
+        .node-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .node-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.2;
+        }
+
+        .node-sub {
+            font-size: 8.5px;
+            font-weight: 500;
+            color: #64748b;
+            line-height: 1.2;
+            max-width: 110px;
+            margin-top: 1px;
+        }
+
+        .node-lg .node-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 15px;
+            box-shadow: 0 3px 12px rgba(0, 0, 0, .1);
+        }
+
+        .node-lg .node-icon svg {
+            width: 27px;
+            height: 27px;
+        }
+
+        .node-lg .node-label {
+            font-size: 12.5px;
+            font-weight: 800;
+        }
+
+        .node-sm .node-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+        }
+
+        .node-sm .node-icon svg {
+            width: 19px;
+            height: 19px;
+        }
+
+        .node-sm .node-label {
+            font-size: 9.5px;
+        }
+
+        .bg-blue {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .bg-indigo {
+            background: #e0e7ff;
+            color: #4f46e5;
+        }
+
+        .bg-green {
+            background: #d1fae5;
+            color: #059669;
+        }
+
+        .bg-emerald {
+            background: #ecfdf5;
+            color: #10b981;
+        }
+
+        .bg-amber {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .bg-orange {
+            background: #ffedd5;
+            color: #ea580c;
+        }
+
+        .bg-rose {
+            background: #ffe4e6;
+            color: #e11d48;
+        }
+
+        .bg-purple {
+            background: #ede9fe;
+            color: #7c3aed;
+        }
+
+        .bg-cyan {
+            background: #cffafe;
+            color: #0891b2;
+        }
+
+        .bg-sky {
+            background: #e0f2fe;
+            color: #0284c7;
+        }
+
+        .bg-teal {
+            background: #ccfbf1;
+            color: #0d9488;
+        }
+
+        .bg-red {
+            background: #fef2f2;
+            color: #dc2626;
+        }
+
+        .bg-slate {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .sec {
+            position: absolute;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            color: #c4cdd8;
+            z-index: 3;
+        }
+
+        .title {
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 3;
+        }
+
+        .title h1 {
+            font-size: 18px;
+            font-weight: 900;
+            color: #0f172a;
+        }
+
+        .title h1 span {
+            color: #6366f1;
+        }
+
+        .title p {
+            font-size: 8px;
+            color: #94a3b8;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+        }
+
+        .legend {
+            position: absolute;
+            bottom: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 22px;
+            z-index: 3;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 8.5px;
+            font-weight: 600;
+            color: #94a3b8;
+        }
+
+        .legend-line {
+            width: 22px;
+            height: 2.5px;
+            border-radius: 1px;
+        }
+
+        .pill {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: #ecfdf5;
+            border: 1.5px solid #a7f3d0;
+            border-radius: 7px;
+            padding: 3px 8px;
+            z-index: 2;
+        }
+
+        .pill svg {
+            width: 11px;
+            height: 11px;
+            color: #10b981;
+            flex-shrink: 0;
+        }
+
+        .pill span {
+            font-size: 9px;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .badge {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            background: #d1fae5;
+            border-radius: 5px;
+            padding: 2.5px 7px;
+            font-size: 8px;
+            font-weight: 700;
+            color: #047857;
+            z-index: 2;
+        }
+
+        .badge svg {
+            width: 9px;
+            height: 9px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="title">
+        <h1><span>Linguability</span> — System Architecture</h1>
+        <p>Accessible Language Learning Platform</p>
+    </div>
+
+    <!-- ══════════════════ SVG ARROWS ══════════════════ -->
+    <svg viewBox="0 0 1536 730" fill="none" xmlns="http://www.w3.org/2000/svg"
+        style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:1;">
+        <defs>
+            <marker id="a-blue" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
+                <path d="M0 0L7 2.5L0 5Z" fill="#3b82f6" />
+            </marker>
+            <marker id="a-green" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
+                <path d="M0 0L7 2.5L0 5Z" fill="#10b981" />
+            </marker>
+            <marker id="a-orange" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
+                <path d="M0 0L7 2.5L0 5Z" fill="#f97316" />
+            </marker>
+            <marker id="a-purple" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
+                <path d="M0 0L7 2.5L0 5Z" fill="#8b5cf6" />
+            </marker>
+            <marker id="a-rose" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
+                <path d="M0 0L7 2.5L0 5Z" fill="#e11d48" />
+            </marker>
+            <marker id="a-cyan" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
+                <path d="M0 0L7 2.5L0 5Z" fill="#0891b2" />
+            </marker>
+            <marker id="a-indigo" markerWidth="7" markerHeight="5" refX="6" refY="2.5" orient="auto">
+                <path d="M0 0L7 2.5L0 5Z" fill="#6366f1" />
+            </marker>
+        </defs>
+
+        <!-- Subtle column backgrounds -->
+        <rect x="0" y="42" width="155" height="660" fill="#f8fafc" opacity="0.4" />
+        <rect x="155" y="42" width="375" height="660" fill="#eff6ff" opacity="0.15" />
+        <rect x="530" y="42" width="490" height="660" fill="#fffbeb" opacity="0.12" />
+        <rect x="1020" y="42" width="516" height="660" fill="#ecfdf5" opacity="0.2" />
+
+        <!-- Column dividers -->
+        <line x1="155" y1="48" x2="155" y2="700" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="5,5" />
+        <line x1="530" y1="48" x2="530" y2="700" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="5,5" />
+        <line x1="1020" y1="48" x2="1020" y2="700" stroke="#e2e8f0" stroke-width="1" stroke-dasharray="5,5" />
+
+        <!-- ═══ AUTH FLOW (vertical col 1) ═══ -->
+        <path d="M77 130 L77 155" stroke="#6366f1" stroke-width="2" marker-end="url(#a-indigo)" />
+        <path d="M77 220 L77 245" stroke="#6366f1" stroke-width="2" marker-end="url(#a-indigo)" />
+        <path d="M77 310 L77 345" stroke="#6366f1" stroke-width="2" marker-end="url(#a-indigo)" />
+
+        <!-- Session → Frontend context area -->
+        <path d="M110 390 L165 390" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#a-blue)" opacity="0.5" />
+
+        <!-- ═══ FRONTEND → BACKEND ═══ -->
+        <!-- All arrows go right as clean horizontal lines at DIFFERENT vertical heights -->
+
+        <!-- 1. Lessons → Express (y=80, top track) -->
+        <path d="M285 80 L540 80" stroke="#3b82f6" stroke-width="2" marker-end="url(#a-blue)" />
+        <text x="410" y="74" fill="#3b82f6" font-size="7.5" font-weight="700" font-family="Inter">REST API</text>
+
+        <!-- 2. Assessments → Express (y=150, second track) -->
+        <path d="M395 150 L540 150" stroke="#3b82f6" stroke-width="1.5" marker-end="url(#a-blue)" />
+
+        <!-- 3. Practice → Web Speech (y=260, browser API track) -->
+        <path d="M285 255 L540 255" stroke="#8b5cf6" stroke-width="1.5" stroke-dasharray="5,3"
+            marker-end="url(#a-purple)" />
+        <text x="430" y="249" fill="#8b5cf6" font-size="7" font-weight="700" font-family="Inter">SPEECH
+            RECOGNITION</text>
+
+        <!-- 4. Study Rooms → Socket.io (y=390, websocket track) -->
+        <path d="M395 390 L540 390" stroke="#f97316" stroke-width="2" stroke-dasharray="6,3"
+            marker-end="url(#a-orange)" />
+        <text x="440" y="384" fill="#f97316" font-size="7.5" font-weight="700" font-family="Inter">WEBSOCKET</text>
+
+        <!-- 5. Study Rooms → WebRTC (y=490, P2P track) -->
+        <path d="M395 430 L430 490 L540 490" stroke="#0891b2" stroke-width="1.5" stroke-dasharray="5,3"
+            marker-end="url(#a-cyan)" />
+        <text x="445" y="484" fill="#0891b2" font-size="7" font-weight="700" font-family="Inter">P2P MEDIA</text>
+
+        <!-- 6. Accessibility → ResponsiveVoice (y=580, TTS track — far below) -->
+        <path d="M285 575 L540 575" stroke="#e11d48" stroke-width="1.5" stroke-dasharray="5,3"
+            marker-end="url(#a-rose)" />
+        <text x="370" y="569" fill="#e11d48" font-size="7" font-weight="700" font-family="Inter">TTS REQUEST</text>
+
+        <!-- ═══ BACKEND → DATABASE ═══ -->
+        <!-- Express → Supabase DB (smooth curve above sub-nodes) -->
+        <path d="M640 95 C640 62, 750 55, 980 55 L980 115 L1030 115" stroke="#f97316" stroke-width="2"
+            marker-end="url(#a-orange)" fill="none" />
+        <text x="800" y="50" fill="#f97316" font-size="7.5" font-weight="700" font-family="Inter">PERSIST DATA</text>
+
+        <!-- Socket.io → DB (smooth curve going right and up) -->
+        <path d="M610 340 C610 310, 950 320, 950 230 L950 180 L1030 180" stroke="#f97316" stroke-width="1.5"
+            marker-end="url(#a-orange)" opacity="0.5" fill="none" />
+
+        <!-- Socket.io → Real-time Chat connector -->
+        <line x1="635" y1="370" x2="710" y2="370" stroke="#f9731650" stroke-width="1.5" />
+
+        <!-- Socket.io → WebRTC signaling connector -->
+        <path d="M585 420 L585 460" stroke="#f9731640" stroke-width="1.5" />
+
+        <!-- WebRTC → STUN/TURN connector -->
+        <line x1="625" y1="488" x2="710" y2="488" stroke="#64748b30" stroke-width="1.5" />
+
+        <!-- ═══ FRONTEND → DATABASE (direct Supabase SDK — bottom sweep) ═══ -->
+        <path d="M510 660 C700 690, 870 680, 1030 500" stroke="#10b981" stroke-width="2.5" marker-end="url(#a-green)"
+            fill="none" />
+        <text x="680" y="688" fill="#10b981" font-size="8" font-weight="700" font-family="Inter">SUPABASE CLIENT SDK
+            (DIRECT)</text>
+
+        <!-- Small connector lines: Express to sub-endpoints -->
+        <line x1="640" y1="105" x2="710" y2="90" stroke="#f9731640" stroke-width="1.5" />
+        <line x1="640" y1="140" x2="710" y2="168" stroke="#f9731640" stroke-width="1.5" />
+        <line x1="748" y1="90" x2="835" y2="90" stroke="#f9731630" stroke-width="1" />
+        <line x1="748" y1="170" x2="835" y2="170" stroke="#f9731630" stroke-width="1" />
+    </svg>
+
+    <!-- ══════════════════ NODES ══════════════════ -->
+
+    <!-- Section labels -->
+    <div class="sec" style="top:50px; left:35px;">Users</div>
+    <div class="sec" style="top:50px; left:290px;">Frontend</div>
+    <div class="sec" style="top:50px; left:670px;">Backend & APIs</div>
+    <div class="sec" style="top:50px; left:1180px;">Database</div>
+
+    <!-- ═══ COL 1: AUTH (vertically stacked, x≈50) ═══ -->
+    <div class="node node-lg" style="top:68px; left:50px;">
+        <div class="node-icon bg-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+            </svg></div>
+        <div class="node-label">Learners</div>
+    </div>
+    <div class="node" style="top:163px; left:50px;">
+        <div class="node-icon bg-red"><svg viewBox="0 0 24 24">
+                <path fill="#4285F4"
+                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z" />
+                <path fill="#34A853"
+                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                <path fill="#FBBC05"
+                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                <path fill="#EA4335"
+                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+            </svg></div>
+        <div class="node-label">Google OAuth</div>
+    </div>
+    <div class="node" style="top:253px; left:50px;">
+        <div class="node-icon bg-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg></div>
+        <div class="node-label">Supabase Auth</div>
+    </div>
+    <div class="node" style="top:353px; left:50px;">
+        <div class="node-icon bg-indigo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg></div>
+        <div class="node-label">Session + JWT</div>
+    </div>
+
+    <!-- ═══ COL 2: FRONTEND (2 sub-columns at x≈180 and x≈320) ═══ -->
+    <!-- Row 1 (y≈68): Lessons / Assessments -->
+    <div class="node" style="top:63px; left:180px;">
+        <div class="node-icon bg-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round">
+                <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+                <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+            </svg></div>
+        <div class="node-label">Lessons</div>
+        <div class="node-sub">Words · Numbers · Sentences</div>
+    </div>
+    <div class="node" style="top:63px; left:330px;">
+        <div class="node-icon bg-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round">
+                <path d="M9 11l3 3L22 4" />
+                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
+            </svg></div>
+        <div class="node-label">Assessments</div>
+        <div class="node-sub">Quizzes · Save/Resume</div>
+    </div>
+
+    <!-- Row 2 (y≈180): Practice / Onboarding -->
+    <div class="node" style="top:175px; left:180px;">
+        <div class="node-icon bg-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <circle cx="12" cy="12" r="6" />
+                <circle cx="12" cy="12" r="2" />
+            </svg></div>
+        <div class="node-label">Practice</div>
+        <div class="node-sub">Vocab · Listening · Pronunciation</div>
+    </div>
+    <div class="node" style="top:175px; left:330px;">
+        <div class="node-icon bg-indigo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+            </svg></div>
+        <div class="node-label">Onboarding</div>
+        <div class="node-sub">Personalized setup</div>
+    </div>
+
+    <!-- Row 3 (y≈300): Analytics / Study Rooms -->
+    <div class="node" style="top:300px; left:180px;">
+        <div class="node-icon bg-cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round">
+                <line x1="18" y1="20" x2="18" y2="10" />
+                <line x1="12" y1="20" x2="12" y2="4" />
+                <line x1="6" y1="20" x2="6" y2="14" />
+            </svg></div>
+        <div class="node-label">Analytics</div>
+        <div class="node-sub">Progress · Streaks</div>
+    </div>
+    <div class="node" style="top:355px; left:330px;">
+        <div class="node-icon bg-purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round">
+                <polygon points="23 7 16 12 23 17 23 7" />
+                <rect x="1" y="5" width="15" height="14" rx="2" />
+            </svg></div>
+        <div class="node-label">Study Rooms</div>
+        <div class="node-sub">Video · Chat · Collab</div>
+    </div>
+
+    <!-- Row 4 (y≈480): Accessibility -->
+    <div class="node" style="top:480px; left:180px;">
+        <div class="node-icon bg-rose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round">
+                <circle cx="12" cy="12" r="10" />
+                <circle cx="12" cy="7" r="1.5" fill="currentColor" />
+                <path d="M7 11h10" />
+                <path d="M10 11v6l-1 2" />
+                <path d="M14 11v6l1 2" />
+            </svg></div>
+        <div class="node-label">Accessibility</div>
+        <div class="node-sub">Dyslexia · TTS · Contrast</div>
+    </div>
+
+    <!-- Tech badges at bottom -->
+    <div class="node node-sm" style="top:610px; left:190px;">
+        <div class="node-icon" style="background:#dbeafe; color:#2563eb;"><svg viewBox="0 0 24 24" fill="#61dafb">
+                <circle cx="12" cy="12" r="2.2" />
+                <ellipse cx="12" cy="12" rx="10" ry="4" fill="none" stroke="#61dafb" stroke-width="1.1" />
+                <ellipse cx="12" cy="12" rx="10" ry="4" fill="none" stroke="#61dafb" stroke-width="1.1"
+                    transform="rotate(60 12 12)" />
+                <ellipse cx="12" cy="12" rx="10" ry="4" fill="none" stroke="#61dafb" stroke-width="1.1"
+                    transform="rotate(120 12 12)" />
+            </svg></div>
+        <div class="node-label" style="font-size:9px;">React 18 + Vite</div>
+    </div>
+    <div class="node node-sm" style="top:610px; left:310px;">
+        <div class="node-icon bg-slate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round">
+                <circle cx="12" cy="12" r="3" />
+                <path
+                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9" />
+            </svg></div>
+        <div class="node-label" style="font-size:9px;">Context API</div>
+    </div>
+    <div class="node node-sm" style="top:610px; left:415px;">
+        <div class="node-icon" style="background:#ede9fe; color:#7c3aed;"><svg viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg></div>
+        <div class="node-label" style="font-size:9px;">ProtectedRoute</div>
+    </div>
+
+
+    <!-- ═══ COL 3: BACKEND — Top half: Express cluster. Bottom half: Browser APIs ═══ -->
+
+    <!-- Express (main node) -->
+    <div class="node node-lg" style="top:90px; left:555px;">
+        <div class="node-icon bg-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="2" y="2" width="20" height="20" rx="3" />
+                <line x1="9" y1="2" x2="9" y2="22" />
+                <line x1="9" y1="8" x2="22" y2="8" />
+                <line x1="9" y1="14" x2="22" y2="14" />
+            </svg></div>
+        <div class="node-label">Express.js</div>
+        <div class="node-sub">REST API Server</div>
+    </div>
+
+    <!-- Sub-endpoints right of Express -->
+    <div class="node node-sm" style="top:68px; left:710px;">
+        <div class="node-icon bg-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round">
+                <path d="M4 11a9 9 0 0 1 9 9" />
+                <path d="M4 4a16 16 0 0 1 16 16" />
+                <circle cx="5" cy="19" r="1.5" />
+            </svg></div>
+        <div class="node-label">/api/lessons</div>
+    </div>
+    <div class="node node-sm" style="top:68px; left:835px;">
+        <div class="node-icon bg-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                <line x1="12" y1="19" x2="12" y2="23" />
+            </svg></div>
+        <div class="node-label">Pronunciation</div>
+        <div class="node-sub">Levenshtein</div>
+    </div>
+    <div class="node node-sm" style="top:148px; left:710px;">
+        <div class="node-icon bg-orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10" />
+                <circle cx="12" cy="12" r="6" />
+                <circle cx="12" cy="12" r="2" />
+            </svg></div>
+        <div class="node-label">/api/practice</div>
+    </div>
+    <div class="node node-sm" style="top:148px; left:835px;">
+        <div class="node-icon bg-sky"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+            </svg></div>
+        <div class="node-label">TTS Proxy</div>
+        <div class="node-sub">Google TTS</div>
+    </div>
+
+    <!-- Web Speech API -->
+    <div class="node" style="top:230px; left:555px;">
+        <div class="node-icon bg-purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+                <line x1="12" y1="19" x2="12" y2="23" />
+            </svg></div>
+        <div class="node-label">Web Speech API</div>
+        <div class="node-sub">Browser STT</div>
+    </div>
+
+    <!-- Socket.io -->
+    <div class="node node-lg" style="top:340px; left:555px;">
+        <div class="node-icon bg-amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round">
+                <path d="M4.9 19.1C1 15.2 1 8.8 4.9 4.9" />
+                <path d="M7.8 16.2c-2.3-2.3-2.3-6.1 0-8.5" />
+                <circle cx="12" cy="12" r="2" />
+                <path d="M16.2 7.8c2.3 2.3 2.3 6.1 0 8.5" />
+                <path d="M19.1 4.9C23 8.8 23 15.1 19.1 19" />
+            </svg></div>
+        <div class="node-label">Socket.io</div>
+        <div class="node-sub">Signaling Server</div>
+    </div>
+
+    <!-- Chat (right of Socket.io) -->
+    <div class="node node-sm" style="top:350px; left:710px;">
+        <div class="node-icon bg-rose"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+            </svg></div>
+        <div class="node-label">Real-time Chat</div>
+    </div>
+
+    <!-- WebRTC -->
+    <div class="node" style="top:460px; left:555px;">
+        <div class="node-icon bg-cyan"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round">
+                <polygon points="23 7 16 12 23 17 23 7" />
+                <rect x="1" y="5" width="15" height="14" rx="2" />
+            </svg></div>
+        <div class="node-label">WebRTC</div>
+        <div class="node-sub">P2P Video / Audio</div>
+    </div>
+
+    <!-- STUN/TURN (right of WebRTC) -->
+    <div class="node node-sm" style="top:465px; left:710px;">
+        <div class="node-icon bg-slate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round">
+                <circle cx="12" cy="12" r="3" />
+                <circle cx="5" cy="6" r="2" />
+                <circle cx="19" cy="6" r="2" />
+                <circle cx="5" cy="18" r="2" />
+                <circle cx="19" cy="18" r="2" />
+                <line x1="12" y1="9" x2="12" y2="3" />
+                <line x1="9.5" y1="13.5" x2="6.5" y2="16.5" />
+                <line x1="14.5" y1="13.5" x2="17.5" y2="16.5" />
+            </svg></div>
+        <div class="node-label">STUN / TURN</div>
+        <div class="node-sub">NAT traversal</div>
+    </div>
+
+    <!-- ResponsiveVoice -->
+    <div class="node" style="top:555px; left:555px;">
+        <div class="node-icon bg-teal"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="2" y1="12" x2="22" y2="12" />
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+            </svg></div>
+        <div class="node-label">ResponsiveVoice</div>
+        <div class="node-sub">Hindi TTS</div>
+    </div>
+
+
+    <!-- ═══ COL 4: DATABASE ═══ -->
+    <div class="node node-lg" style="top:68px; left:1170px;">
+        <div class="node-icon bg-emerald"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+            </svg></div>
+        <div class="node-label">Supabase</div>
+        <div class="node-sub">PostgreSQL</div>
+    </div>
+
+    <!-- Supabase → pills connector -->
+    <svg viewBox="0 0 1536 730"
+        style="position:absolute; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none;">
+        <line x1="1200" y1="150" x2="1200" y2="185" stroke="#10b98130" stroke-width="1.5" />
+        <line x1="1200" y1="150" x2="1100" y2="185" stroke="#10b98130" stroke-width="1" />
+        <line x1="1200" y1="150" x2="1300" y2="185" stroke="#10b98130" stroke-width="1" />
+    </svg>
+
+    <!-- DB pills -->
+    <div class="pill" style="top:192px; left:1060px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+        </svg><span>profiles</span></div>
+    <div class="pill" style="top:192px; left:1230px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <line x1="4" y1="21" x2="4" y2="14" />
+            <line x1="4" y1="10" x2="4" y2="3" />
+            <line x1="12" y1="21" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12" y2="3" />
+            <line x1="20" y1="21" x2="20" y2="16" />
+            <line x1="20" y1="12" x2="20" y2="3" />
+        </svg><span>user_settings</span></div>
+    <div class="pill" style="top:228px; left:1060px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+        </svg><span>lesson_progress</span></div>
+    <div class="pill" style="top:228px; left:1230px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <polygon
+                points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+        </svg><span>assessment_results</span></div>
+    <div class="pill" style="top:264px; left:1060px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z" />
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2" />
+        </svg><span>pronunciation_results</span></div>
+    <div class="pill" style="top:264px; left:1230px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+            <polyline points="17 21 17 13 7 13 7 21" />
+        </svg><span>quiz_progress</span></div>
+    <div class="pill" style="top:300px; left:1060px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+        </svg><span>notifications</span></div>
+    <div class="pill" style="top:300px; left:1230px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg><span>room_messages</span></div>
+
+    <!-- Badges -->
+    <div class="badge" style="top:370px; left:1070px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <rect x="3" y="11" width="18" height="11" rx="2" />
+            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+        </svg>Row Level Security</div>
+    <div class="badge" style="top:398px; left:1070px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+        </svg>Realtime Subscriptions</div>
+    <div class="badge" style="top:426px; left:1070px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            stroke-width="2">
+            <path
+                d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4" />
+        </svg>Auth Integration</div>
+
+    <!-- LEGEND -->
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-line" style="background:#3b82f6;"></div> HTTP / REST
+        </div>
+        <div class="legend-item">
+            <div class="legend-line"
+                style="background:repeating-linear-gradient(90deg,#f97316 0,#f97316 4px,transparent 4px,transparent 8px);">
+            </div> WebSocket
+        </div>
+        <div class="legend-item">
+            <div class="legend-line" style="background:#10b981;"></div> Supabase SDK
+        </div>
+        <div class="legend-item">
+            <div class="legend-line"
+                style="background:repeating-linear-gradient(90deg,#8b5cf6 0,#8b5cf6 4px,transparent 4px,transparent 8px);">
+            </div> Browser API
+        </div>
+        <div class="legend-item">
+            <div class="legend-line"
+                style="background:repeating-linear-gradient(90deg,#e11d48 0,#e11d48 4px,transparent 4px,transparent 8px);">
+            </div> TTS
+        </div>
+        <div class="legend-item">
+            <div class="legend-line"
+                style="background:repeating-linear-gradient(90deg,#0891b2 0,#0891b2 4px,transparent 4px,transparent 8px);">
+            </div> P2P Media
+        </div>
+    </div>
+
+</body>
+
+</html>

@@ -40,7 +40,7 @@ function PronunciationPractice() {
 
         async function loadData() {
             try {
-                const res = await fetch(`http://localhost:3001/api/practice/${lang}/pronunciation`);
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/practice/${lang}/pronunciation`);
                 const data = await res.json();
                 if (cancelled) return;
 
@@ -164,7 +164,7 @@ function PronunciationPractice() {
     const speakWithGoogleTTS = (text) => {
         const gttsLang = gttsLangMap[lang] || 'en';
         const encodedText = encodeURIComponent(text);
-        const url = `http://localhost:3001/api/practice/tts?text=${encodedText}&lang=${gttsLang}`;
+        const url = `${import.meta.env.VITE_BACKEND_URL}/api/practice/tts?text=${encodedText}&lang=${gttsLang}`;
         const audio = new Audio(url);
         audio.playbackRate = playbackRate;
         setIsSpeaking(true);
@@ -361,7 +361,7 @@ function PronunciationPractice() {
         const current = words[index];
 
         try {
-            const res = await fetch("http://localhost:3001/api/practice/check-pronunciation", {
+            const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/practice/check-pronunciation`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ expected: current.text, spoken: spokenText }),
