@@ -12,7 +12,7 @@ const app = express()
 const server = http.createServer(app)
 const io = new Server(server, {
     cors: {
-        origin: "*", // Allow all origins for development
+        origin: ["https://linguability-app.vercel.app", "http://localhost:5173"],
         methods: ["GET", "POST"]
     }
 })
