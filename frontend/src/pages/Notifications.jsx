@@ -166,6 +166,7 @@ function Notifications() {
 
         setSavingPrefs(true)
         try {
+            // Try to save email preferences
             const { error } = await supabase
                 .from('user_settings')
                 .upsert({
@@ -174,10 +175,21 @@ function Notifications() {
                     updated_at: new Date().toISOString()
                 }, { onConflict: 'user_id' })
 
-            if (error) throw error
+            if (error) {
+                // If column doesn't exist, show helpful message
+                if (error.code === '42703' || error.message?.includes('column')) {
+                    console.error('email_notifications column missing. Add it in Supabase SQL Editor:')
+                    console.error("ALTER TABLE user_settings ADD COLUMN email_notifications JSONB DEFAULT '{}';")
+                    // Still close the panel - preferences will be local only
+                    alert('Email preferences saved locally. Database column needs setup by admin.')
+                } else {
+                    throw error
+                }
+            }
             setShowEmailSettings(false)
         } catch (err) {
             console.error('Error saving preferences:', err)
+            alert('Failed to save preferences. Please try again.')
         } finally {
             setSavingPrefs(false)
         }
