@@ -16,11 +16,20 @@
 
 const { Resend } = require('resend')
 
-// Initialize Resend with API key from environment
-const resend = new Resend(process.env.RESEND_API_KEY)
+// Initialize Resend with API key from environment (only if key exists)
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
 // Email sender (use your verified domain or Resend's default)
 const FROM_EMAIL = process.env.FROM_EMAIL || 'Linguability <onboarding@resend.dev>'
+
+// Check if email service is available
+const isEmailEnabled = () => {
+    if (!resend) {
+        console.log('[Email] Resend API key not configured - emails disabled')
+        return false
+    }
+    return true
+}
 
 /**
  * Email templates
@@ -249,6 +258,11 @@ const TEMPLATES = {
  */
 async function sendEmail(to, type, data = {}) {
     try {
+        // Check if email service is available
+        if (!isEmailEnabled()) {
+            return { success: true, skipped: true, message: 'Email service not configured' }
+        }
+
         // Validate email
         if (!to || !to.includes('@')) {
             console.error('Invalid email address:', to)

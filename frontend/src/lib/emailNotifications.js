@@ -1,14 +1,15 @@
 /**
  * Email Notification Utilities
  * 
- * Functions to trigger email notifications via backend API
- * and create in-app notifications
+ * Functions to create in-app notifications and trigger email notifications
  */
+
+import { supabase } from './supabaseClient'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://linguability.onrender.com'
 
 /**
- * Create an in-app notification (stored in database)
+ * Create an in-app notification directly via Supabase
  * 
  * @param {string} userId - User ID
  * @param {string} type - Notification type (streak, achievement, lesson, quiz, reminder)
@@ -19,27 +20,24 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://linguability.onren
  */
 export async function createNotification(userId, type, title, message, link = null) {
     try {
-        const response = await fetch(`${API_BASE_URL}/api/notifications/create`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                userId,
+        const { data, error } = await supabase
+            .from('notifications')
+            .insert({
+                user_id: userId,
                 type,
                 title,
                 message,
-                link
+                link: link || null
             })
-        })
+            .select()
+            .single()
 
-        if (!response.ok) {
-            const error = await response.json()
-            console.error('Notification API error:', error)
-            return { success: false, error: error.error }
+        if (error) {
+            console.error('Error creating notification:', error)
+            return { success: false, error: error.message }
         }
 
-        return await response.json()
+        return { success: true, id: data?.id }
     } catch (error) {
         console.error('Failed to create notification:', error)
         return { success: false, error: error.message }
