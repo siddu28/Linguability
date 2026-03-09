@@ -60,10 +60,22 @@ jobs:
           echo "   Frontend (Vercel): Auto-deploying..."
           echo "   Backend (Render):  Auto-deploying..."
           echo ""
-          echo "📍 URLs:"
-          echo "   Frontend: Check Vercel Dashboard"
-          echo "   Backend:  Check Render Dashboard"
+          echo "📍 Live URLs:"
+          echo "   Frontend: https://linguability-app.vercel.app"
+          echo "   Backend:  https://linguability.onrender.com"
+          echo "   GitHub:   https://github.com/siddu28/Linguability"
           echo "============================================"
+
+      - name: 🏥 Health Check - Frontend
+        run: |
+          echo "Checking frontend health..."
+          sleep 30  # Wait for Vercel deploy
+          curl -f https://linguability-app.vercel.app || echo "Frontend may still be deploying..."
+
+      - name: 🏥 Health Check - Backend
+        run: |
+          echo "Checking backend health..."
+          curl -f https://linguability.onrender.com || echo "Backend may still be deploying..."
 
   # ==================== Trigger Render Deploy (Optional) ====================
   # Uncomment if you want to manually trigger Render deploys

@@ -90,14 +90,14 @@ This document outlines the CI/CD pipeline and DevOps strategy for the Linguabili
 
 ### Frontend (Vercel Dashboard)
 ```
-VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_URL=https://qmoflreegstjebzzdoft.supabase.co
 VITE_SUPABASE_ANON_KEY=your-anon-key
-VITE_API_URL=https://your-backend.onrender.com
+VITE_API_URL=https://linguability.onrender.com
 ```
 
 ### Backend (Render Dashboard)
 ```
-SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_URL=https://qmoflreegstjebzzdoft.supabase.co
 SUPABASE_SERVICE_KEY=your-service-key
 PORT=3001
 NODE_ENV=production
@@ -249,10 +249,10 @@ main (production)
 ### URLs
 | Service | URL |
 |---------|-----|
-| Frontend | `https://linguability.vercel.app` (example) |
-| Backend | `https://linguability-api.onrender.com` (example) |
-| Supabase | `https://your-project.supabase.co` |
-| GitHub | `https://github.com/your-username/linguability` |
+| Frontend | `https://linguability-app.vercel.app` |
+| Backend | `https://linguability.onrender.com` |
+| Supabase | `https://qmoflreegstjebzzdoft.supabase.co` |
+| GitHub | `https://github.com/siddu28/Linguability` |
 
 ### Commands
 ```bash
