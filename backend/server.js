@@ -33,11 +33,15 @@ const supabase = (supabaseUrl && supabaseKey) ? createClient(supabaseUrl, supaba
 const lessonsRouter = require('./routes/lessons')
 const practiceRouter = require('./routes/practice')
 const recommendationsRouter = require('./routes/recommendations')
+const notificationsRouter = require('./routes/notifications')
+const cronRouter = require('./routes/cron')
 
 // Routes
 app.use('/api/practice', practiceRouter)
 app.use('/api/lessons', lessonsRouter)
 app.use('/api/recommendations', recommendationsRouter)
+app.use('/api/notifications', notificationsRouter)
+app.use('/api/cron', cronRouter)
 
 // Health check
 app.get('/api/health', (req, res) => {

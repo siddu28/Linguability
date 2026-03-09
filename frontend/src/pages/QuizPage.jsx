@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Trophy, Target, Clock, RotateCcw, Home, CheckCircle2, XCircle, Check, X, Play, RefreshCw } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { getProfile, getUserSettings, saveAssessmentResult, saveQuizProgress, getQuizProgress, deleteQuizProgress } from '../lib/database'
+import { sendLowScoreHelpEmail, createNotification } from '../lib/emailNotifications'
 import { getQuizById, generateQuizQuestions } from '../data/quizData'
 import Navbar from '../components/Navbar'
 import Quiz from '../components/Quiz'
@@ -175,6 +176,38 @@ function QuizPage() {
                     timeTakenSeconds: quizResults.timeTakenSeconds,
                     answers: quizResults.answers
                 })
+
+                // Create in-app notification for quiz completion
+                const language = quiz.language || quiz.title.split(' ')[0] || 'Quiz'
+                if (quizResults.scorePercentage >= 70) {
+                    // Good score - congratulations notification
+                    createNotification(
+                        user.id,
+                        'achievement',
+                        'Great Quiz Performance! 🎉',
+                        `You scored ${quizResults.scorePercentage}% on ${quiz.title}. Keep up the excellent work!`,
+                        '/assessments'
+                    ).catch(err => console.log('Notification skipped:', err))
+                } else if (quizResults.scorePercentage < 50) {
+                    // Low score - helpful notification
+                    createNotification(
+                        user.id,
+                        'quiz',
+                        `Need help with ${language}?`,
+                        `You scored ${quizResults.scorePercentage}% on ${quiz.title}. Review the lessons to improve!`,
+                        '/lessons'
+                    ).catch(err => console.log('Notification skipped:', err))
+
+                    // Also send email
+                    if (user?.email) {
+                        sendLowScoreHelpEmail(
+                            user.email,
+                            user.user_metadata?.name || user.email.split('@')[0],
+                            language,
+                            quizResults.scorePercentage
+                        ).catch(err => console.log('Low score email skipped:', err))
+                    }
+                }
             } catch (error) {
                 console.error('Error saving results:', error)
             } finally {

@@ -126,8 +126,10 @@ function generateSmartRecommendations(assessmentResults, lessonProgress, limit) 
     const languages = ['english', 'hindi', 'tamil', 'telugu']
     
     // ============================================================
-    // PRIORITY 1: Languages with LOW quiz scores
+    // PRIORITY 1: Languages with LOW quiz scores (one per language)
     // ============================================================
+    const lowScoreLanguages = []
+    
     for (const lang of languages) {
         // Find quiz results for this language
         const langQuizResults = assessmentResults.filter(r => {
@@ -141,51 +143,57 @@ function generateSmartRecommendations(assessmentResults, lessonProgress, limit) 
             const scores = langQuizResults.map(r => r.score_percentage || r.score || 0)
             const lowestScore = Math.min(...scores)
             const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length
-            const langName = LANGUAGE_NAMES[lang]
-
+            
             if (lowestScore < 50) {
-                // Critical: Very low score - recommend lessons first
-                recommendations.push({
-                    type: 'lesson',
-                    activityId: `${lang}_words_1`,
-                    title: `${langName} Vocabulary`,
-                    subtitle: `Your quiz score was ${lowestScore}% — study to improve!`,
-                    reason: `Low score detected: ${lowestScore}%`,
-                    action: '/lessons',
-                    icon: 'BookOpen',
-                    score: 100 + (50 - lowestScore), // Higher priority for lower scores
-                    confidence: 0.95,
-                    language: lang
-                })
-
-                // Also recommend practice for this language
-                recommendations.push({
-                    type: 'practice',
-                    activityId: `${lang}_pronunciation`,
-                    title: `${langName} Practice`,
-                    subtitle: `Practice ${langName} to boost your ${lowestScore}% score`,
-                    reason: 'Practice helps improve quiz scores',
-                    action: '/practice',
-                    icon: 'Mic',
-                    score: 95 + (50 - lowestScore),
-                    confidence: 0.90,
-                    language: lang
+                lowScoreLanguages.push({
+                    lang,
+                    lowestScore,
+                    avgScore,
+                    priority: 100 + (50 - lowestScore) // Higher priority for lower scores
                 })
             } else if (avgScore < 70) {
-                // Medium: Needs improvement
-                recommendations.push({
-                    type: 'lesson',
-                    activityId: `${lang}_words_1`,
-                    title: `${langName} Review`,
-                    subtitle: `Improve your ${Math.round(avgScore)}% average`,
-                    reason: 'Room for improvement',
-                    action: '/lessons',
-                    icon: 'BookOpen',
-                    score: 80 + (70 - avgScore),
-                    confidence: 0.85,
-                    language: lang
+                lowScoreLanguages.push({
+                    lang,
+                    lowestScore,
+                    avgScore,
+                    priority: 70 + (70 - avgScore)
                 })
             }
+        }
+    }
+
+    // Sort by priority (lowest scores first) and add ONE recommendation per language
+    lowScoreLanguages.sort((a, b) => b.priority - a.priority)
+    
+    for (const { lang, lowestScore, avgScore, priority } of lowScoreLanguages) {
+        const langName = LANGUAGE_NAMES[lang]
+        
+        if (lowestScore < 50) {
+            recommendations.push({
+                type: 'lesson',
+                activityId: `${lang}_words_1`,
+                title: `${langName} Vocabulary`,
+                subtitle: `Quiz score: ${lowestScore}% — study to improve!`,
+                reason: `Low score: ${lowestScore}%`,
+                action: '/lessons',
+                icon: 'BookOpen',
+                score: priority,
+                confidence: 0.95,
+                language: lang
+            })
+        } else {
+            recommendations.push({
+                type: 'lesson',
+                activityId: `${lang}_words_1`,
+                title: `${langName} Review`,
+                subtitle: `Avg score: ${Math.round(avgScore)}% — room to improve`,
+                reason: 'Needs practice',
+                action: '/lessons',
+                icon: 'BookOpen',
+                score: priority,
+                confidence: 0.85,
+                language: lang
+            })
         }
     }
 

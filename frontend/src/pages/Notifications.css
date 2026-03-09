@@ -10,7 +10,38 @@
 }
 
 .notifications-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     margin-bottom: var(--spacing-md);
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+}
+
+.notifications-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+}
+
+.email-settings-btn,
+.mark-all-read-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    transition: all var(--transition-fast);
+    border: 1px solid var(--color-border);
+    background-color: var(--color-white);
+    color: var(--color-text-secondary);
+}
+
+.email-settings-btn:hover,
+.mark-all-read-btn:hover {
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
 }
 
 .notifications-title {
@@ -167,4 +198,173 @@
 
 [data-theme="dark"] .notification-header {
     border-bottom-color: #e91e63;
+}
+
+/* Email Settings Panel */
+.email-settings-panel {
+    margin-bottom: var(--spacing-xl);
+    border: 2px solid var(--color-primary);
+}
+
+.email-settings-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.email-settings-header h3 {
+    font-size: var(--font-size-base);
+    font-weight: var(--font-weight-semibold);
+    margin: 0;
+}
+
+.email-prefs-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.email-pref-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    cursor: pointer;
+    padding: var(--spacing-sm);
+    border-radius: var(--radius-md);
+    transition: background-color var(--transition-fast);
+}
+
+.email-pref-item:hover {
+    background-color: var(--color-background);
+}
+
+.email-pref-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--color-primary);
+}
+
+.pref-icon {
+    flex-shrink: 0;
+}
+
+.email-settings-actions {
+    margin-top: var(--spacing-md);
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--color-border);
+}
+
+.save-prefs-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-lg);
+    background-color: var(--color-primary);
+    color: var(--color-white);
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-medium);
+    transition: opacity var(--transition-fast);
+}
+
+.save-prefs-btn:hover:not(:disabled) {
+    opacity: 0.9;
+}
+
+.save-prefs-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Loading State */
+.notifications-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-3xl);
+    color: var(--color-text-secondary);
+}
+
+.notifications-loading p {
+    margin-top: var(--spacing-md);
+}
+
+/* Error State */
+.notifications-error {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg);
+    background-color: #FEE2E2;
+    border-color: #EF4444;
+    color: #991B1B;
+}
+
+/* Empty State */
+.notifications-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacing-3xl);
+    text-align: center;
+}
+
+.notifications-empty .empty-icon {
+    color: var(--color-text-muted);
+    margin-bottom: var(--spacing-md);
+}
+
+.notifications-empty h3 {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-xs);
+}
+
+.notifications-empty p {
+    color: var(--color-text-secondary);
+}
+
+/* Spin Animation */
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Dark Mode for new elements */
+[data-theme="dark"] .email-settings-btn,
+[data-theme="dark"] .mark-all-read-btn {
+    background-color: #2D2D2D;
+    border-color: #444;
+    color: #ccc;
+}
+
+[data-theme="dark"] .email-settings-btn:hover,
+[data-theme="dark"] .mark-all-read-btn:hover {
+    background-color: #3D3D3D;
+    color: #fff;
+}
+
+[data-theme="dark"] .email-settings-panel {
+    background-color: #1E1E1E;
+}
+
+[data-theme="dark"] .email-pref-item:hover {
+    background-color: #2D2D2D;
+}
+
+[data-theme="dark"] .notifications-empty {
+    background-color: #1E1E1E;
+}
+
+[data-theme="dark"] .notifications-error {
+    background-color: #3D1515;
+    border-color: #EF4444;
+    color: #FCA5A5;
 }
