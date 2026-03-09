@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
 import { getUserSettings, getProfile, getLessonProgress, markLessonComplete, updateLessonProgress } from '../lib/database'
+import { createNotification } from '../lib/emailNotifications'
 import Navbar from '../components/Navbar'
 import Card from '../components/Card'
 import Button from '../components/Button'
@@ -239,6 +240,15 @@ function Lessons() {
             if (isComplete) {
                 // Mark as completed only when all words are visited
                 await markLessonComplete(user.id, lessonId)
+
+                // Create completion notification
+                createNotification(
+                    user.id,
+                    'lesson',
+                    'Lesson Completed! 🎉',
+                    `Great job! You completed "${activeLesson.lesson.title}" in ${selectedLanguage.name}.`,
+                    '/lessons'
+                ).catch(err => console.log('Notification skipped:', err))
             } else if (progressPercent > 0) {
                 // Save as in_progress with percentage
                 await updateLessonProgress(user.id, lessonId, 'in_progress', progressPercent)

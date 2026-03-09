@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabaseClient'
 import { useAuth } from '../context/AuthContext'
+import { sendWelcomeEmail } from '../lib/emailNotifications'
 import './Login.css'
 
 // Custom SVG Icons - Unique designs
@@ -144,6 +145,9 @@ function Login() {
                 if (error) throw error
 
                 if (data?.session) {
+                    // Send welcome email (fire and forget)
+                    sendWelcomeEmail(formData.email, formData.email.split('@')[0])
+                        .catch(err => console.log('Welcome email skipped:', err))
                     navigate('/onboarding')
                 } else {
                     setErrorMessage('Check your email to confirm your account, then sign in.')

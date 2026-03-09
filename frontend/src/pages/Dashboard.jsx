@@ -12,7 +12,9 @@ import {
     Volume2,
     Mic,
     Hash,
-    MessageSquare
+    MessageSquare,
+    RefreshCw,
+    Sparkles
 } from 'lucide-react'
 import Navbar from '../components/Navbar'
 import Card from '../components/Card'
@@ -22,7 +24,20 @@ import Achievements from '../components/Achievements'
 import ProgressRing from '../components/ProgressRing'
 import { useAuth } from '../context/AuthContext'
 import { getLessonProgress, getProfile } from '../lib/database'
+import { useRecommendations } from '../hooks/useRecommendations'
 import './Dashboard.css'
+
+// Icon mapping for recommendation engine
+const ICON_MAP = {
+    BookOpen: BookOpen,
+    Mic: Mic,
+    Volume2: Volume2,
+    Target: Target,
+    Hash: Hash,
+    MessageSquare: MessageSquare,
+    TrendingUp: TrendingUp,
+    Sparkles: Sparkles
+}
 
 function Dashboard() {
     const { user } = useAuth()
@@ -38,9 +53,16 @@ function Dashboard() {
         completedLanguages: 0
     })
     const [currentLesson, setCurrentLesson] = useState(null)
-    const [recommendations, setRecommendations] = useState([])
     const [userName, setUserName] = useState('')
     const [activityDates, setActivityDates] = useState([])
+
+    // Use intelligent recommendation engine
+    const { 
+        recommendations, 
+        loading: recommendationsLoading, 
+        refresh: refreshRecommendations,
+        recordFeedback 
+    } = useRecommendations(user?.id, { limit: 4 })
 
     // Lesson sections for mapping
     const lessonSections = {
@@ -191,54 +213,7 @@ function Dashboard() {
                     })
                 }
 
-                // Generate recommendations based on progress
-                const recs = []
-
-                // If user has completed lessons, suggest vocabulary review
-                if (completedLessons.length > 0) {
-                    recs.push({
-                        icon: BookOpen,
-                        title: 'Vocabulary Review',
-                        subtitle: `${completedLessons.length * 5} words due for review`,
-                        action: '/lessons'
-                    })
-                }
-
-                // Suggest pronunciation practice if user has done any lessons
-                if (progress.length > 0) {
-                    recs.push({
-                        icon: Mic,
-                        title: 'Pronunciation Practice',
-                        subtitle: 'Improve your speaking',
-                        action: '/practice'
-                    })
-                }
-
-                // Find languages the user hasn't started yet
-                const startedLanguages = new Set(progress.map(p => p.lesson_id.split('_')[0]))
-                const allLanguages = ['english', 'hindi', 'tamil', 'telugu']
-                const unstarted = allLanguages.filter(l => !startedLanguages.has(l))
-
-                if (unstarted.length > 0) {
-                    const randomUnstarted = unstarted[Math.floor(Math.random() * unstarted.length)]
-                    recs.push({
-                        icon: BookOpen,
-                        title: `${languageNames[randomUnstarted]} Basics`,
-                        subtitle: 'New language available',
-                        action: '/lessons'
-                    })
-                }
-
-                // If no started lessons, show beginner recommendations
-                if (progress.length === 0) {
-                    recs.push(
-                        { icon: BookOpen, title: 'Start with English', subtitle: 'Begin your journey', action: '/lessons' },
-                        { icon: Mic, title: 'Pronunciation Practice', subtitle: 'Learn proper pronunciation', action: '/practice' },
-                        { icon: BookOpen, title: 'Hindi Basics', subtitle: 'New language available', action: '/lessons' }
-                    )
-                }
-
-                setRecommendations(recs.slice(0, 3))
+                // Recommendations are now loaded from the intelligent recommendation engine hook
             } catch (error) {
                 console.error('Error loading dashboard data:', error)
             } finally {
@@ -382,28 +357,67 @@ function Dashboard() {
                         </button>
                     </Card>
 
-                    {/* Recommended For You */}
+                    {/* Recommended For You - Powered by AI */}
                     <Card className="recommended-card">
                         <div className="section-header">
-                            <TrendingUp size={20} />
-                            <h2 className="section-title">Recommended For You</h2>
+                            <Sparkles size={20} />
+                            <h2 className="section-title">Smart Recommendations</h2>
+                            <button 
+                                className="refresh-btn" 
+                                onClick={refreshRecommendations}
+                                disabled={recommendationsLoading}
+                                title="Refresh recommendations"
+                            >
+                                <RefreshCw size={16} className={recommendationsLoading ? 'spinning' : ''} />
+                            </button>
                         </div>
-                        <p className="section-subtitle">Based on your learning style</p>
+                        <p className="section-subtitle">AI-powered suggestions based on your learning</p>
 
                         <div className="recommendation-list">
-                            {recommendations.map(({ icon: Icon, title, subtitle, action }, index) => (
-                                <button
-                                    key={index}
-                                    className="recommendation-item"
-                                    onClick={() => handleRecommendationClick(action)}
-                                >
-                                    <div className="recommendation-info">
-                                        <h3 className="recommendation-title">{title}</h3>
-                                        <p className="recommendation-subtitle">{subtitle}</p>
-                                    </div>
-                                    <ChevronRight size={20} className="recommendation-arrow" />
-                                </button>
-                            ))}
+                            {recommendationsLoading ? (
+                                <div className="recommendations-loading">
+                                    <div className="loading-spinner"></div>
+                                    <p>Analyzing...</p>
+                                </div>
+                            ) : recommendations.length > 0 ? (
+                                recommendations.slice(0, 4).map((rec, index) => {
+                                    const IconComponent = ICON_MAP[rec.icon] || BookOpen
+                                    return (
+                                        <button
+                                            key={rec.id || index}
+                                            className="recommendation-item"
+                                            onClick={() => {
+                                                recordFeedback(rec.id, 'clicked')
+                                                handleRecommendationClick(rec.action)
+                                            }}
+                                            title={rec.reason || rec.subtitle}
+                                        >
+                                            <div className="recommendation-icon">
+                                                <IconComponent size={16} />
+                                            </div>
+                                            <div className="recommendation-info">
+                                                <h3 className="recommendation-title">{rec.title}</h3>
+                                                <p className="recommendation-subtitle">{rec.subtitle}</p>
+                                            </div>
+                                            {rec.confidence && (
+                                                <div className="recommendation-score">
+                                                    <span className="confidence-badge">
+                                                        {Math.round(rec.confidence * 100)}%
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </button>
+                                    )
+                                })
+                            ) : (
+                                <div className="no-recommendations">
+                                    <BookOpen size={24} />
+                                    <p>Start learning to get personalized recommendations!</p>
+                                    <Button onClick={() => navigate('/lessons')}>
+                                        Begin Your Journey
+                                    </Button>
+                                </div>
+                            )}
                         </div>
                     </Card>
 
