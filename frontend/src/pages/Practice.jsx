@@ -8,7 +8,7 @@ import Button from "../components/Button";
 import FocusModeToggle from '../components/FocusModeToggle';
 import { useSettings } from '../context/SettingsContext';
 import {
-    ChevronRight, Mic, Headphones, BookOpen, Play,
+    ChevronRight, Mic, Headphones, BookOpen, PenTool, Play,
     CheckCircle2, TrendingUp, Clock, Flame, Activity, BookMarked
 } from "lucide-react";
 import "./Practice.css";
@@ -79,6 +79,13 @@ export default function Practice() {
             icon: BookOpen,
             desc: 'Expand your word bank with flashcards',
             color: '#10B981'
+        },
+        {
+            id: 'writing',
+            title: 'Writing',
+            icon: PenTool,
+            desc: 'Practice handwriting and written responses',
+            color: '#A855F7'
         }
     ];
 

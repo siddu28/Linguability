@@ -1,3 +1,7 @@
+// IMPORTANT: Import instrument.js at the very top before all other imports
+require('./instrument.js')
+
+const Sentry = require('@sentry/node')
 const express = require('express')
 const cors = require('cors')
 const dotenv = require('dotenv')
@@ -12,7 +16,7 @@ const app = express()
 const server = http.createServer(app)
 const io = new Server(server, {
     cors: {
-        origin: ["https://linguability-app.vercel.app", "http://localhost:5173"],
+        origin: "*", // Allow all origins for development
         methods: ["GET", "POST"]
     }
 })
@@ -32,10 +36,12 @@ const supabase = (supabaseUrl && supabaseKey) ? createClient(supabaseUrl, supaba
 // Import routes
 const lessonsRouter = require('./routes/lessons')
 const practiceRouter = require('./routes/practice');
+const evaluateRouter = require('./routes/evaluate');
 
 // Routes
 app.use('/api/practice', practiceRouter);
 app.use('/api/lessons', lessonsRouter)
+app.use('/api/evaluate', evaluateRouter);
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -129,6 +135,14 @@ io.on('connection', (socket) => {
         // For simple WebRTC, the peer connection will detect closure eventually
     })
 })
+
+// Sentry test route - visit /debug-sentry to verify error reporting
+app.get('/debug-sentry', function mainHandler(req, res) {
+    throw new Error('My first Sentry error!')
+})
+
+// Sentry error handler - must be registered after all routes and other middleware
+Sentry.setupExpressErrorHandler(app)
 
 // Start server
 server.listen(PORT, () => {

@@ -462,3 +462,41 @@ export async function getAllPracticeProgress(userId) {
     }
     return data
 }
+
+// ============ WRITING RESULTS ============
+
+export async function saveWritingResult(userId, result) {
+    const { data, error } = await supabase
+        .from('writing_results')
+        .insert({
+            user_id: userId,
+            language: result.language,
+            prompt_id: result.promptId,
+            user_response: result.userResponse,
+            score: result.score,
+            is_correct: result.isCorrect,
+            created_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+
+    if (error) {
+        console.error('Error saving writing result:', error)
+        return null
+    }
+    return data
+}
+
+export async function getWritingResults(userId) {
+    const { data, error } = await supabase
+        .from('writing_results')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+
+    if (error) {
+        console.error('Error fetching writing results:', error)
+        return []
+    }
+    return data
+}
