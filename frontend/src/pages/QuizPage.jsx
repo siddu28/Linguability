@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft, Trophy, Target, Clock, RotateCcw, Home, CheckCircle2, XCircle, Check, X, Play, RefreshCw } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
-import { getProfile, getUserSettings, saveAssessmentResult, saveQuizProgress, getQuizProgress, deleteQuizProgress } from '../lib/database'
+import { getProfile, getUserSettings, saveAssessmentResult, saveQuizProgress, getQuizProgress, deleteQuizProgress, getLearnedWords } from '../lib/database'
 import { sendLowScoreHelpEmail, createNotification } from '../lib/emailNotifications'
 import { getQuizById, generateQuizQuestions } from '../data/quizData'
 import Navbar from '../components/Navbar'
@@ -59,8 +59,44 @@ function QuizPage() {
                     // Use saved questions to maintain order
                     setQuestions(existingProgress.questions)
                 } else {
-                    // Generate fresh questions
-                    const generatedQuestions = generateQuizQuestions(quizId)
+                    // Try dynamic LLM-generated questions first
+                    let generatedQuestions = null
+                    try {
+                        const knownWords = await getLearnedWords(user.id, quizConfig.language)
+                        const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/evaluate/generate-assessment`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                language: quizConfig.language,
+                                level: quizConfig.level,
+                                categories: quizConfig.categories,
+                                count: quizConfig.questionsCount,
+                                knownWords
+                            })
+                        })
+                        if (res.ok) {
+                            const llmQuestions = await res.json()
+                            if (Array.isArray(llmQuestions) && llmQuestions.length > 0) {
+                                // Transform LLM questions to match frontend format
+                                generatedQuestions = llmQuestions.map((q, idx) => ({
+                                    id: q.id || idx + 1,
+                                    question: q.question,
+                                    questionAudio: q.question,
+                                    options: q.options,
+                                    correctAnswer: q.options[q.correctAnswer],
+                                    correctIndex: q.correctAnswer,
+                                    category: q.category || 'general'
+                                }))
+                            }
+                        }
+                    } catch (err) {
+                        console.warn('Dynamic assessment generation unavailable, using static:', err.message)
+                    }
+
+                    // Fallback to local static question generation
+                    if (!generatedQuestions) {
+                        generatedQuestions = generateQuizQuestions(quizId)
+                    }
                     setQuestions(generatedQuestions)
                 }
 

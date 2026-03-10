@@ -462,6 +462,7 @@ export async function getAllPracticeProgress(userId) {
     return data
 }
 
+<<<<<<< HEAD
 // ============ XP & LEADERBOARD ============
 
 // Get user's total XP
@@ -581,4 +582,114 @@ export async function getUserRank(userId) {
     const leaderboard = await getLeaderboard(100)
     const index = leaderboard.findIndex(u => u.id === userId)
     return index >= 0 ? index + 1 : null
+=======
+// ============ WRITING RESULTS ============
+
+export async function saveWritingResult(userId, result) {
+    const { data, error } = await supabase
+        .from('writing_results')
+        .insert({
+            user_id: userId,
+            language: result.language,
+            prompt_id: result.promptId,
+            user_response: result.userResponse,
+            score: result.score,
+            is_correct: result.isCorrect,
+            created_at: new Date().toISOString()
+        })
+        .select()
+        .single()
+
+    if (error) {
+        console.error('Error saving writing result:', error)
+        return null
+    }
+    return data
+}
+
+export async function getWritingResults(userId) {
+    const { data, error } = await supabase
+        .from('writing_results')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+
+    if (error) {
+        console.error('Error fetching writing results:', error)
+        return []
+    }
+    return data
+}
+
+// ============ USER KNOWLEDGE (for Profile-Grounded RAG) ============
+
+/**
+ * Record a word the user has learned (upsert to avoid duplicates).
+ */
+export async function recordLearnedWord(userId, word, language) {
+    const { data, error } = await supabase
+        .from('user_knowledge')
+        .upsert({
+            user_id: userId,
+            word,
+            language,
+            learned_at: new Date().toISOString()
+        }, {
+            onConflict: 'user_id,word,language'
+        })
+        .select()
+        .single()
+
+    if (error) {
+        console.error('Error recording learned word:', error)
+        return null
+    }
+    return data
+}
+
+/**
+ * Record multiple words the user has learned in a batch.
+ */
+export async function recordLearnedWords(userId, words, language) {
+    if (!words || words.length === 0) return []
+
+    const rows = words.map(word => ({
+        user_id: userId,
+        word,
+        language,
+        learned_at: new Date().toISOString()
+    }))
+
+    const { data, error } = await supabase
+        .from('user_knowledge')
+        .upsert(rows, {
+            onConflict: 'user_id,word,language'
+        })
+        .select()
+
+    if (error) {
+        console.error('Error recording learned words:', error)
+        return []
+    }
+    return data
+}
+
+/**
+ * Get all words the user has learned for a given language.
+ * Returns an array of word strings (for passing to the RAG LLM).
+ */
+export async function getLearnedWords(userId, language) {
+    const { data, error } = await supabase
+        .from('user_knowledge')
+        .select('word')
+        .eq('user_id', userId)
+        .eq('language', language)
+        .order('learned_at', { ascending: false })
+
+    if (error) {
+        console.error('Error fetching learned words:', error)
+        return []
+    }
+    return data.map(row => row.word)
+>>>>>>> origin/satvic4
 }

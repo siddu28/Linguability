@@ -1,0 +1,531 @@
+{
+    "english": {
+        "1": {
+            "prompt": "Write 'Hello' in English",
+            "expected": "Hello",
+            "accepted": [
+                "Hello",
+                "Hi",
+                "Hey",
+                "Greetings"
+            ],
+            "keywords": [
+                "hello",
+                "hi",
+                "hey"
+            ],
+            "category": "Greetings"
+        },
+        "2": {
+            "prompt": "Write 'Thank you' in English",
+            "expected": "Thank you",
+            "accepted": [
+                "Thank you",
+                "Thanks",
+                "Thank you very much",
+                "Many thanks"
+            ],
+            "keywords": [
+                "thank",
+                "thanks"
+            ],
+            "category": "Courtesy"
+        },
+        "3": {
+            "prompt": "Write 'Good morning' in English",
+            "expected": "Good morning",
+            "accepted": [
+                "Good morning",
+                "Morning"
+            ],
+            "keywords": [
+                "good",
+                "morning"
+            ],
+            "category": "Greetings"
+        },
+        "4": {
+            "prompt": "Write 'How are you?' in English",
+            "expected": "How are you?",
+            "accepted": [
+                "How are you?",
+                "How are you",
+                "How are you doing",
+                "How do you do"
+            ],
+            "keywords": [
+                "how",
+                "are",
+                "you"
+            ],
+            "category": "Conversation"
+        },
+        "5": {
+            "prompt": "Write 'I am happy' in English",
+            "expected": "I am happy",
+            "accepted": [
+                "I am happy",
+                "I'm happy",
+                "I am glad",
+                "I'm glad"
+            ],
+            "keywords": [
+                "happy",
+                "glad"
+            ],
+            "category": "Feelings"
+        },
+        "6": {
+            "prompt": "Write 'My name is...' in English",
+            "expected": "My name is",
+            "accepted": [
+                "My name is",
+                "My name's",
+                "I am",
+                "I'm"
+            ],
+            "keywords": [
+                "name",
+                "my"
+            ],
+            "category": "Introduction"
+        },
+        "7": {
+            "prompt": "Write 'I like to read books' in English",
+            "expected": "I like to read books",
+            "accepted": [
+                "I like to read books",
+                "I like reading books",
+                "I love to read books",
+                "I love reading books",
+                "I enjoy reading books"
+            ],
+            "keywords": [
+                "like",
+                "read",
+                "books"
+            ],
+            "category": "Hobbies"
+        },
+        "8": {
+            "prompt": "Write 'Where is the school?' in English",
+            "expected": "Where is the school?",
+            "accepted": [
+                "Where is the school?",
+                "Where is the school",
+                "Where's the school"
+            ],
+            "keywords": [
+                "where",
+                "school"
+            ],
+            "category": "Places"
+        }
+    },
+    "hindi": {
+        "1": {
+            "prompt": "Write 'Hello' in Hindi",
+            "expected": "नमस्ते",
+            "accepted": [
+                "नमस्ते",
+                "नमस्कार",
+                "प्रणाम",
+                "Namaste",
+                "Namaskar",
+                "Pranam",
+                "namaste",
+                "namaskar"
+            ],
+            "keywords": [
+                "नमस्ते",
+                "नमस्कार",
+                "namaste",
+                "namaskar"
+            ],
+            "category": "Greetings"
+        },
+        "2": {
+            "prompt": "Write 'Thank you' in Hindi",
+            "expected": "धन्यवाद",
+            "accepted": [
+                "धन्यवाद",
+                "शुक्रिया",
+                "Dhanyavaad",
+                "Shukriya",
+                "dhanyavaad",
+                "shukriya",
+                "dhanyawad"
+            ],
+            "keywords": [
+                "धन्यवाद",
+                "शुक्रिया",
+                "dhanyavaad",
+                "shukriya"
+            ],
+            "category": "Courtesy"
+        },
+        "3": {
+            "prompt": "Write 'Good morning' in Hindi",
+            "expected": "शुभ प्रभात",
+            "accepted": [
+                "शुभ प्रभात",
+                "सुप्रभात",
+                "Shubh Prabhat",
+                "Suprabhat",
+                "shubh prabhat",
+                "suprabhat"
+            ],
+            "keywords": [
+                "शुभ",
+                "प्रभात",
+                "shubh",
+                "prabhat",
+                "suprabhat"
+            ],
+            "category": "Greetings"
+        },
+        "4": {
+            "prompt": "Write 'How are you?' in Hindi",
+            "expected": "आप कैसे हैं?",
+            "accepted": [
+                "आप कैसे हैं?",
+                "आप कैसे हैं",
+                "कैसे हो",
+                "तुम कैसे हो",
+                "Aap kaise hain",
+                "Kaise ho",
+                "aap kaise hain"
+            ],
+            "keywords": [
+                "कैसे",
+                "kaise"
+            ],
+            "category": "Conversation"
+        },
+        "5": {
+            "prompt": "Write 'I am happy' in Hindi",
+            "expected": "मैं खुश हूँ",
+            "accepted": [
+                "मैं खुश हूँ",
+                "मैं खुश हूं",
+                "Main khush hoon",
+                "main khush hun",
+                "Mai khush hu"
+            ],
+            "keywords": [
+                "खुश",
+                "khush"
+            ],
+            "category": "Feelings"
+        },
+        "6": {
+            "prompt": "Write 'My name is...' in Hindi",
+            "expected": "मेरा नाम है",
+            "accepted": [
+                "मेरा नाम है",
+                "मेरा नाम",
+                "Mera naam hai",
+                "Mera naam",
+                "mera naam hai"
+            ],
+            "keywords": [
+                "नाम",
+                "naam",
+                "mera"
+            ],
+            "category": "Introduction"
+        },
+        "7": {
+            "prompt": "Write 'I like to read books' in Hindi",
+            "expected": "मुझे किताबें पढ़ना पसंद है",
+            "accepted": [
+                "मुझे किताबें पढ़ना पसंद है",
+                "मुझे पढ़ना पसंद है",
+                "Mujhe kitaabein padhna pasand hai",
+                "mujhe kitaab padhna pasand hai"
+            ],
+            "keywords": [
+                "किताब",
+                "पढ़ना",
+                "पसंद",
+                "kitaab",
+                "padhna",
+                "pasand"
+            ],
+            "category": "Hobbies"
+        },
+        "8": {
+            "prompt": "Write 'Where is the school?' in Hindi",
+            "expected": "स्कूल कहाँ है?",
+            "accepted": [
+                "स्कूल कहाँ है?",
+                "स्कूल कहाँ है",
+                "विद्यालय कहाँ है",
+                "School kahaan hai",
+                "school kahan hai"
+            ],
+            "keywords": [
+                "स्कूल",
+                "कहाँ",
+                "school",
+                "kahaan",
+                "kahan"
+            ],
+            "category": "Places"
+        }
+    },
+    "tamil": {
+        "1": {
+            "prompt": "Write 'Hello' in Tamil",
+            "expected": "வணக்கம்",
+            "accepted": [
+                "வணக்கம்",
+                "Vanakkam",
+                "vanakkam"
+            ],
+            "keywords": [
+                "வணக்கம்",
+                "vanakkam"
+            ],
+            "category": "Greetings"
+        },
+        "2": {
+            "prompt": "Write 'Thank you' in Tamil",
+            "expected": "நன்றி",
+            "accepted": [
+                "நன்றி",
+                "Nandri",
+                "nandri",
+                "nanri"
+            ],
+            "keywords": [
+                "நன்றி",
+                "nandri"
+            ],
+            "category": "Courtesy"
+        },
+        "3": {
+            "prompt": "Write 'Good morning' in Tamil",
+            "expected": "காலை வணக்கம்",
+            "accepted": [
+                "காலை வணக்கம்",
+                "Kaalai Vanakkam",
+                "kaalai vanakkam"
+            ],
+            "keywords": [
+                "காலை",
+                "வணக்கம்",
+                "kaalai",
+                "vanakkam"
+            ],
+            "category": "Greetings"
+        },
+        "4": {
+            "prompt": "Write 'How are you?' in Tamil",
+            "expected": "எப்படி இருக்கிறீர்கள்?",
+            "accepted": [
+                "எப்படி இருக்கிறீர்கள்?",
+                "எப்படி இருக்கிறீர்கள்",
+                "எப்படி இருக்க",
+                "Eppadi irukkeenga",
+                "eppadi irukkeenga"
+            ],
+            "keywords": [
+                "எப்படி",
+                "eppadi"
+            ],
+            "category": "Conversation"
+        },
+        "5": {
+            "prompt": "Write 'I am happy' in Tamil",
+            "expected": "நான் மகிழ்ச்சியாக இருக்கிறேன்",
+            "accepted": [
+                "நான் மகிழ்ச்சியாக இருக்கிறேன்",
+                "நான் சந்தோஷமாக இருக்கிறேன்",
+                "Naan magizhchiyaaga irukkiren",
+                "naan santhoshamaaga irukkiren"
+            ],
+            "keywords": [
+                "மகிழ்ச்சி",
+                "சந்தோஷம்",
+                "magizhchi",
+                "santhosham"
+            ],
+            "category": "Feelings"
+        },
+        "6": {
+            "prompt": "Write 'My name is...' in Tamil",
+            "expected": "என் பெயர்",
+            "accepted": [
+                "என் பெயர்",
+                "En peyar",
+                "en peyar",
+                "ennoda peyar"
+            ],
+            "keywords": [
+                "பெயர்",
+                "peyar"
+            ],
+            "category": "Introduction"
+        },
+        "7": {
+            "prompt": "Write 'I like to read books' in Tamil",
+            "expected": "நான் புத்தகங்கள் படிக்க விரும்புகிறேன்",
+            "accepted": [
+                "நான் புத்தகங்கள் படிக்க விரும்புகிறேன்",
+                "எனக்கு புத்தகம் படிக்க பிடிக்கும்",
+                "Naan puthagangal padikka virumbugiren"
+            ],
+            "keywords": [
+                "புத்தகம்",
+                "படிக்க",
+                "puthagam",
+                "padikka"
+            ],
+            "category": "Hobbies"
+        },
+        "8": {
+            "prompt": "Write 'Where is the school?' in Tamil",
+            "expected": "பள்ளிக்கூடம் எங்கே?",
+            "accepted": [
+                "பள்ளிக்கூடம் எங்கே?",
+                "பள்ளிக்கூடம் எங்கே",
+                "பள்ளி எங்கே",
+                "Pallikoodam engge",
+                "palli engge"
+            ],
+            "keywords": [
+                "பள்ளி",
+                "எங்கே",
+                "palli",
+                "engge"
+            ],
+            "category": "Places"
+        }
+    },
+    "telugu": {
+        "1": {
+            "prompt": "Write 'Hello' in Telugu",
+            "expected": "నమస్కారం",
+            "accepted": [
+                "నమస్కారం",
+                "Namaskaram",
+                "namaskaram",
+                "namaskaaram"
+            ],
+            "keywords": [
+                "నమస్కారం",
+                "namaskaram"
+            ],
+            "category": "Greetings"
+        },
+        "2": {
+            "prompt": "Write 'Thank you' in Telugu",
+            "expected": "ధన్యవాదాలు",
+            "accepted": [
+                "ధన్యవాదాలు",
+                "Dhanyavaadaalu",
+                "dhanyavaadaalu",
+                "dhanyavadalu"
+            ],
+            "keywords": [
+                "ధన్యవాదాలు",
+                "dhanyavaadaalu"
+            ],
+            "category": "Courtesy"
+        },
+        "3": {
+            "prompt": "Write 'Good morning' in Telugu",
+            "expected": "శుభోదయం",
+            "accepted": [
+                "శుభోదయం",
+                "Shubhodayam",
+                "shubhodayam"
+            ],
+            "keywords": [
+                "శుభోదయం",
+                "shubhodayam"
+            ],
+            "category": "Greetings"
+        },
+        "4": {
+            "prompt": "Write 'How are you?' in Telugu",
+            "expected": "మీరు ఎలా ఉన్నారు?",
+            "accepted": [
+                "మీరు ఎలా ఉన్నారు?",
+                "మీరు ఎలా ఉన్నారు",
+                "ఎలా ఉన్నారు",
+                "Meeru elaa unnaru",
+                "meeru elaa unnaru",
+                "ela unnaru"
+            ],
+            "keywords": [
+                "ఎలా",
+                "elaa",
+                "ela"
+            ],
+            "category": "Conversation"
+        },
+        "5": {
+            "prompt": "Write 'I am happy' in Telugu",
+            "expected": "నేను సంతోషంగా ఉన్నాను",
+            "accepted": [
+                "నేను సంతోషంగా ఉన్నాను",
+                "Nenu santhoshamga unnaanu",
+                "nenu santhoshamga unnaanu"
+            ],
+            "keywords": [
+                "సంతోషం",
+                "santhosham"
+            ],
+            "category": "Feelings"
+        },
+        "6": {
+            "prompt": "Write 'My name is...' in Telugu",
+            "expected": "నా పేరు",
+            "accepted": [
+                "నా పేరు",
+                "Naa peru",
+                "naa peru"
+            ],
+            "keywords": [
+                "పేరు",
+                "peru"
+            ],
+            "category": "Introduction"
+        },
+        "7": {
+            "prompt": "Write 'I like to read books' in Telugu",
+            "expected": "నాకు పుస్తకాలు చదవడం ఇష్టం",
+            "accepted": [
+                "నాకు పుస్తకాలు చదవడం ఇష్టం",
+                "Naaku pusthakaalu chadavadam ishtam",
+                "naaku pustakalu chadavadam ishtam"
+            ],
+            "keywords": [
+                "పుస్తకాలు",
+                "చదవడం",
+                "pustakalu",
+                "chadavadam"
+            ],
+            "category": "Hobbies"
+        },
+        "8": {
+            "prompt": "Write 'Where is the school?' in Telugu",
+            "expected": "పాఠశాల ఎక్కడ?",
+            "accepted": [
+                "పాఠశాల ఎక్కడ?",
+                "పాఠశాల ఎక్కడ",
+                "School ekkada",
+                "paathashaala ekkada"
+            ],
+            "keywords": [
+                "పాఠశాల",
+                "ఎక్కడ",
+                "paathashaala",
+                "ekkada"
+            ],
+            "category": "Places"
+        }
+    }
+}

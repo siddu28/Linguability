@@ -1,0 +1,118 @@
+# Feature 4: Handwriting Canvas + NLP Written Evaluation
+
+Replace the typed input approach from the original plan with a **drawing canvas** where users handwrite in any language, then the system evaluates their response using NLP.
+
+## How It Works (User Flow)
+
+1. User picks a language → selects "Writing" practice
+2. A **prompt** is shown (e.g., "Write 'Namaste' in Hindi")
+3. User **draws on an HTML5 canvas** using mouse/touch
+4. User can also **type** if they prefer (toggle between canvas & keyboard)
+5. On submit, the backend runs NLP evaluation (Jaccard similarity, n-gram analysis, keyword matching)
+6. User gets detailed feedback: score, what was right/wrong, accepted alternatives
+
+> [!IMPORTANT]
+> **Canvas = drawing only, not OCR.** After initial research, reliable multilingual handwriting OCR (for Hindi/Tamil/Telugu) requires heavy external APIs or large models. Instead, the canvas serves as a **learning tool** — the user draws the characters to practice muscle memory, then **types** or **selects** what they wrote for NLP evaluation. This keeps the feature self-contained with no external API keys, matching the project philosophy.
+
+---
+
+## Proposed Changes
+
+### Backend — NLP Evaluation Service
+
+#### [NEW] [writtenEvaluation.js](file:///c:/Users/Public/Linguability/backend/services/writtenEvaluation.js)
+
+Core NLP evaluation service using the `natural` and `string-similarity` npm packages:
+- **Jaccard similarity** on tokenized words
+- **N-gram cosine similarity** (bigrams/trigrams)
+- **Keyword matching** against accepted translations
+- **Partial credit scoring** (not just exact match)
+- **Detailed feedback generation** per response
+
+#### [NEW] [accepted-translations.json](file:///c:/Users/Public/Linguability/backend/data/accepted-translations.json)
+
+Multiple valid translations per prompt for each language. E.g., "Hello" → `["Namaste", "Namaskar", "Pranam"]` for Hindi.
+
+#### [NEW] [evaluate.js](file:///c:/Users/Public/Linguability/backend/routes/evaluate.js)
+
+Express route `POST /api/evaluate/written` that:
+- Receives `{ language, promptId, userResponse }`
+- Calls `writtenEvaluation.js` to compute scores
+- Returns structured feedback JSON
+
+#### [MODIFY] [server.js](file:///c:/Users/Public/Linguability/backend/server.js)
+
+- Import and register the new evaluate route: `app.use('/api/evaluate', evaluateRouter)`
+
+#### [MODIFY] [practice.json](file:///c:/Users/Public/Linguability/backend/data/practice.json)
+
+- Add `"writing"` section to each language with prompts like:
+  ```json
+  { "id": 1, "prompt": "Write 'Hello' in Hindi", "expectedText": "नमस्ते", "hint": "Namaste" }
+  ```
+
+---
+
+### Frontend — Handwriting Canvas Page
+
+#### [NEW] [WritingPractice.jsx](file:///c:/Users/Public/Linguability/frontend/src/pages/practice/WritingPractice.jsx)
+
+Full-featured practice page following the [VocabularyPractice.jsx](file:///c:/Users/Public/Linguability/frontend/src/pages/practice/VocabularyPractice.jsx) pattern:
+- **Drawing canvas** (HTML5 `<canvas>`) with:
+  - Mouse + touch support
+  - Adjustable pen color/size
+  - Clear/undo buttons
+  - Responsive sizing
+- **Type mode toggle**: switch between canvas drawing and text input
+- **Submit flow**: sends typed/confirmed text to backend for NLP evaluation
+- **Feedback display**: score circle, detailed breakdown, tips
+- **Progress save/restore** using existing [savePracticeProgress](file:///c:/Users/Public/Linguability/frontend/src/lib/database.js#410-436) pattern
+
+#### [NEW] [WritingPractice.css](file:///c:/Users/Public/Linguability/frontend/src/pages/practice/WritingPractice.css)
+
+Styles for the canvas, toolbar, feedback cards — matching existing practice UI aesthetic.
+
+#### [MODIFY] [Practice.jsx](file:///c:/Users/Public/Linguability/frontend/src/pages/Practice.jsx)
+
+- Add "Writing" as a 4th practice type in the `practiceTypes` array (with `PenTool` icon from lucide-react)
+
+#### [MODIFY] [App.jsx](file:///c:/Users/Public/Linguability/frontend/src/App.jsx)
+
+- Add lazy import for `WritingPractice`
+- Add route `/practice/writing` with `ProtectedRoute`
+
+#### [MODIFY] [database.js](file:///c:/Users/Public/Linguability/frontend/src/lib/database.js)
+
+- Add `saveWritingResult(userId, result)` — saves to `writing_results` table
+- Add `getWritingResults(userId)` — fetches writing history
+
+---
+
+### New Dependencies
+
+| Package | Where | Purpose |
+|---------|-------|---------|
+| `natural` | Backend | NLP — tokenizer, n-gram, Jaccard distance |
+| `string-similarity` | Backend | Dice coefficient for fuzzy text matching |
+
+---
+
+## Verification Plan
+
+### Browser Testing
+1. Start backend: `cd c:\Users\Public\Linguability\backend && npm run dev`
+2. Start frontend: `cd c:\Users\Public\Linguability\frontend && npm run dev`
+3. Navigate to `/practice` → verify "Writing" appears as 4th practice type
+4. Select a language → click Writing → verify canvas loads with a prompt
+5. Draw on canvas → verify drawing works (mouse/touch)
+6. Toggle to type mode → type a response → submit
+7. Verify NLP feedback appears with score and detailed breakdown
+8. Test with intentional misspelling → verify partial credit
+
+### Manual API Test
+```bash
+curl -X POST http://localhost:3001/api/evaluate/written \
+  -H "Content-Type: application/json" \
+  -d '{"language":"hindi","promptId":1,"userResponse":"namaste"}'
+```
+Verify the response includes `overallScore`, `feedback`, and `acceptedAlternatives`.

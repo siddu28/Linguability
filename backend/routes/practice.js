@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const practiceData = require('../data/practice.json');
+const { generatePracticeContent } = require('../services/llmService');
 
 
 // ================== GET ALL PRACTICE (optional) ==================
@@ -9,31 +10,8 @@ router.get('/', (req, res) => {
 });
 
 
-// ================== LISTENING ==================
-router.get('/:languageId/listening', (req, res) => {
-    const data = practiceData[req.params.languageId];
-    if (!data) return res.status(404).json({ error: "Language not found" });
-
-    res.json(data.listening);
-});
-
-
-// ================== PRONUNCIATION WORDS ==================
-router.get('/:languageId/pronunciation', (req, res) => {
-    const data = practiceData[req.params.languageId];
-    if (!data) return res.status(404).json({ error: "Language not found" });
-
-    res.json(data.pronunciation);
-});
-
-
-// ================== VOCABULARY ==================
-router.get('/:languageId/vocabulary', (req, res) => {
-    const data = practiceData[req.params.languageId];
-    if (!data) return res.status(404).json({ error: "Language not found" });
-
-    res.json(data.vocabulary);
-});
+// Static routes removed — all practice types now use the dynamic
+// /:languageId/:type route below (with static fallback).
 
 
 // ================== PRONUNCIATION CHECK ==================
@@ -112,15 +90,25 @@ router.get('/languages', (req, res) => {
     res.json(langs)
 })
 
-// GET practice by language + type
-router.get('/:languageId/:type', (req, res) => {
+// GET practice by language + type — dynamic RAG generation with static fallback
+router.get('/:languageId/:type', async (req, res) => {
     const { languageId, type } = req.params
+    const knownWords = req.query.knownWords ? req.query.knownWords.split(',') : []
 
+    // Try dynamic generation first if GROQ_API_KEY is configured
+    if (process.env.GROQ_API_KEY) {
+        try {
+            const generated = await generatePracticeContent(languageId, type, knownWords);
+            return res.json(generated);
+        } catch (err) {
+            console.error(`[Practice] LLM generation failed for ${languageId}/${type}, falling back to static:`, err.message);
+        }
+    }
+
+    // Fallback to static data
     const lang = practiceData[languageId]
     if (!lang) return res.status(404).json({ error: "Language not found" })
-
     if (!lang[type]) return res.status(404).json({ error: "Practice type not found" })
-
     res.json(lang[type])
 })
 

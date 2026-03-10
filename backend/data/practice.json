@@ -62,6 +62,16 @@
             { "id": 2, "word": "River", "meaning": "A large natural stream of water", "example": "The river flows fast.", "category": "Nature" },
             { "id": 3, "word": "Run", "meaning": "Move at a speed faster than a walk", "example": "I run every morning.", "category": "Actions" },
             { "id": 4, "word": "School", "meaning": "A place for education", "example": "She goes to school.", "category": "Places" }
+        ],
+        "writing": [
+            { "id": 1, "prompt": "Write 'Hello' in English", "expectedText": "Hello", "hint": "Hello" },
+            { "id": 2, "prompt": "Write 'Thank you' in English", "expectedText": "Thank you", "hint": "Thank you" },
+            { "id": 3, "prompt": "Write 'Good morning' in English", "expectedText": "Good morning", "hint": "Good morning" },
+            { "id": 4, "prompt": "Write 'How are you?' in English", "expectedText": "How are you?", "hint": "How are you?" },
+            { "id": 5, "prompt": "Write 'I am fine' in English", "expectedText": "I am fine", "hint": "I am fine" },
+            { "id": 6, "prompt": "Write 'Goodbye' in English", "expectedText": "Goodbye", "hint": "Goodbye" },
+            { "id": 7, "prompt": "Write 'Please' in English", "expectedText": "Please", "hint": "Please" },
+            { "id": 8, "prompt": "Write 'Welcome' in English", "expectedText": "Welcome", "hint": "Welcome" }
         ]
     },
     "hindi": {
@@ -114,6 +124,16 @@
         "vocabulary": [
             { "id": 1, "word": "सेब", "meaning": "एक मीठा फल", "example": "मैंने एक सेब खाया।", "category": "Food" },
             { "id": 2, "word": "नदी", "meaning": "पानी का बड़ा प्रवाह", "example": "नदी तेजी से बह रही है।", "category": "Nature" }
+        ],
+        "writing": [
+            { "id": 1, "prompt": "Write 'Hello' in Hindi", "expectedText": "नमस्ते", "hint": "Namaste" },
+            { "id": 2, "prompt": "Write 'Thank you' in Hindi", "expectedText": "धन्यवाद", "hint": "Dhanyavaad" },
+            { "id": 3, "prompt": "Write 'Good morning' in Hindi", "expectedText": "शुभ प्रभात", "hint": "Shubh Prabhaat" },
+            { "id": 4, "prompt": "Write 'How are you?' in Hindi", "expectedText": "आप कैसे हैं?", "hint": "Aap kaise hain?" },
+            { "id": 5, "prompt": "Write 'I am fine' in Hindi", "expectedText": "मैं ठीक हूँ", "hint": "Main theek hoon" },
+            { "id": 6, "prompt": "Write 'Goodbye' in Hindi", "expectedText": "अलविदा", "hint": "Alvida" },
+            { "id": 7, "prompt": "Write 'Please' in Hindi", "expectedText": "कृपया", "hint": "Kripya" },
+            { "id": 8, "prompt": "Write 'Welcome' in Hindi", "expectedText": "स्वागत है", "hint": "Swaagat hai" }
         ]
     },
     "tamil": {
@@ -165,6 +185,16 @@
         },
         "vocabulary": [
             { "id": 1, "word": "ஆப்பிள்", "meaning": "ஒரு இனிப்பு பழம்", "example": "நான் ஒரு ஆப்பிள் சாப்பிட்டேன்.", "category": "Food" }
+        ],
+        "writing": [
+            { "id": 1, "prompt": "Write 'Hello' in Tamil", "expectedText": "வணக்கம்", "hint": "Vanakkam" },
+            { "id": 2, "prompt": "Write 'Thank you' in Tamil", "expectedText": "நன்றி", "hint": "Nandri" },
+            { "id": 3, "prompt": "Write 'Good morning' in Tamil", "expectedText": "காலை வணக்கம்", "hint": "Kaalai Vanakkam" },
+            { "id": 4, "prompt": "Write 'How are you?' in Tamil", "expectedText": "நீங்கள் எப்படி இருக்கிறீர்கள்?", "hint": "Neengal eppadi irukkireergal?" },
+            { "id": 5, "prompt": "Write 'I am fine' in Tamil", "expectedText": "நான் நலம்", "hint": "Naan nalam" },
+            { "id": 6, "prompt": "Write 'Goodbye' in Tamil", "expectedText": "போய் வருகிறேன்", "hint": "Poi varugiren" },
+            { "id": 7, "prompt": "Write 'Please' in Tamil", "expectedText": "தயவுசெய்து", "hint": "Thayavu seidhu" },
+            { "id": 8, "prompt": "Write 'Welcome' in Tamil", "expectedText": "வரவேற்கிறோம்", "hint": "Varaveerkirom" }
         ]
     },
     "telugu": {
@@ -216,6 +246,16 @@
         },
         "vocabulary": [
             { "id": 1, "word": "యాపిల్", "meaning": "ఒక తీపి ఫలం", "example": "నేను ఒక యాపిల్ తిన్నాను.", "category": "Food" }
+        ],
+        "writing": [
+            { "id": 1, "prompt": "Write 'Hello' in Telugu", "expectedText": "నమస్కారం", "hint": "Namaskaram" },
+            { "id": 2, "prompt": "Write 'Thank you' in Telugu", "expectedText": "ధన్యవాదాలు", "hint": "Dhanyavaadaalu" },
+            { "id": 3, "prompt": "Write 'Good morning' in Telugu", "expectedText": "శుభోదయం", "hint": "Shubhodayam" },
+            { "id": 4, "prompt": "Write 'How are you?' in Telugu", "expectedText": "మీరు ఎలా ఉన్నారు?", "hint": "Meeru ela unnaru?" },
+            { "id": 5, "prompt": "Write 'I am fine' in Telugu", "expectedText": "నేను బాగున్నాను", "hint": "Nenu baagunnanu" },
+            { "id": 6, "prompt": "Write 'Goodbye' in Telugu", "expectedText": "వీడ్కోలు", "hint": "Veedkolu" },
+            { "id": 7, "prompt": "Write 'Please' in Telugu", "expectedText": "దయచేసి", "hint": "Dayachesi" },
+            { "id": 8, "prompt": "Write 'Welcome' in Telugu", "expectedText": "స్వాగతం", "hint": "Swaagatam" }
         ]
     }
 }

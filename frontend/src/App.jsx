@@ -1,5 +1,6 @@
 import { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import * as Sentry from '@sentry/react'
 
 // Future flags for React Router v7 compatibility
 const routerFutureFlags = {
@@ -30,7 +31,7 @@ import { SoundProvider } from './context/SoundContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import Chatbot from './components/Chatbot'
 
-// Chatbot wrapper â€” only shows on authenticated pages
+// Chatbot wrapper — only shows on authenticated pages
 function AuthenticatedChatbot() {
     const { user } = useAuth()
     const location = useLocation()
@@ -42,165 +43,50 @@ function AuthenticatedChatbot() {
 const VocabularyPractice = lazy(() => import("./pages/practice/VocabularyPractice"));
 const ListeningPractice = lazy(() => import("./pages/practice/ListeningPractice"));
 const PronunciationPractice = lazy(() => import("./pages/practice/PronunciationPractice"));
+const WritingPractice = lazy(() => import("./pages/practice/WritingPractice"));
 
 function App() {
     return (
-        <AuthProvider>
-            <SettingsProvider>
-                <SoundProvider>
-                    <BrowserRouter future={routerFutureFlags}>
-                    <Suspense fallback={<div className="loading-state">Loading...</div>}>
-                        <Routes>
-                            <Route path="/" element={<Navigate to="/login" replace />} />
-                            <Route path="/login" element={<Login />} />
-                            <Route path="/logout" element={<Logout />} />
-                            <Route path="/onboarding" element={<Onboarding />} />
+        <Sentry.ErrorBoundary fallback={<div style={{ padding: '2rem', textAlign: 'center' }}><h2>Something went wrong</h2><p>The error has been reported. Please refresh the page.</p></div>}>
+            <AuthProvider>
+                <SettingsProvider>
+                    <SoundProvider>
+                        <BrowserRouter future={routerFutureFlags}>
+                            <Suspense fallback={<div className="loading-state">Loading...</div>}>
+                                <Routes>
+                                    <Route path="/" element={<Navigate to="/login" replace />} />
+                                    <Route path="/login" element={<Login />} />
+                                    <Route path="/logout" element={<Logout />} />
+                                    <Route path="/onboarding" element={<Onboarding />} />
 
-                            <Route
-                                path="/dashboard"
-                                element={
-                                    <ProtectedRoute>
-                                        <Dashboard />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route
-                                path="/notifications"
-                                element={
-                                    <ProtectedRoute>
-                                        <Notifications />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route
-                                path="/settings"
-                                element={
-                                    <ProtectedRoute>
-                                        <Settings />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route
-                                path="/lessons"
-                                element={
-                                    <ProtectedRoute>
-                                        <Lessons />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route
-                                path="/practice"
-                                element={
-                                    <ProtectedRoute>
-                                        <Practice />
-                                    </ProtectedRoute>
-                                }
-                            />
+                                    <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+                                    <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+                                    <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+                                    <Route path="/lessons" element={<ProtectedRoute><Lessons /></ProtectedRoute>} />
+                                    <Route path="/practice" element={<ProtectedRoute><Practice /></ProtectedRoute>} />
 
-                            <Route
-                                path="/practice/vocabulary"
-                                element={
-                                    <ProtectedRoute>
-                                        <VocabularyPractice />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route
-                                path="/practice/listening"
-                                element={
-                                    <ProtectedRoute>
-                                        <ListeningPractice />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route
-                                path="/practice/pronunciation"
-                                element={
-                                    <ProtectedRoute>
-                                        <PronunciationPractice />
-                                    </ProtectedRoute>
-                                }
-                            />
+                                    <Route path="/practice/vocabulary" element={<ProtectedRoute><VocabularyPractice /></ProtectedRoute>} />
+                                    <Route path="/practice/listening" element={<ProtectedRoute><ListeningPractice /></ProtectedRoute>} />
+                                    <Route path="/practice/pronunciation" element={<ProtectedRoute><PronunciationPractice /></ProtectedRoute>} />
+                                    <Route path="/practice/writing" element={<ProtectedRoute><WritingPractice /></ProtectedRoute>} />
 
-                            <Route
-                                path="/profile"
-                                element={
-                                    <ProtectedRoute>
-                                        <Profile />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route
-                                path="/assessments"
-                                element={
-                                    <ProtectedRoute>
-                                        <Assessments />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route
-                                path="/assessments/quiz/:quizId"
-                                element={
-                                    <ProtectedRoute>
-                                        <QuizPage />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route
-                                path="/assessments/pronunciation/:testId"
-                                element={
-                                    <ProtectedRoute>
-                                        <PronunciationPage />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route
-                                path="/study-rooms"
-                                element={
-                                    <ProtectedRoute>
-                                        <StudyRooms />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route
-                                path="/study-rooms/:roomId"
-                                element={
-                                    <ProtectedRoute>
-                                        <StudyRoom />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route
-                                path="/analytics"
-                                element={
-                                    <ProtectedRoute>
-                                        <Analytics />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route
-                                path="/leaderboard"
-                                element={
-                                    <ProtectedRoute>
-                                        <LeaderboardPage />
-                                    </ProtectedRoute>
-                                }
-                            />
-                            <Route
-                                path="/ar-explorer"
-                                element={
-                                    <ProtectedRoute>
-                                        <ARExplorerPage />
-                                    </ProtectedRoute>
-                                }
-                            />
-                        </Routes>
-                        <AuthenticatedChatbot />
-                    </Suspense>
-                </BrowserRouter>
-                </SoundProvider>
-            </SettingsProvider>
-        </AuthProvider>
+                                    <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+                                    <Route path="/assessments" element={<ProtectedRoute><Assessments /></ProtectedRoute>} />
+                                    <Route path="/assessments/quiz/:quizId" element={<ProtectedRoute><QuizPage /></ProtectedRoute>} />
+                                    <Route path="/assessments/pronunciation/:testId" element={<ProtectedRoute><PronunciationPage /></ProtectedRoute>} />
+                                    <Route path="/study-rooms" element={<ProtectedRoute><StudyRooms /></ProtectedRoute>} />
+                                    <Route path="/study-rooms/:roomId" element={<ProtectedRoute><StudyRoom /></ProtectedRoute>} />
+                                    <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+                                    <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
+                                    <Route path="/ar-explorer" element={<ProtectedRoute><ARExplorerPage /></ProtectedRoute>} />
+                                </Routes>
+                                <AuthenticatedChatbot />
+                            </Suspense>
+                        </BrowserRouter>
+                    </SoundProvider>
+                </SettingsProvider>
+            </AuthProvider>
+        </Sentry.ErrorBoundary>
     )
 }
 

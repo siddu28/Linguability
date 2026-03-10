@@ -12,7 +12,7 @@ router.get('/languages', (req, res) => {
     res.json(languages)
 })
 
-// Get words for a specific language and lesson
+// Get words for a specific language and lesson (static data)
 router.get('/:languageId/:lessonType', (req, res) => {
     const { languageId, lessonType } = req.params
 
