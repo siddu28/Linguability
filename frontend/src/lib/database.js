@@ -462,7 +462,6 @@ export async function getAllPracticeProgress(userId) {
     return data
 }
 
-<<<<<<< HEAD
 // ============ XP & LEADERBOARD ============
 
 // Get user's total XP
@@ -582,7 +581,8 @@ export async function getUserRank(userId) {
     const leaderboard = await getLeaderboard(100)
     const index = leaderboard.findIndex(u => u.id === userId)
     return index >= 0 ? index + 1 : null
-=======
+}
+
 // ============ WRITING RESULTS ============
 
 export async function saveWritingResult(userId, result) {
@@ -691,5 +691,4 @@ export async function getLearnedWords(userId, language) {
         return []
     }
     return data.map(row => row.word)
->>>>>>> origin/satvic4
 }

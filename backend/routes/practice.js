@@ -95,7 +95,17 @@ router.get('/:languageId/:type', async (req, res) => {
     const { languageId, type } = req.params
     const knownWords = req.query.knownWords ? req.query.knownWords.split(',') : []
 
-    // Try dynamic generation first if GROQ_API_KEY is configured
+    // Skip LLM for writing practice - use static prompts from /api/evaluate/prompts/:lang instead
+    // Writing prompts are handled by the evaluate router with instant static data
+    if (type === 'writing') {
+        const lang = practiceData[languageId]
+        if (!lang || !lang[type]) {
+            return res.status(404).json({ error: "Use /api/evaluate/prompts/:lang for writing prompts" })
+        }
+        return res.json(lang[type])
+    }
+
+    // Try dynamic generation for other types if GROQ_API_KEY is configured
     if (process.env.GROQ_API_KEY) {
         try {
             const generated = await generatePracticeContent(languageId, type, knownWords);

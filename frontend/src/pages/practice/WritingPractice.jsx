@@ -81,55 +81,26 @@ function WritingPractice() {
 
         async function loadData() {
             try {
-                let data = null;
-
-                // Try dynamic RAG-generated writing prompts first
-                if (user?.id) {
-                    try {
-                        const known = await getLearnedWords(user.id, lang);
-                        const knownParam = known.length > 0 ? `?knownWords=${encodeURIComponent(known.join(','))}` : '';
-                        const ragRes = await fetch(
-                            `${import.meta.env.VITE_BACKEND_URL}/api/practice/${lang}/writing${knownParam}`
-                        );
-                        if (ragRes.ok) {
-                            const ragData = await ragRes.json();
-                            if (Array.isArray(ragData) && ragData.length > 0) {
-                                // Transform to prompt format expected by WritingPractice
-                                data = ragData.map(item => ({
-                                    id: item.id,
-                                    prompt: item.prompt,
-                                    hint: item.hint || item.expectedText,
-                                    category: item.category || 'general'
-                                }));
-                            }
-                        }
-                    } catch (_) { /* fall through to static */ }
-                }
-
-                // Fallback to static prompts
-                if (!data) {
-                    const res = await fetch(
-                        `${import.meta.env.VITE_BACKEND_URL}/api/evaluate/prompts/${lang}`
-                    );
-                    data = await res.json();
-                }
-
+                // Load static prompts (fast, instant)
+                const staticRes = await fetch(
+                    `${import.meta.env.VITE_BACKEND_URL}/api/evaluate/prompts/${lang}`
+                );
+                const staticData = await staticRes.json();
+                
                 if (cancelled) return;
-
-                if (Array.isArray(data)) {
-                    setPrompts(data);
-
+                
+                if (Array.isArray(staticData) && staticData.length > 0) {
+                    setPrompts(staticData);
+                    
                     // Restore saved progress
                     if (user?.id) {
                         const saved = await getPracticeProgress(user.id, lang, "writing");
                         if (!cancelled && saved) {
-                            const restoredIndex = Math.min(saved.current_index, data.length - 1);
+                            const restoredIndex = Math.min(saved.current_index, staticData.length - 1);
                             setIndex(restoredIndex);
                             setCompletedCount(saved.completed_count || 0);
                         }
                     }
-                } else {
-                    setPrompts([]);
                 }
             } catch (err) {
                 console.error("Error fetching writing prompts:", err);
