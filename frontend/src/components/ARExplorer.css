@@ -1,0 +1,710 @@
+/* AR Explorer - Modern & Stunning UI */
+.ar-explorer-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  color: white;
+}
+
+/* Top Navigation Bar */
+.ar-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.ar-nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  color: white;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.ar-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.ar-home-btn {
+  padding: 0.6rem;
+}
+
+.ar-title-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.ar-title-section h1 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+  background: linear-gradient(135deg, #00d9ff, #00ff88);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.ar-title-section svg {
+  color: #00d9ff;
+}
+
+/* Main Container */
+.ar-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+/* Language Pills */
+.ar-language-pills {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.ar-lang-label {
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  margin-right: 0.5rem;
+}
+
+.ar-lang-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.25rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  border-radius: 50px;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.ar-lang-pill:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.ar-lang-pill.active {
+  background: linear-gradient(135deg, #00d9ff, #00ff88);
+  border-color: transparent;
+  color: #1a1a2e;
+  font-weight: 600;
+  box-shadow: 0 4px 20px rgba(0, 217, 255, 0.3);
+}
+
+.ar-lang-flag {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+/* Main Layout */
+.ar-main {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .ar-main {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Camera Section */
+.ar-camera-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ar-camera-wrapper {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 24px;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.ar-camera-container {
+  position: relative;
+  aspect-ratio: 4/3;
+  background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 100%);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ar-camera-container.active {
+  box-shadow: 0 0 0 3px rgba(0, 217, 255, 0.3);
+}
+
+.ar-canvas {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+.ar-camera-placeholder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+}
+
+.ar-placeholder-icon {
+  width: 100px;
+  height: 100px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+}
+
+.ar-camera-placeholder h3 {
+  font-size: 1.25rem;
+  margin: 0 0 0.5rem;
+  color: white;
+}
+
+.ar-camera-placeholder p {
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+}
+
+/* Camera Controls */
+.ar-camera-controls {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.ar-control-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2.5rem;
+  border: none;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.ar-start-btn {
+  background: linear-gradient(135deg, #00d9ff, #00ff88);
+  color: #1a1a2e;
+  box-shadow: 0 4px 20px rgba(0, 217, 255, 0.4);
+}
+
+.ar-start-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(0, 217, 255, 0.5);
+}
+
+.ar-stop-btn {
+  background: linear-gradient(135deg, #ff6b6b, #ff4757);
+  color: white;
+  box-shadow: 0 4px 20px rgba(255, 107, 107, 0.4);
+}
+
+.ar-stop-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(255, 107, 107, 0.5);
+}
+
+/* Instructions Banner */
+.ar-instructions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, rgba(0, 217, 255, 0.15), rgba(0, 255, 136, 0.15));
+  border-radius: 12px;
+  color: #00d9ff;
+  font-size: 0.9rem;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Results Panel */
+.ar-results-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.ar-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.ar-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.25rem;
+  background: rgba(255, 255, 255, 0.03);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.ar-card-icon {
+  font-size: 1.3rem;
+}
+
+.ar-card-header h3 {
+  flex: 1;
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.ar-badge {
+  background: linear-gradient(135deg, #00d9ff, #00ff88);
+  color: #1a1a2e;
+  padding: 0.25rem 0.75rem;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.ar-card-content {
+  padding: 1rem 1.25rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.ar-card-content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.ar-card-content::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.ar-card-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+/* Empty State */
+.ar-empty-state {
+  text-align: center;
+  padding: 2rem 1rem;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* Object List */
+.ar-object-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.ar-object-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 14px;
+  padding: 1rem;
+  border-left: 4px solid #00d9ff;
+  transition: all 0.2s ease;
+}
+
+.ar-object-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.ar-object-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.ar-object-words {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ar-word-english {
+  font-weight: 600;
+  text-transform: capitalize;
+  font-size: 1.05rem;
+}
+
+.ar-word-translation {
+  color: #00ff88;
+  font-size: 1rem;
+}
+
+.ar-confidence-badge {
+  background: rgba(0, 217, 255, 0.2);
+  color: #00d9ff;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Object Actions */
+.ar-object-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ar-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  color: white;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ar-action-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.ar-action-primary {
+  background: rgba(0, 217, 255, 0.2);
+  border-color: rgba(0, 217, 255, 0.3);
+}
+
+.ar-action-primary:hover {
+  background: rgba(0, 217, 255, 0.3);
+}
+
+.ar-action-save {
+  background: rgba(0, 255, 136, 0.2);
+  border-color: rgba(0, 255, 136, 0.3);
+  color: #00ff88;
+}
+
+.ar-action-save:hover {
+  background: rgba(0, 255, 136, 0.3);
+}
+
+/* Vocabulary List */
+.ar-vocab-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.ar-vocab-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 255, 136, 0.1);
+  border-radius: 10px;
+  border: 1px solid rgba(0, 255, 136, 0.2);
+}
+
+.ar-vocab-words {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.ar-vocab-words strong {
+  text-transform: capitalize;
+  font-size: 0.95rem;
+}
+
+.ar-vocab-words span {
+  color: #00ff88;
+  font-size: 0.85rem;
+}
+
+.ar-remove-btn {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 107, 107, 0.2);
+  color: #ff6b6b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.ar-remove-btn:hover {
+  background: #ff6b6b;
+  color: white;
+}
+
+/* Loading State */
+.ar-explorer-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  gap: 1.5rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.ar-loading-animation {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.ar-spinner {
+  width: 80px;
+  height: 80px;
+  color: #00d9ff;
+  animation: spin 1.5s linear infinite;
+}
+
+.ar-sparkle {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 30px;
+  height: 30px;
+  color: #00ff88;
+  animation: sparkle 1.5s ease-in-out infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes sparkle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.ar-explorer-loading h2 {
+  font-size: 1.5rem;
+  margin: 0;
+  background: linear-gradient(135deg, #00d9ff, #00ff88);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.ar-explorer-loading p {
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0;
+}
+
+.ar-loading-bar {
+  width: 200px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.ar-loading-progress {
+  height: 100%;
+  background: linear-gradient(135deg, #00d9ff, #00ff88);
+  border-radius: 2px;
+  animation: loading 2s ease-in-out infinite;
+}
+
+@keyframes loading {
+  0% { width: 0%; }
+  50% { width: 80%; }
+  100% { width: 100%; }
+}
+
+/* Error State */
+.ar-explorer-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  gap: 1rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.ar-explorer-error svg {
+  color: #ff6b6b;
+  margin-bottom: 0.5rem;
+}
+
+.ar-explorer-error h2 {
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.ar-explorer-error p {
+  color: rgba(255, 255, 255, 0.6);
+  max-width: 400px;
+}
+
+.ar-error-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.ar-back-btn,
+.ar-retry-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ar-back-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.ar-back-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.ar-retry-btn {
+  background: linear-gradient(135deg, #00d9ff, #00ff88);
+  color: #1a1a2e;
+}
+
+.ar-retry-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 217, 255, 0.4);
+}
+
+/* Toast Notification */
+.ar-toast {
+  position: fixed;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, rgba(0, 217, 255, 0.9), rgba(0, 255, 136, 0.9));
+  border-radius: 50px;
+  color: #1a1a2e;
+  font-weight: 600;
+  box-shadow: 0 4px 30px rgba(0, 217, 255, 0.4);
+  animation: toastSlide 0.3s ease;
+  z-index: 1000;
+}
+
+@keyframes toastSlide {
+  from { 
+    opacity: 0; 
+    transform: translateX(-50%) translateY(20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateX(-50%) translateY(0); 
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .ar-topbar {
+    padding: 0.75rem 1rem;
+  }
+  
+  .ar-title-section h1 {
+    font-size: 1.1rem;
+  }
+  
+  .ar-nav-btn span {
+    display: none;
+  }
+  
+  .ar-container {
+    padding: 1rem;
+  }
+  
+  .ar-language-pills {
+    gap: 0.5rem;
+  }
+  
+  .ar-lang-pill {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+  
+  .ar-control-btn {
+    padding: 0.85rem 2rem;
+    font-size: 1rem;
+  }
+  
+  .ar-card-content {
+    max-height: 250px;
+  }
+}

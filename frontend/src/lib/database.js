@@ -17,7 +17,7 @@ export async function getProfile(userId) {
 }
 
 export async function updateProfile(userId, updates) {
-    let payload = { ...updates, updated_at: new Date().toISOString() }
+    let payload = { id: userId, ...updates, updated_at: new Date().toISOString() }
 
     // Remove columns already known to be missing
     for (const col of _missingProfileCols) delete payload[col]
@@ -26,8 +26,7 @@ export async function updateProfile(userId, updates) {
     for (let attempt = 0; attempt < 5; attempt++) {
         const { data, error } = await supabase
             .from('profiles')
-            .update(payload)
-            .eq('id', userId)
+            .upsert(payload)
             .select()
             .single()
 
@@ -461,4 +460,125 @@ export async function getAllPracticeProgress(userId) {
         return []
     }
     return data
+}
+
+// ============ XP & LEADERBOARD ============
+
+// Get user's total XP
+export async function getUserXP(userId) {
+    const { data, error } = await supabase
+        .from('profiles')
+        .select('total_xp')
+        .eq('id', userId)
+        .single()
+
+    if (error) {
+        console.error('Error fetching user XP:', error)
+        return 0
+    }
+    return data?.total_xp || 0
+}
+
+// Add XP to user (calculates based on achievements and progress if column doesn't exist)
+export async function addUserXP(userId, amount, reason) {
+    try {
+        // Try to update total_xp directly
+        const { data, error } = await supabase
+            .from('profiles')
+            .update({ 
+                total_xp: supabase.raw(`COALESCE(total_xp, 0) + ${amount}`),
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', userId)
+            .select('total_xp')
+            .single()
+
+        if (error) {
+            // If column doesn't exist, silently fail (XP will be calculated client-side)
+            if (error.message?.includes('total_xp')) {
+                console.warn('total_xp column not found - run database-xp-leaderboard.sql')
+                return null
+            }
+            console.error('Error adding XP:', error)
+            return null
+        }
+        
+        return data?.total_xp
+    } catch (err) {
+        console.error('Error adding XP:', err)
+        return null
+    }
+}
+
+// Get leaderboard
+export async function getLeaderboard(limit = 50) {
+    try {
+        const { data, error } = await supabase
+            .from('profiles')
+            .select('id, full_name, avatar_id, total_xp')
+            .order('total_xp', { ascending: false, nullsFirst: false })
+            .limit(limit)
+
+        if (error) {
+            // If total_xp column doesn't exist, calculate from progress
+            if (error.message?.includes('total_xp')) {
+                console.warn('total_xp column not found - falling back to calculation')
+                return await calculateLeaderboardFromProgress(limit)
+            }
+            console.error('Error fetching leaderboard:', error)
+            return []
+        }
+        
+        return data || []
+    } catch (err) {
+        console.error('Error fetching leaderboard:', err)
+        return []
+    }
+}
+
+// Calculate leaderboard from lesson_progress if total_xp doesn't exist
+async function calculateLeaderboardFromProgress(limit = 50) {
+    try {
+        // Get all profiles
+        const { data: profiles } = await supabase
+            .from('profiles')
+            .select('id, full_name, avatar_id')
+            .limit(100)
+
+        // Get all lesson progress
+        const { data: progress } = await supabase
+            .from('lesson_progress')
+            .select('user_id, status')
+
+        if (!profiles) return []
+
+        // Calculate XP per user
+        const userXP = {}
+        progress?.forEach(p => {
+            if (!userXP[p.user_id]) userXP[p.user_id] = 0
+            if (p.status === 'completed') userXP[p.user_id] += 25
+            else if (p.status === 'in_progress') userXP[p.user_id] += 5
+        })
+
+        // Merge and sort
+        const leaderboard = profiles
+            .map(p => ({
+                ...p,
+                total_xp: userXP[p.id] || 0
+            }))
+            .sort((a, b) => b.total_xp - a.total_xp)
+            .slice(0, limit)
+
+        return leaderboard
+    } catch (err) {
+        console.error('Error calculating leaderboard:', err)
+        return []
+    }
+}
+
+// Get user's rank on leaderboard
+export async function getUserRank(userId) {
+    const leaderboard = await getLeaderboard(100)
+    const index = leaderboard.findIndex(u => u.id === userId)
+    return index >= 0 ? index + 1 : null
 }

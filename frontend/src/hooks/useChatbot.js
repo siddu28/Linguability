@@ -11,7 +11,7 @@ export function useChatbot() {
     const [messages, setMessages] = useState([
         {
             id: 'welcome',
-            text: "Hello! 👋 I'm LinguaBot, your learning assistant. I can help you navigate the platform, answer questions, and support your learning journey. What would you like to do?",
+            text: "Hello! 👋 I'm **LinguaBot**, your AI assistant for Linguability!\n\nI know everything about this platform and can help you:\n\n🧭 **Navigate** — \"Take me to lessons\"\n📖 **Learn** — Hindi, Tamil, Telugu, English\n🎤 **Practice** — Pronunciation, vocabulary, listening\n📋 **Quiz** — Test your knowledge\n👥 **Connect** — Join study rooms\n♿ **Accessibility** — Dyslexia fonts, ADHD settings\n\nJust ask me anything! What would you like to do today? 😊",
             sender: 'bot',
             timestamp: new Date()
         }
@@ -136,7 +136,7 @@ export function useChatbot() {
     const clearMessages = useCallback(() => {
         setMessages([{
             id: 'welcome',
-            text: "Hello! 👋 I'm LinguaBot. How can I help you?",
+            text: "Hello! 👋 I'm **LinguaBot**! How can I help you navigate Linguability today?\n\n🧭 Navigation • 📖 Lessons • 🎤 Practice • 📋 Quiz • 👥 Study Rooms • ♿ Accessibility",
             sender: 'bot',
             timestamp: new Date()
         }])

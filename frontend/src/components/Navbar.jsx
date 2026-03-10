@@ -8,19 +8,24 @@ import {
     Users,
     BarChart3,
     Volume2,
+    VolumeX,
     Moon,
     Sun,
     Bell,
     User,
     Settings,
-    LogOut
+    LogOut,
+    Camera,
+    Trophy
 } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
+import { useSound } from '../context/SoundContext'
 import './Navbar.css'
 
 function Navbar() {
     const navigate = useNavigate()
     const { user } = useAuth()
+    const { soundEnabled, toggleSound, playSound } = useSound()
     const [showProfileMenu, setShowProfileMenu] = useState(false)
     const [isDarkMode, setIsDarkMode] = useState(() => {
         const saved = localStorage.getItem('theme')
@@ -34,7 +39,9 @@ function Navbar() {
         { to: '/practice', icon: Mic, label: 'Practice' },
         { to: '/assessments', icon: ClipboardCheck, label: 'Assessments' },
         { to: '/analytics', icon: BarChart3, label: 'Analytics' },
+        { to: '/leaderboard', icon: Trophy, label: 'Leaderboard' },
         { to: '/study-rooms', icon: Users, label: 'Study Rooms' },
+        { to: '/ar-explorer', icon: Camera, label: 'AR Explorer' },
     ]
 
     // Close menu when clicking outside
@@ -102,8 +109,16 @@ function Navbar() {
             </div>
 
             <div className="navbar-actions">
-                <button className="navbar-icon-btn" aria-label="Toggle sound">
-                    <Volume2 size={20} />
+                <button 
+                    className={`navbar-icon-btn ${soundEnabled ? 'active' : ''}`} 
+                    aria-label="Toggle sound"
+                    onClick={() => {
+                        toggleSound()
+                        playSound('click')
+                    }}
+                    title={soundEnabled ? 'Sound On' : 'Sound Off'}
+                >
+                    {soundEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
                 </button>
                 <button
                     className="navbar-icon-btn"

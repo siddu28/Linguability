@@ -22,8 +22,11 @@ import PronunciationPage from './pages/PronunciationPage'
 import StudyRooms from './pages/StudyRooms'
 import StudyRoom from './pages/StudyRoom'
 import Analytics from './pages/Analytics'
+import ARExplorerPage from './pages/ARExplorerPage'
+import LeaderboardPage from './pages/LeaderboardPage'
 import { AuthProvider, useAuth } from './context/AuthContext'
 import { SettingsProvider } from './context/SettingsContext'
+import { SoundProvider } from './context/SoundContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import Chatbot from './components/Chatbot'
 
@@ -44,7 +47,8 @@ function App() {
     return (
         <AuthProvider>
             <SettingsProvider>
-                <BrowserRouter future={routerFutureFlags}>
+                <SoundProvider>
+                    <BrowserRouter future={routerFutureFlags}>
                     <Suspense fallback={<div className="loading-state">Loading...</div>}>
                         <Routes>
                             <Route path="/" element={<Navigate to="/login" replace />} />
@@ -174,10 +178,27 @@ function App() {
                                     </ProtectedRoute>
                                 }
                             />
+                            <Route
+                                path="/leaderboard"
+                                element={
+                                    <ProtectedRoute>
+                                        <LeaderboardPage />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/ar-explorer"
+                                element={
+                                    <ProtectedRoute>
+                                        <ARExplorerPage />
+                                    </ProtectedRoute>
+                                }
+                            />
                         </Routes>
                         <AuthenticatedChatbot />
                     </Suspense>
                 </BrowserRouter>
+                </SoundProvider>
             </SettingsProvider>
         </AuthProvider>
     )

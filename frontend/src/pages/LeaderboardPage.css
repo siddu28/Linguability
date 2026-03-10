@@ -1,0 +1,33 @@
+.leaderboard-page {
+    min-height: 100vh;
+    background-color: var(--color-background);
+}
+
+.leaderboard-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: var(--spacing-xl);
+}
+
+.leaderboard-header {
+    margin-bottom: var(--spacing-xl);
+}
+
+.leaderboard-header h1 {
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-bold);
+    margin-bottom: var(--spacing-xs);
+}
+
+.leaderboard-header p {
+    color: var(--color-text-muted);
+}
+
+.leaderboard-main-card {
+    padding: 0 !important;
+    overflow: hidden;
+}
+
+.leaderboard-main-card .leaderboard {
+    border-radius: 0;
+}

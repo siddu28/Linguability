@@ -47,11 +47,16 @@ const RefreshIcon = () => (
 
 // ── Quick Action Chips ──────────────────────────────────────────────────
 const QUICK_ACTIONS = [
-    { label: '🔢 Math', message: 'Help me with math' },
-    { label: '🌍 Translate', message: 'Translate hello to all languages' },
-    { label: '📋 Quiz', message: 'Give me a vocabulary quiz' },
-    { label: '📚 Lessons', message: 'Take me to my lessons' },
-    { label: '🎯 Practice', message: 'Where can I practice?' },
+    { label: '🏠 Dashboard', message: 'Take me to the dashboard' },
+    { label: '📖 Lessons', message: 'Show me the lessons' },
+    { label: '🎤 Pronunciation', message: 'I want to practice pronunciation' },
+    { label: '📚 Vocabulary', message: 'Practice vocabulary' },
+    { label: '📋 Quiz', message: 'I want to take a quiz' },
+    { label: '👥 Study Room', message: 'Join a study room' },
+    { label: '📈 Progress', message: 'Show my analytics' },
+    { label: '⚙️ Settings', message: 'Open settings' },
+    { label: '🌍 Translate', message: 'Translate hello to Hindi, Tamil, Telugu' },
+    { label: '♿ Accessibility', message: 'Help with accessibility options' },
     { label: '❓ Help', message: 'What can you help me with?' },
 ]
 
@@ -205,7 +210,7 @@ function Chatbot() {
                             <div className="chatbot-avatar">🤖</div>
                             <div className="chatbot-header-info">
                                 <h3>LinguaBot</h3>
-                                <span>Your learning assistant</span>
+                                <span>AI Assistant • Knows Everything!</span>
                             </div>
                         </div>
                         <div className="chatbot-header-actions">

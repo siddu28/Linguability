@@ -373,6 +373,15 @@
     margin-top: var(--spacing-md);
 }
 
+/* Leaderboard Card */
+.leaderboard-card {
+    margin-top: var(--spacing-xl);
+}
+
+.leaderboard-card .leaderboard {
+    padding: 0;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
     .stats-grid {

@@ -224,22 +224,34 @@
 
 /* Navigation links inside messages */
 .chatbot-nav-link {
-    display: inline;
-    background: rgba(108, 92, 231, 0.2);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: linear-gradient(135deg, rgba(108, 92, 231, 0.25), rgba(162, 155, 254, 0.2));
     color: #a29bfe;
-    border: none;
-    padding: 2px 8px;
-    border-radius: 8px;
+    border: 1px solid rgba(108, 92, 231, 0.3);
+    padding: 4px 10px;
+    border-radius: 12px;
     cursor: pointer;
-    font-size: inherit;
+    font-size: 12px;
     font-family: inherit;
-    transition: all 0.2s;
+    font-weight: 500;
+    transition: all 0.25s ease;
     text-decoration: none;
+    margin: 2px 0;
+}
+
+.chatbot-nav-link::before {
+    content: '→';
+    font-size: 10px;
 }
 
 .chatbot-nav-link:hover {
-    background: rgba(108, 92, 231, 0.4);
+    background: linear-gradient(135deg, rgba(108, 92, 231, 0.5), rgba(162, 155, 254, 0.4));
     color: #fff;
+    border-color: rgba(108, 92, 231, 0.6);
+    transform: translateX(2px);
+    box-shadow: 0 2px 8px rgba(108, 92, 231, 0.3);
 }
 
 /* Typing Indicator */
@@ -278,15 +290,32 @@
     padding: 10px 16px 6px;
     border-top: 1px solid rgba(255, 255, 255, 0.05);
     flex-shrink: 0;
+    max-height: 90px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(108, 92, 231, 0.3) transparent;
+}
+
+.chatbot-quick-actions::-webkit-scrollbar {
+    width: 4px;
+}
+
+.chatbot-quick-actions::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chatbot-quick-actions::-webkit-scrollbar-thumb {
+    background: rgba(108, 92, 231, 0.3);
+    border-radius: 2px;
 }
 
 .chatbot-quick-btn {
     background: rgba(108, 92, 231, 0.15);
     border: 1px solid rgba(108, 92, 231, 0.25);
     color: #c4b5fd;
-    padding: 5px 12px;
+    padding: 5px 10px;
     border-radius: 20px;
-    font-size: 12px;
+    font-size: 11px;
     cursor: pointer;
     transition: all 0.2s;
     white-space: nowrap;
@@ -296,6 +325,7 @@
     background: rgba(108, 92, 231, 0.3);
     border-color: rgba(108, 92, 231, 0.5);
     color: #fff;
+    transform: translateY(-1px);
 }
 
 /* Input Area */

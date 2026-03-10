@@ -10,6 +10,7 @@ try {
     const apiKey = process.env.GEMINI_API_KEY
     if (apiKey) {
         genAI = new GoogleGenerativeAI(apiKey)
+        // Try multiple models in order of preference — if one is rate-limited, try the next
         geminiModels = [
             genAI.getGenerativeModel({ model: 'gemini-2.0-flash' }),
             genAI.getGenerativeModel({ model: 'gemini-2.0-flash-lite' }),
@@ -192,80 +193,10 @@ setInterval(() => {
     }
 }, 10 * 60 * 1000)
 
-// ─── Smart Rule-based Fallback with Full Platform Knowledge ─────────────────
+// ─── Smart Rule-based Fallback ──────────────────────────────────────────────
+// Used ONLY when ALL Gemini models are unavailable
 function getRuleBasedReply(message) {
     const msg = message.toLowerCase().trim()
-
-    // ── Navigation Detection (Priority) ─────────────────────────────────
-    const navigationRules = [
-        // Dashboard
-        { patterns: ['dashboard', 'home', 'main page', 'my progress', 'streak', 'overview'], 
-          reply: "🏠 Head to your **Dashboard** at [/dashboard]!\n\nYou'll see your streak, progress overview, recommended lessons, and achievements. It's your personal learning hub! 📊" },
-        
-        // Lessons
-        { patterns: ['lesson', 'course', 'learn language', 'start learning', 'begin course', 'language course', 'teach me', 'start course'],
-          reply: "📖 Visit **Lessons** at [/lessons]!\n\nWe have structured courses for English, Hindi, Tamil, and Telugu — from beginner to advanced. Pick a language and start learning! 🚀" },
-        
-        // Practice - General
-        { patterns: ['practice', 'exercise', 'drill', 'train', 'improve skills'],
-          reply: "🎯 **Practice** has 3 modes:\n\n📚 **Vocabulary** [/practice/vocabulary] — Learn words with flashcards\n🎤 **Pronunciation** [/practice/pronunciation] — Record & compare your voice\n👂 **Listening** [/practice/listening] — Comprehension exercises\n\nWhich would you like to try?" },
-        
-        // Vocabulary
-        { patterns: ['vocabulary', 'words', 'flashcard', 'word practice', 'new words', 'learn words'],
-          reply: "📚 Practice **Vocabulary** at [/practice/vocabulary]!\n\nLearn new words with flashcards, see images, and use spaced repetition to remember them! 🧠" },
-        
-        // Pronunciation
-        { patterns: ['pronunciation', 'speaking', 'speak', 'record voice', 'say word', 'pronounce', 'accent', 'speech'],
-          reply: "🎤 Practice **Pronunciation** at [/practice/pronunciation]!\n\nRecord your voice, and our AI will evaluate how accurately you pronounced each word. Great for perfecting accents! 🗣️" },
-        
-        // Listening
-        { patterns: ['listening', 'hear', 'audio', 'comprehension', 'listen'],
-          reply: "👂 Try **Listening Practice** at [/practice/listening]!\n\nListen to native speakers and answer comprehension questions. You can adjust playback speed for accessibility! 🎧" },
-        
-        // Assessments/Quiz
-        { patterns: ['assessment', 'quiz', 'test', 'exam', 'evaluate', 'score', 'check knowledge'],
-          reply: "📋 Take an **Assessment** at [/assessments]!\n\nTest your knowledge with quizzes — multiple choice, fill-in-blank, and more. Track your progress over time! ✅" },
-        
-        // Study Rooms
-        { patterns: ['study room', 'study group', 'video call', 'peer', 'collaborate', 'partner', 'join room', 'group study', 'study together', 'with others'],
-          reply: "👥 Join a **Study Room** at [/study-rooms]!\n\nConnect with other learners via video/audio calls, chat in real-time, and practice language together. Learning is better with friends! 🤝" },
-        
-        // Analytics
-        { patterns: ['analytics', 'stats', 'statistics', 'progress report', 'time spent', 'how much', 'performance', 'how am i doing', 'my stats'],
-          reply: "📈 View your **Analytics** at [/analytics]!\n\nSee detailed stats: time spent learning, skill breakdown, quiz history, streak calendar, and more. Track your improvement! 📊" },
-        
-        // Profile
-        { patterns: ['profile', 'my account', 'edit profile', 'avatar', 'my info', 'about me', 'change name'],
-          reply: "👤 Update your **Profile** at [/profile]!\n\nChange your name, avatar, bio, set learning goals, and manage accessibility preferences. Make it yours! ✨" },
-        
-        // Settings
-        { patterns: ['setting', 'preferences', 'config', 'customize', 'font', 'theme', 'notification setting', 'change setting', 'dark mode', 'light mode'],
-          reply: "⚙️ Open **Settings** at [/settings]!\n\nCustomize fonts (including OpenDyslexic for dyslexia), text size, colors, notifications, and more. Make learning comfortable! 🎨" },
-        
-        // Notifications
-        { patterns: ['notification', 'alert', 'reminder', 'message', "what's new", 'updates'],
-          reply: "🔔 Check **Notifications** at [/notifications]!\n\nSee reminders, achievement unlocks, study room invites, and announcements. Stay in the loop! 📬" },
-        
-        // Accessibility specific
-        { patterns: ['dyslexia', 'adhd', 'disability', 'accessible', 'opendyslexic', 'screen reader', 'accessibility', 'learning disability', 'special needs'],
-          reply: "♿ We've got you covered!\n\nGo to [/settings] to enable:\n\n• **OpenDyslexic font** for dyslexia\n• **Larger text** sizes\n• **Hidden timers** for ADHD\n• **High contrast mode**\n• **Screen reader support**\n\nYour comfort matters! 💜" },
-        
-        // Languages
-        { patterns: ['hindi', 'learn hindi'],
-          reply: "🇮🇳 Learn **Hindi** (हिंदी)!\n\nStart lessons at [/lessons] — we have beginner to advanced courses.\n\nQuick phrase: नमस्ते (Namaste) = Hello!\n\nReady to begin? 📚" },
-        { patterns: ['tamil', 'learn tamil'],
-          reply: "🇮🇳 Learn **Tamil** (தமிழ்)!\n\nStart lessons at [/lessons] — from alphabets to conversations.\n\nQuick phrase: வணக்கம் (Vaṇakkam) = Hello!\n\nLet's go! 📚" },
-        { patterns: ['telugu', 'learn telugu'],
-          reply: "🇮🇳 Learn **Telugu** (తెలుగు)!\n\nStart lessons at [/lessons] — structured courses for all levels.\n\nQuick phrase: నమస్కారం (Namaskāram) = Hello!\n\nExcited for you! 📚" },
-        { patterns: ['english', 'learn english'],
-          reply: "🇺🇸 Learn **English**!\n\nStart lessons at [/lessons] — grammar, vocabulary, and conversation practice.\n\nWe'll help you master it! 📚" },
-    ]
-
-    for (const rule of navigationRules) {
-        if (rule.patterns.some(p => msg.includes(p))) {
-            return rule.reply
-        }
-    }
 
     // ── Math evaluation ─────────────────────────────────────────────────
     const mathMatch = msg.match(/(?:what\s+is\s+|calculate\s+|solve\s+|compute\s+|evaluate\s+)?(-?\d+(?:\.\d+)?[\s]*[+\-*/x×÷%^][\s]*-?\d+(?:\.\d+)?(?:[\s]*[+\-*/x×÷%^][\s]*-?\d+(?:\.\d+)?)*)/)
@@ -284,22 +215,13 @@ function getRuleBasedReply(message) {
         'hello': { hindi: 'नमस्ते (namaste)', tamil: 'வணக்கம் (vaṇakkam)', telugu: 'నమస్కారం (namaskāram)' },
         'thank you': { hindi: 'धन्यवाद (dhanyavaad)', tamil: 'நன்றி (naṉṟi)', telugu: 'ధన్యవాదాలు (dhan\'yavādālu)' },
         'good morning': { hindi: 'शुभ प्रभात (shubh prabhaat)', tamil: 'காலை வணக்கம் (kālai vaṇakkam)', telugu: 'శుభోదయం (śubhōdayaṁ)' },
-        'good night': { hindi: 'शुभ रात्रि (shubh raatri)', tamil: 'இனிய இரவு (iṉiya iravu)', telugu: 'శుభ రాత్రి (śubha rātri)' },
         'water': { hindi: 'पानी (paani)', tamil: 'தண்ணீர் (taṇṇīr)', telugu: 'నీరు (nīru)' },
-        'food': { hindi: 'खाना (khana)', tamil: 'உணவு (uṇavu)', telugu: 'ఆహారం (āhāraṁ)' },
         'book': { hindi: 'किताब (kitaab)', tamil: 'புத்தகம் (puttakam)', telugu: 'పుస్తకం (pustakaṁ)' },
         'apple': { hindi: 'सेब (seb)', tamil: 'ஆப்பிள் (āppiḷ)', telugu: 'యాపిల్ (yāpil)' },
         'school': { hindi: 'स्कूल (school)', tamil: 'பள்ளி (paḷḷi)', telugu: 'పాఠశాల (pāṭhaśāla)' },
         'mother': { hindi: 'माँ (maa)', tamil: 'அம்மா (ammā)', telugu: 'అమ్మ (amma)' },
-        'father': { hindi: 'पिता (pita)', tamil: 'அப்பா (appā)', telugu: 'నాన్న (nānna)' },
+        'father': { hindi: 'पिता (pita)', tamil: 'அப்பா (appā)', telugu: 'నாన్న (nānna)' },
         'friend': { hindi: 'दोस्त (dost)', tamil: 'நண்பன் (naṇpaṉ)', telugu: 'స్నేహితుడు (snēhituḍu)' },
-        'love': { hindi: 'प्यार (pyaar)', tamil: 'அன்பு (aṉpu)', telugu: 'ప్రేమ (prēma)' },
-        'yes': { hindi: 'हाँ (haan)', tamil: 'ஆம் (ām)', telugu: 'అవును (avunu)' },
-        'no': { hindi: 'नहीं (nahi)', tamil: 'இல்லை (illai)', telugu: 'కాదు (kādu)' },
-        'please': { hindi: 'कृपया (kripya)', tamil: 'தயவுசெய்து (tayavuceytu)', telugu: 'దయచేసి (dayacēsi)' },
-        'sorry': { hindi: 'माफ़ कीजिए (maaf kijiye)', tamil: 'மன்னிக்கவும் (maṉṉikkavum)', telugu: 'క్షమించండి (kṣamiñcaṇḍi)' },
-        'how are you': { hindi: 'आप कैसे हैं (aap kaise hain)', tamil: 'நீங்கள் எப்படி இருக்கிறீர்கள் (nīṅkaḷ eppaṭi irukkiṟīrkaḷ)', telugu: 'మీరు ఎలా ఉన్నారు (mīru elā unnāru)' },
-        'goodbye': { hindi: 'अलविदा (alvida)', tamil: 'போய் வருகிறேன் (pōy varukiṟēṉ)', telugu: 'వెళ్ళొస్తాను (veḷḷostānu)' },
     }
 
     const translateMatch = msg.match(/(?:translate|how\s+(?:do\s+you\s+|to\s+)?say|what\s+is\s+.+\s+in)\s+['""']?(\w+(?:\s+\w+)?)['""']?/i)
@@ -311,33 +233,15 @@ function getRuleBasedReply(message) {
         }
     }
 
-    // ── Platform Q&A ────────────────────────────────────────────────────
-    const platformQA = [
-        { patterns: ['what is linguability', 'about this', 'what does this do', 'what platform', 'tell me about'],
-          reply: "🌟 **Linguability** is a language-learning platform designed for everyone, including students with disabilities!\n\n📖 Learn Hindi, Tamil, Telugu, English\n🎯 Practice vocabulary, pronunciation, listening\n👥 Study with peers in video rooms\n♿ Full accessibility support\n\nExplore at [/dashboard]! 🚀" },
-        { patterns: ['how do i start', 'getting started', 'new here', 'beginner', 'where to begin', 'first time'],
-          reply: "🎉 **Welcome!** Here's how to get started:\n\n1️⃣ Visit [/lessons] and pick a language\n2️⃣ Complete your first lesson\n3️⃣ Practice at [/practice]\n4️⃣ Track progress at [/analytics]\n\nI'm here if you need help! 😊" },
-        { patterns: ['who made this', 'creator', 'developer', 'built by', 'created by'],
-          reply: "🛠️ Linguability was built by a team passionate about accessible education! It's designed with love for all learners, especially those with dyslexia, ADHD, and other learning differences. 💜" },
-        { patterns: ['ar', 'camera', 'object detection', 'point camera', 'augmented reality'],
-          reply: "📷 **AR Word Explorer**!\n\nPoint your camera at objects and learn their names in different languages! It uses AI to detect objects and shows translations instantly.\n\nFind it in the Practice section! 🔍" },
-    ]
-
-    for (const qa of platformQA) {
-        if (qa.patterns.some(p => msg.includes(p))) {
-            return qa.reply
-        }
-    }
-
     // ── Keyword-based rules ─────────────────────────────────────────────
     const rules = [
-        { keywords: ['hello', 'hi', 'hey', 'hii', 'hola', 'namaste'], reply: "Hello! 👋 I'm **LinguaBot**, your AI learning assistant!\n\nI know everything about Linguability and can help you:\n\n🧭 Navigate the platform\n🌍 Learn languages\n🔢 Solve math problems\n📚 Answer questions\n\nWhat would you like to do? 😊" },
-        { keywords: ['quiz me', 'test me', 'quick quiz', 'give me a quiz'], reply: "📋 **Quick Quiz!**\n\n1. What is 'water' in Hindi?\n2. What is 12 × 8?\n3. What is 'thank you' in Tamil?\n4. Spell 'necessary' correctly!\n\nType your answers or go to [/assessments] for full quizzes! 🎯" },
-        { keywords: ['help', 'what can you', 'how can you help', 'assist', 'support'], reply: "I can help with **everything**! 🚀\n\n🧭 **Navigate** — \"Take me to lessons\"\n🌍 **Languages** — \"Translate hello to Hindi\"\n🔢 **Math** — \"What is 25 × 4?\"\n📖 **Learn** — \"Teach me Tamil basics\"\n📋 **Quiz** — \"Quiz me!\"\n♿ **Accessibility** — \"Help with dyslexia settings\"\n\nJust ask! 😊" },
-        { keywords: ['thank', 'thanks', 'awesome', 'great', 'perfect', 'wonderful'], reply: "You're welcome! 🌟 Anything else I can help with? I'm always here for you! 💜" },
-        { keywords: ['bye', 'goodbye', 'see you', 'later', 'good night'], reply: "Goodbye! Keep learning and come back soon! 🎉📚" },
-        { keywords: ['good', 'nice', 'cool', 'amazing', 'love it'], reply: "Thank you! 😊 Let me know if you need anything else! I'm here to help! 💪" },
-        { keywords: ['who are you', 'your name', 'what are you'], reply: "I'm **LinguaBot** 🤖 — your AI assistant on Linguability!\n\nI can help you learn languages, navigate the platform, solve problems, and answer any questions. Think of me as your personal tutor! 🎓" },
+        { keywords: ['hello', 'hi', 'hey', 'hii'], reply: "Hello! 👋 I'm LinguaBot, your AI learning assistant. I can help with math, languages, quizzes, science, grammar, and much more — just ask me anything! 😊" },
+        { keywords: ['quiz', 'test me'], reply: "📋 **Quick Quiz!**\n\n1. What is 'water' in Hindi?\n2. What is 12 × 8?\n3. What is the capital of France?\n4. 'வணக்கம்' means ___ in English?\n\nType your answers! 🎯" },
+        { keywords: ['lesson', 'learn', 'study', 'teach'], reply: "Browse lessons at [/lessons]! Or ask me to teach you anything right here — math, science, languages, grammar, history — I'm your AI tutor! 📚" },
+        { keywords: ['practice', 'exercise'], reply: "Head to [/practice] for structured exercises! Or ask me for a quiz, translation, or explanation right here! 🎯" },
+        { keywords: ['help', 'what can you'], reply: "I can help with **everything**! 🚀\n\n🔢 Math & Science\n🌍 Translations & Languages\n📖 Grammar & Writing\n📋 Quizzes & Exercises\n💡 General Knowledge\n🧭 Platform Navigation\n\nJust ask anything! 😊" },
+        { keywords: ['thank', 'thanks', 'awesome'], reply: "You're welcome! 🌟 Ask me anything else — I'm always here!" },
+        { keywords: ['bye', 'goodbye'], reply: "Goodbye! Happy learning! 🎉" },
     ]
 
     for (const rule of rules) {
@@ -346,8 +250,7 @@ function getRuleBasedReply(message) {
         }
     }
 
-    // ── Default response with platform links ────────────────────────────
-    return "I'm **LinguaBot**, your AI assistant for everything on Linguability! 😊\n\n**Try asking me:**\n🧭 \"Where can I practice pronunciation?\"\n🌍 \"Translate 'thank you' to all languages\"\n🔢 \"What is 156 ÷ 12?\"\n📖 \"How do I start learning Hindi?\"\n♿ \"Help with accessibility settings\"\n\n**Quick links:**\n• [/lessons] — Start learning\n• [/practice] — Practice skills\n• [/study-rooms] — Study with others\n• [/settings] — Customize experience\n\nJust ask anything! 🚀"
+    return "I'm your AI learning assistant and I can help with **anything**! 😊\n\nTry asking me:\n🔢 \"What is 2+3\" or \"Solve 5x + 3 = 18\"\n🌍 \"Translate hello to Hindi\"\n📖 \"Explain photosynthesis\" or \"What is gravity?\"\n✍️ \"Check my grammar\" or \"Help me write an essay\"\n📋 \"Give me a quiz\"\n\nJust ask! 🚀"
 }
 
 // ─── Call Gemini with retry across models ────────────────────────────────────
@@ -389,7 +292,7 @@ router.post('/', async (req, res) => {
                 const session = conversationHistory.get(sid)
                 session.lastActive = Date.now()
 
-                // Build message contents with system prompt
+                // Build message contents with compact system prompt
                 const contents = [
                     { role: 'user', parts: [{ text: SYSTEM_PROMPT + '\n\nRespond to the student\'s message.' }] },
                     { role: 'model', parts: [{ text: "Hello! 👋 I'm LinguaBot — your AI tutor. I can help with math, languages, science, writing, and anything else. What would you like to learn? 😊" }] },

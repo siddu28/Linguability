@@ -10,6 +10,7 @@ import {
     ChevronRight,
     TrendingUp,
     Volume2,
+    VolumeX,
     Mic,
     Hash,
     MessageSquare,
@@ -21,8 +22,10 @@ import Card from '../components/Card'
 import Button from '../components/Button'
 import StreakCalendar from '../components/StreakCalendar'
 import Achievements from '../components/Achievements'
+import Leaderboard from '../components/Leaderboard'
 import ProgressRing from '../components/ProgressRing'
 import { useAuth } from '../context/AuthContext'
+import { useSound } from '../context/SoundContext'
 import { getLessonProgress, getProfile } from '../lib/database'
 import { useRecommendations } from '../hooks/useRecommendations'
 import './Dashboard.css'
@@ -42,6 +45,7 @@ const ICON_MAP = {
 function Dashboard() {
     const { user } = useAuth()
     const navigate = useNavigate()
+    const { readPageAloud, isSpeaking, stopSpeaking } = useSound()
     const [loading, setLoading] = useState(true)
     const [stats, setStats] = useState({
         streak: 0,
@@ -276,8 +280,12 @@ function Dashboard() {
                         </h1>
                         <p className="dashboard-subtitle">Continue your learning journey today</p>
                     </div>
-                    <Button variant="secondary" icon={Volume2}>
-                        Read Aloud
+                    <Button 
+                        variant={isSpeaking ? "primary" : "secondary"} 
+                        icon={isSpeaking ? VolumeX : Volume2}
+                        onClick={isSpeaking ? stopSpeaking : readPageAloud}
+                    >
+                        {isSpeaking ? 'Stop Reading' : 'Read Aloud'}
                     </Button>
                 </div>
 
@@ -449,6 +457,11 @@ function Dashboard() {
                         <h2 className="section-title">Achievements</h2>
                     </div>
                     <Achievements stats={stats} />
+                </Card>
+
+                {/* Leaderboard */}
+                <Card className="leaderboard-card">
+                    <Leaderboard compact={true} />
                 </Card>
             </main>
         </div>
