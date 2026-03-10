@@ -1,5 +1,5 @@
 import { Suspense, lazy } from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 
 // Future flags for React Router v7 compatibility
 const routerFutureFlags = {
@@ -22,9 +22,19 @@ import PronunciationPage from './pages/PronunciationPage'
 import StudyRooms from './pages/StudyRooms'
 import StudyRoom from './pages/StudyRoom'
 import Analytics from './pages/Analytics'
-import { AuthProvider } from './context/AuthContext'
+import { AuthProvider, useAuth } from './context/AuthContext'
 import { SettingsProvider } from './context/SettingsContext'
 import ProtectedRoute from './components/ProtectedRoute'
+import Chatbot from './components/Chatbot'
+
+// Chatbot wrapper — only shows on authenticated pages
+function AuthenticatedChatbot() {
+    const { user } = useAuth()
+    const location = useLocation()
+    const hiddenPaths = ['/login', '/logout', '/onboarding', '/']
+    if (!user || hiddenPaths.includes(location.pathname)) return null
+    return <Chatbot />
+}
 
 const VocabularyPractice = lazy(() => import("./pages/practice/VocabularyPractice"));
 const ListeningPractice = lazy(() => import("./pages/practice/ListeningPractice"));
@@ -165,6 +175,7 @@ function App() {
                                 }
                             />
                         </Routes>
+                        <AuthenticatedChatbot />
                     </Suspense>
                 </BrowserRouter>
             </SettingsProvider>
