@@ -38,6 +38,10 @@ const lessonsRouter = require('./routes/lessons')
 const practiceRouter = require('./routes/practice');
 const evaluateRouter = require('./routes/evaluate');
 
+// Pre-warm the semantic evaluation model (fire-and-forget)
+const { warmUp: warmUpSemanticModel } = require('./services/semanticEvaluation');
+warmUpSemanticModel();
+
 // Routes
 app.use('/api/practice', practiceRouter);
 app.use('/api/lessons', lessonsRouter)

@@ -668,6 +668,7 @@ function Lessons() {
                     lessonTitle={activeLesson.lesson.title}
                     onClose={handleCloseLessonViewer}
                     onProgress={handleLessonProgress}
+                    userId={user?.id}
                 />
             )}
         </div>

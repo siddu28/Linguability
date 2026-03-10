@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { savePracticeProgress, getPracticeProgress } from "../../lib/database";
+import { savePracticeProgress, getPracticeProgress, getLearnedWords } from "../../lib/database";
 import Navbar from "../../components/Navbar";
 import Button from "../../components/Button";
 import Tesseract from "tesseract.js";
@@ -81,10 +81,38 @@ function WritingPractice() {
 
         async function loadData() {
             try {
-                const res = await fetch(
-                    `${import.meta.env.VITE_BACKEND_URL}/api/evaluate/prompts/${lang}`
-                );
-                const data = await res.json();
+                let data = null;
+
+                // Try dynamic RAG-generated writing prompts first
+                if (user?.id) {
+                    try {
+                        const known = await getLearnedWords(user.id, lang);
+                        const knownParam = known.length > 0 ? `?knownWords=${encodeURIComponent(known.join(','))}` : '';
+                        const ragRes = await fetch(
+                            `${import.meta.env.VITE_BACKEND_URL}/api/practice/${lang}/writing${knownParam}`
+                        );
+                        if (ragRes.ok) {
+                            const ragData = await ragRes.json();
+                            if (Array.isArray(ragData) && ragData.length > 0) {
+                                // Transform to prompt format expected by WritingPractice
+                                data = ragData.map(item => ({
+                                    id: item.id,
+                                    prompt: item.prompt,
+                                    hint: item.hint || item.expectedText,
+                                    category: item.category || 'general'
+                                }));
+                            }
+                        }
+                    } catch (_) { /* fall through to static */ }
+                }
+
+                // Fallback to static prompts
+                if (!data) {
+                    const res = await fetch(
+                        `${import.meta.env.VITE_BACKEND_URL}/api/evaluate/prompts/${lang}`
+                    );
+                    data = await res.json();
+                }
 
                 if (cancelled) return;
 

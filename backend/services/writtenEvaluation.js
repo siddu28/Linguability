@@ -7,6 +7,7 @@
 
 const natural = require('natural');
 const stringSimilarity = require('string-similarity');
+const { semanticSimilarity } = require('./semanticEvaluation');
 
 // Tokeniser that works for both Latin and Devanagari/Indian scripts
 const tokenizer = new natural.WordTokenizer();
@@ -131,7 +132,7 @@ function findBestMatch(userResponse, acceptedTranslations) {
  * @param {object} promptData - The expected data from accepted-translations.json
  * @returns {object} Evaluation result with scores and feedback
  */
-function evaluateWrittenResponse(userResponse, promptData) {
+async function evaluateWrittenResponse(userResponse, promptData) {
     if (!userResponse || !userResponse.trim()) {
         return {
             overallScore: 0,
@@ -199,16 +200,29 @@ function evaluateWrittenResponse(userResponse, promptData) {
     // 5. Keyword matching
     const kwScore = Math.round(keywordMatchScore(userText, keywords) * 100);
 
-    // 6. Compute weighted overall score
+    // 6. Semantic similarity via AI embeddings
+    let semanticScore = 0;
+    try {
+        const semResult = await semanticSimilarity(userText, accepted);
+        semanticScore = semResult.score;
+    } catch (err) {
+        console.error('[WrittenEval] Semantic evaluation fallback:', err.message);
+        // Continue without semantic score — the other metrics still work
+    }
+
+    // 7. Compute weighted overall score (semantic-aware)
+    // Semantic meaning is weighted heaviest so paraphrases score well.
     const overallScore = Math.round(
-        diceScore * 0.30 +      // String similarity (handles typos well)
-        jaccardScore * 0.20 +   // Word-level overlap
-        ngramScore * 0.30 +     // Character-level patterns
+        semanticScore * 0.35 +  // AI semantic meaning (highest weight)
+        diceScore * 0.20 +      // String similarity (handles typos)
+        jaccardScore * 0.10 +   // Word-level overlap
+        ngramScore * 0.15 +     // Character-level patterns
         kwScore * 0.20          // Key concept presence
     );
 
-    // 7. Generate feedback
-    const isCorrect = overallScore >= 80;
+    // 8. Generate feedback
+    // Also consider high semantic similarity alone as correct (meaning matches)
+    const isCorrect = overallScore >= 80 || semanticScore >= 85;
     const details = [];
 
     // Dice feedback
@@ -260,6 +274,7 @@ function evaluateWrittenResponse(userResponse, promptData) {
         feedback: { summary, details },
         scores: {
             exactMatch: 0,
+            semanticSimilarity: semanticScore,
             diceCoefficient: diceScore,
             jaccardSimilarity: jaccardScore,
             ngramSimilarity: ngramScore,

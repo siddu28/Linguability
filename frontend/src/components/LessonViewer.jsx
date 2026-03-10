@@ -14,6 +14,7 @@ import { getWordsForLesson } from '../data/wordsData'
 import { getNumbersForLesson } from '../data/numbersData'
 import { getSentencesForLesson } from '../data/sentencesData'
 import { useSettings } from '../context/SettingsContext'
+import { recordLearnedWords } from '../lib/database'
 import Button from './Button'
 import FocusModeToggle from './FocusModeToggle'
 import './LessonViewer.css'
@@ -23,7 +24,8 @@ function LessonViewer({
     section,
     lessonTitle,
     onClose,
-    onProgress // Callback: (progressPercent, isComplete) => void
+    onProgress, // Callback: (progressPercent, isComplete) => void
+    userId       // User ID for recording learned words
 }) {
     // Get user accessibility settings
     const { getStyleValues, getSpeechRate, settings } = useSettings()
@@ -370,6 +372,18 @@ function LessonViewer({
 
         // Lesson is complete only if all words have been visited
         const isComplete = words.length > 0 && visitedWords.length >= words.length
+
+        // Record learned vocabulary to user_knowledge table (fire-and-forget)
+        if (userId && learnedWords.length > 0) {
+            const learnedWordTexts = learnedWords
+                .map(idx => words[idx]?.word)
+                .filter(Boolean)
+            if (learnedWordTexts.length > 0) {
+                recordLearnedWords(userId, learnedWordTexts, language.id).catch(err =>
+                    console.error('Error recording learned words:', err)
+                )
+            }
+        }
 
         // Report progress to parent
         if (onProgress) {

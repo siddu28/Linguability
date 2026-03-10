@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { savePracticeProgress, getPracticeProgress } from "../../lib/database";
+import { savePracticeProgress, getPracticeProgress, getLearnedWords } from "../../lib/database";
 import Navbar from "../../components/Navbar";
 import Button from "../../components/Button";
 import { Volume2, ChevronRight, CheckCircle, XCircle, ArrowLeft } from "lucide-react";
@@ -44,7 +44,16 @@ function ListeningPractice() {
 
         async function loadData() {
             try {
-                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/practice/${lang}/listening`);
+                // Fetch user's known words for profile-grounded RAG
+                let knownParam = '';
+                if (user?.id) {
+                    try {
+                        const known = await getLearnedWords(user.id, lang);
+                        if (known.length > 0) knownParam = `?knownWords=${encodeURIComponent(known.join(','))}`;
+                    } catch (_) { /* ignore */ }
+                }
+
+                const res = await fetch(`${import.meta.env.VITE_BACKEND_URL}/api/practice/${lang}/listening${knownParam}`);
                 const data = await res.json();
                 if (cancelled) return;
 
