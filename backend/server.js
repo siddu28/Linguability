@@ -32,10 +32,12 @@ const supabase = (supabaseUrl && supabaseKey) ? createClient(supabaseUrl, supaba
 // Import routes
 const lessonsRouter = require('./routes/lessons')
 const practiceRouter = require('./routes/practice');
+const chatbotRouter = require('./routes/chatbot');
 
 // Routes
 app.use('/api/practice', practiceRouter);
 app.use('/api/lessons', lessonsRouter)
+app.use('/api/chatbot', chatbotRouter)
 
 // Health check
 app.get('/api/health', (req, res) => {
