@@ -50,14 +50,17 @@ vi.mock('../lib/database', () => ({
 import Practice from '../pages/Practice'
 import { AuthProvider } from '../context/AuthContext'
 import { SettingsProvider } from '../context/SettingsContext'
+import { SoundProvider } from '../context/SoundContext'
 
 function renderWithProviders(ui, { route = '/practice' } = {}) {
     return render(
         <MemoryRouter initialEntries={[route]}>
             <AuthProvider>
-                <SettingsProvider>
-                    {ui}
-                </SettingsProvider>
+                <SoundProvider>
+                    <SettingsProvider>
+                        {ui}
+                    </SettingsProvider>
+                </SoundProvider>
             </AuthProvider>
         </MemoryRouter>
     )
@@ -157,7 +160,7 @@ describe('Practice Page — Language Selected View', () => {
         renderWithProviders(<Practice />, { route: '/practice?lang=english' })
         await waitFor(() => {
             const startBtns = screen.getAllByText('Start Practice')
-            expect(startBtns.length).toBe(3)
+            expect(startBtns.length).toBe(4)
         })
     })
 

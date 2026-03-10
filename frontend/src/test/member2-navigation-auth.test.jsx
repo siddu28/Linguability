@@ -26,13 +26,16 @@ vi.mock('../lib/supabaseClient', () => ({
 import Navbar from '../components/Navbar'
 import ProtectedRoute from '../components/ProtectedRoute'
 import { AuthProvider, useAuth } from '../context/AuthContext'
+import { SoundProvider } from '../context/SoundContext'
 
-// Helper to wrap components needing Router + Auth
+// Helper to wrap components needing Router + Auth + Sound
 function renderWithProviders(ui, { route = '/' } = {}) {
     return render(
         <MemoryRouter initialEntries={[route]}>
             <AuthProvider>
-                {ui}
+                <SoundProvider>
+                    {ui}
+                </SoundProvider>
             </AuthProvider>
         </MemoryRouter>
     )

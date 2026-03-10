@@ -62,6 +62,7 @@ vi.mock('../lib/database', () => ({
 
 import { AuthProvider } from '../context/AuthContext'
 import { SettingsProvider } from '../context/SettingsContext'
+import { SoundProvider } from '../context/SoundContext'
 import Settings from '../pages/Settings'
 import Notifications from '../pages/Notifications'
 
@@ -69,9 +70,11 @@ function renderWithProviders(ui, { route = '/' } = {}) {
     return render(
         <MemoryRouter initialEntries={[route]}>
             <AuthProvider>
-                <SettingsProvider>
-                    {ui}
-                </SettingsProvider>
+                <SoundProvider>
+                    <SettingsProvider>
+                        {ui}
+                    </SettingsProvider>
+                </SoundProvider>
             </AuthProvider>
         </MemoryRouter>
     )
