@@ -419,6 +419,7 @@ function WritingPractice() {
                         language: lang,
                         promptId: prompts[index].id,
                         userResponse: responseText.trim(),
+                        ...(prompts[index].hint ? { expectedText: prompts[index].hint } : {}),
                     }),
                 }
             );

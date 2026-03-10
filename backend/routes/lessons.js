@@ -1,7 +1,6 @@
 const express = require('express')
 const router = express.Router()
 const wordsData = require('../data/words.json')
-const { generateLessonContent } = require('../services/llmService')
 
 // Get all languages
 router.get('/languages', (req, res) => {
@@ -13,22 +12,10 @@ router.get('/languages', (req, res) => {
     res.json(languages)
 })
 
-// Get words for a specific language and lesson — with dynamic RAG generation
-router.get('/:languageId/:lessonType', async (req, res) => {
+// Get words for a specific language and lesson (static data)
+router.get('/:languageId/:lessonType', (req, res) => {
     const { languageId, lessonType } = req.params
-    const knownWords = req.query.knownWords ? req.query.knownWords.split(',') : []
 
-    // Try dynamic generation if GROQ_API_KEY is set
-    if (process.env.GROQ_API_KEY) {
-        try {
-            const generated = await generateLessonContent(languageId, lessonType, knownWords)
-            return res.json(generated)
-        } catch (err) {
-            console.error(`[Lessons] LLM generation failed for ${languageId}/${lessonType}, falling back to static:`, err.message)
-        }
-    }
-
-    // Fallback to static data
     if (!wordsData[languageId]) {
         return res.status(404).json({ error: 'Language not found' })
     }

@@ -17,28 +17,40 @@ const { generateAssessmentQuestions } = require('../services/llmService');
  * Returns: NLP evaluation result with scores and detailed feedback
  */
 router.post('/written', async (req, res) => {
-    const { language, promptId, userResponse } = req.body;
+    const { language, promptId, userResponse, expectedText } = req.body;
 
     // Validate inputs
-    if (!language || !promptId || userResponse === undefined) {
+    if (!language || userResponse === undefined) {
         return res.status(400).json({
-            error: 'Missing required fields: language, promptId, userResponse'
+            error: 'Missing required fields: language, userResponse'
         });
     }
 
-    // Look up the prompt data
-    const langData = acceptedTranslations[language];
-    if (!langData) {
-        return res.status(404).json({
-            error: `Language '${language}' not found. Available: ${Object.keys(acceptedTranslations).join(', ')}`
-        });
-    }
+    let promptData;
 
-    const promptData = langData[String(promptId)];
-    if (!promptData) {
-        return res.status(404).json({
-            error: `Prompt ID '${promptId}' not found for language '${language}'. Available IDs: ${Object.keys(langData).join(', ')}`
-        });
+    if (expectedText) {
+        // Dynamic prompt — expectedText provided directly by the client
+        promptData = {
+            expected: expectedText,
+            accepted: [expectedText]
+        };
+    } else {
+        // Static prompt — look up from accepted-translations.json
+        if (!promptId) {
+            return res.status(400).json({ error: 'Either promptId or expectedText is required' });
+        }
+        const langData = acceptedTranslations[language];
+        if (!langData) {
+            return res.status(404).json({
+                error: `Language '${language}' not found. Available: ${Object.keys(acceptedTranslations).join(', ')}`
+            });
+        }
+        promptData = langData[String(promptId)];
+        if (!promptData) {
+            return res.status(404).json({
+                error: `Prompt ID '${promptId}' not found for language '${language}'. Available IDs: ${Object.keys(langData).join(', ')}`
+            });
+        }
     }
 
     try {

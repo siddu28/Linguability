@@ -48,43 +48,66 @@ async function generatePracticeContent(language, type, knownWords = []) {
     const languageDisplay = language.charAt(0).toUpperCase() + language.slice(1);
 
     const prompts = {
-        listening: `Generate a JSON object with TWO arrays: "words" and "sentences" for ${languageDisplay} listening practice.
+        listening: `You MUST generate a JSON object with exactly TWO arrays: "words" and "sentences" for ${languageDisplay} listening practice.
 
-"words" array: 10 items, each with:
-  { "id": <number>, "text": "<word in ${languageDisplay}>", "options": ["<correct>", "<wrong1>", "<wrong2>", "<wrong3>"], "category": "<category>" }
+IMPORTANT: Generate EXACTLY 15 items in "words" and EXACTLY 15 items in "sentences". Do NOT generate fewer.
 
-"sentences" array: 10 items, each with:
-  { "id": <number>, "text": "<sentence in ${languageDisplay}>", "options": ["<correct>", "<wrong1>", "<wrong2>", "<wrong3>"], "category": "<category>" }
+"words" array — 15 items, each:
+{ "id": <number 1-15>, "text": "<single word in ${languageDisplay}>", "options": ["<correct>", "<wrong1>", "<wrong2>", "<wrong3>"], "category": "<category>" }
 
-The correct answer MUST always be the first element in options. Use diverse categories (Food, Nature, Actions, Places, Family, Feelings, Colors, Activities).
+"sentences" array — 15 items, each:
+{ "id": <number 16-30>, "text": "<short sentence in ${languageDisplay}>", "options": ["<correct sentence>", "<wrong1>", "<wrong2>", "<wrong3>"], "category": "<category>" }
+
+Rules:
+- The CORRECT answer is always options[0].
+- Use diverse categories: Food, Nature, Actions, Places, Family, Feelings, Colors, Activities, Objects, Occupation, Drinks, Weather.
+- All text must be in ${languageDisplay}.
+- Every item must have exactly 4 options.
 ${knownContext}
-Return ONLY valid JSON, no explanation.`,
+Return ONLY valid JSON. No explanation, no markdown.`,
 
-        vocabulary: `Generate a JSON array of 10 vocabulary items for ${languageDisplay} practice.
-Each item: { "id": <number>, "word": "<word in ${languageDisplay}>", "meaning": "<short definition>", "example": "<example sentence>", "category": "<category>" }
+        vocabulary: `You MUST generate a JSON array with EXACTLY 15 vocabulary items for ${languageDisplay} practice.
 
-Use diverse categories (Food, Nature, Actions, Places, Family, Feelings, Objects, Activities).
+IMPORTANT: The array MUST contain exactly 15 objects. Do NOT return fewer.
+
+Each object:
+{ "id": <number 1-15>, "word": "<word in ${languageDisplay}>", "meaning": "<short definition in English>", "example": "<example sentence using the word>", "category": "<category>" }
+
+Use at least 8 different categories from: Food, Nature, Actions, Places, Family, Feelings, Objects, Activities, Colors, Body, Time, Weather, Occupation, Animals, Clothing.
 ${knownContext}
-Return ONLY a valid JSON array, no explanation.`,
+Return ONLY a valid JSON array with 15 items. No explanation, no markdown.`,
 
-        writing: `Generate a JSON array of 8 writing prompts for ${languageDisplay} practice.
-Each item: { "id": <number>, "prompt": "<instruction telling user what to write>", "expectedText": "<the correct answer>", "hint": "<the correct answer>" }
+        writing: `You MUST generate a JSON array with EXACTLY 12 writing prompts for ${languageDisplay} practice.
 
-The prompts should ask the user to write words or short sentences in ${languageDisplay}.
+IMPORTANT: The array MUST contain exactly 12 objects. Do NOT return fewer.
+
+Each object:
+{ "id": <number 1-12>, "prompt": "<instruction telling user what to write>", "expectedText": "<the CORRECT ${languageDisplay} answer>", "hint": "<same as expectedText>" }
+
+CRITICAL RULES:
+- The "expectedText" and "hint" fields MUST be the CORRECT answer to the prompt. They must MATCH the prompt perfectly.
+- Example for Telugu: if prompt is "Write the Telugu word for 'water'", then expectedText MUST be "నీరు" (the Telugu word for water), NOT any other word.
+- Example for English: if prompt is "Write 'I am happy' in English", then expectedText MUST be "I am happy".
+- NEVER put a mismatched answer. Double-check every single prompt-answer pair.
+- Mix simple single words and short phrases/sentences.
+- Use diverse topics: greetings, food, family, numbers, colors, animals, body parts, daily activities.
 ${knownContext}
-Return ONLY a valid JSON array, no explanation.`,
+Return ONLY a valid JSON array with 12 items. No explanation, no markdown.`,
 
-        pronunciation: `Generate a JSON object with THREE arrays: "simple", "medium", and "hard" for ${languageDisplay} pronunciation practice.
+        pronunciation: `You MUST generate a JSON object with THREE arrays for ${languageDisplay} pronunciation practice.
 
-"simple": 3 items — single words or very short phrases
-"medium": 3 items — common phrases or short sentences
-"hard": 2 items — longer complex sentences
+IMPORTANT: Generate the EXACT counts specified below. Do NOT return fewer.
+
+"simple": EXACTLY 5 items — single common words
+"medium": EXACTLY 5 items — common phrases or short sentences (3-5 words)
+"hard": EXACTLY 5 items — longer complex sentences (6+ words)
 
 Each item: { "id": <number>, "text": "<text in ${languageDisplay}>" }
 
-IDs should be sequential starting from 1 across all arrays.
+IDs must be sequential: simple 1-5, medium 6-10, hard 11-15.
+Use diverse everyday topics.
 ${knownContext}
-Return ONLY valid JSON, no explanation.`
+Return ONLY valid JSON. No explanation, no markdown.`
     };
 
     const prompt = prompts[type];
@@ -99,12 +122,17 @@ Return ONLY valid JSON, no explanation.`
             },
             { role: 'user', content: prompt }
         ],
-        temperature: 0.8,
-        max_tokens: 2000
+        temperature: 0.9,
+        max_tokens: 4000
     });
 
     const raw = completion.choices[0]?.message?.content || '';
-    return parseJSON(raw);
+    console.log(`[LLM] ${language}/${type} — finish_reason: ${completion.choices[0]?.finish_reason}, tokens: ${completion.usage?.completion_tokens}/${completion.usage?.total_tokens}`);
+    console.log(`[LLM] raw length: ${raw.length} chars`);
+    const parsed = parseJSON(raw);
+    const count = Array.isArray(parsed) ? parsed.length : Object.keys(parsed).length;
+    console.log(`[LLM] parsed ${count} top-level items`);
+    return parsed;
 }
 
 // ─── Lesson Content Generation ───────────────────────────

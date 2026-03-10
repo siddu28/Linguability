@@ -10,31 +10,8 @@ router.get('/', (req, res) => {
 });
 
 
-// ================== LISTENING ==================
-router.get('/:languageId/listening', (req, res) => {
-    const data = practiceData[req.params.languageId];
-    if (!data) return res.status(404).json({ error: "Language not found" });
-
-    res.json(data.listening);
-});
-
-
-// ================== PRONUNCIATION WORDS ==================
-router.get('/:languageId/pronunciation', (req, res) => {
-    const data = practiceData[req.params.languageId];
-    if (!data) return res.status(404).json({ error: "Language not found" });
-
-    res.json(data.pronunciation);
-});
-
-
-// ================== VOCABULARY ==================
-router.get('/:languageId/vocabulary', (req, res) => {
-    const data = practiceData[req.params.languageId];
-    if (!data) return res.status(404).json({ error: "Language not found" });
-
-    res.json(data.vocabulary);
-});
+// Static routes removed — all practice types now use the dynamic
+// /:languageId/:type route below (with static fallback).
 
 
 // ================== PRONUNCIATION CHECK ==================
