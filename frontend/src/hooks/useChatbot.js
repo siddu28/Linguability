@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef } from 'react'
 
-const BACKEND_URL = 'http://localhost:3001'
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3001'
 
 // Generate a random session ID for conversation context
 function generateSessionId() {
